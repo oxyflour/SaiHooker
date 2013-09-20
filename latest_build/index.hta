@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="utf-8" />
+    <title>SAI HOOKER TEST</title>
+	<script src="jquery-1.8.0.min.js"></script>
+	<style>
+		body { margin: 0; padding: 0; }
+		.hidden { display: none; }
+		.tab { display: inline-block; margin: 5px; }
+		.tab.active { font-weight: bold; }
+		.tab-content { margin: 5px; display: none; }
+		.tab-content.active { display: block; }
+		.tab-content button { padding:7px; margin:3px; }
+	</style>
+	<!-- HTA tag does not work in IE10 -->
+	<HTA:Application
+		id="Sai_Hooker_33895"
+		applicationname="Sai Hooker"
+		icon="sai.ico"
+		innerborder="no"
+		scroll="yes"
+		selection="no"
+		maximizebutton="no"
+		contextmenu="no"
+		sysmenu="yes"
+		showintaskbar="no"
+		singleinstance="yes" />
+</head>
+<body>
+    <object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
+    <object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
+	<label class="tab active" for="rad0" onclick="sendKeys('n')">UI</label>
+	<label class="tab" for="rad1" onclick="sendKeys('n')">Pens</label>
+	<label class="tab" for="rad2" onclick="sendKeys('^t')">Trans</label>
+	<label class="tab" for="rad4" onclick="sendKeys('q')">Select</label>
+	<label class="tab" for="rad3">More</label>
+	<div for="rad0" class="tab-content active">
+		<button onclick="sendKeys('{TAB}')">Tab</button>
+		<button onclick="sendKeys('{F11}')">F11</button>
+		<button onclick="sendKeys('h')">Flip</button>
+		<button onclick="sendKeys('d')">Clr</button>
+		<button onclick="sendKeys('^f')">Fill</button>
+	</div>
+	<div for="rad1" class="tab-content">
+		<button onclick="sendKeys('e')">[E]</button>
+		<button onclick="sendKeys('c')">[C]</button>
+		<button onclick="sendKeys('s')">[S]</button>
+		<button onclick="sendKeys('a')">[A]</button>
+	</div>
+	<div for="rad2" class="tab-content">
+		<button onclick="$('.tab:first').trigger('click');sendKeys('{ENTER}')">Accept</button>
+		<button onclick="$('.tab:first').trigger('click');sendKeys('{ESCAPE}')">Cancel</button>
+	</div>
+	<div for="rad3" class="tab-content">
+		<span style="margin: 5px">
+			<input id="disableTouch" type="checkbox"
+				onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock
+		</span>
+		<span style="margin: 5px">
+			Pan+<select id="panningKey" style="font-size: 120%"
+				onchange="hooker.SetPanningKey(parseInt(this.value))">
+				<option value="0">None</option>
+				<option value="32">Space</option>
+				<option value="16">Shift</option>
+				<option value="17">Ctrl</option>
+				<option value="18">Alt</option>
+			</select>
+		</span>
+		<!--button onclick="wndutil.PopupMenu(document.getElementById('popup').innerHTML, screenX, screenY);">Menu</button-->
+	</div>
+	<div for="rad4" class="tab-content">
+		<button onclick="sendKeys('^a')">All</button>
+		<button onclick="sendKeys('^c')">Copy</button>
+		<button onclick="sendKeys('^p')">Paste</button>
+		<button onclick="$('.tab:first').trigger('click');sendKeys('^d')">UnSel</button>
+		<!--button onclick="sendKeys('{LEFT}')">&lt;</button>
+		<button onclick="sendKeys('{UP}')">&and;</button>
+		<button onclick="sendKeys('{DOWN}')">&or;</button>
+		<button onclick="sendKeys('{RIGHT}')">&gt;</button-->
+	</div>
+	<div id="log"></div>
+	<script id="popup" type="text/xml">
+		<!-- namespace is required for getElementById -->
+		<menu xmlns="http://www.w3.org/1999/xhtml">
+			<item id="1" text="Redu (&amp;R)" key="^y" />
+			<item id="2" text="Pen (&amp;N)" key="n" />
+			<item id="3" text="Eraser (&amp;E)" key="e" />
+			<item id="4" text="Move (&amp;M)" key="m" />
+			<sep />
+			<menu text="More">
+                <item id="11" text="Undo (&amp;U)" key="^z" />
+                <item id="12" text="Clear (&amp;D)" key="d" />
+                <item id="13" text="Fullscreen (F11)" key="{F11}" />
+                <item id="14" text="Flip (&amp;H)" key="h" />
+                <sep />
+                <item id="111" text="Select (&amp;Q)" key="q" />
+                <item id="112" text="Select All (C-A)" key="^a" />
+                <item id="113" text="Copy (C-C)" key="^c" />
+                <item id="114" text="Paste (C-V)" key="^v" />
+                <item id="113" text="Select None (C-D)" key="^d" />
+                <sep />
+                <item id="121" text="Color (&amp;C)" key="c" />
+                <item id="122" text="Fill (&amp;R)" key="r" />
+                <item id="123" text="SPen (&amp;A)" key="a" />
+                <item id="124" text="SEraser (&amp;S)" key="s" />
+			</menu>
+			<sep />
+			<item id="0" text="Cancel" />
+		</menu>
+	</script>
+    <script>
+		function sendKeys(k) {
+			wndutil.ActiveSaiWindow();
+			wscript.SendKeys(k);
+		}
+
+        window.hooker = document.getElementById('hooker');
+        window.wndutil = document.getElementById('wndutil');
+        window.wscript = new ActiveXObject("WScript.Shell");
+
+        hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
+			document.getElementById('log').innerHTML +=
+				'<div>msg: '+msg+' ('+wParam+', '+lParam+')</div>';
+        });
+        hooker.attachEvent("OnVirtualKey", function (longPress, x, y) {
+            if (longPress) {
+				var xml = document.getElementById('popup').innerHTML;
+				var id = wndutil.PopupMenu(xml, x, y);
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(xml, 'text/xml');
+				var node = doc.getElementById(id)
+				wndutil.ActiveSaiWindow();
+				if (node && node.attributes['key'])
+					wscript.SendKeys(node.attributes['key'].value);
+            }
+            else {
+                wscript.SendKeys('^z');
+            }
+        });
+        window.onload = function () {
+            wndutil.SetupToolWindow(document.title);
+			$('#disableTouch')[0].checked = hooker.DisableTouch(-1);
+			var c = $('#panningKey').children('option'),
+				p = c.filter('[value='+hooker.SetPanningKey(-1)+']');
+			(p[0] || c[0]).selected = true;
+
+			$('label.tab').click(function(e) {
+				$(this).addClass('active').siblings('.tab').removeClass('active');
+				$('.tab-content[for="'+$(this).attr('for')+'"]').addClass('active')
+					.siblings('.tab-content').removeClass('active');
+			});
+        }
+        window.onbeforeunload = function () {
+            hooker.UnHook();
+        }
+		window.ontimer = function () {
+            var errno = hooker.Hook();
+            document.title = 'Sai Hooker: ' + (errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
+		}
+
+        window.resizeTo(280, 120);
+		window.ontimer();
+		setInterval(window.ontimer, 2000)
+    </script>
+</body>
+</html>
