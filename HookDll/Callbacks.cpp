@@ -8,13 +8,91 @@
 
 static IManipulationProcessor* g_pIManipProc = NULL;
 static CManipulationEventSink* g_pManipulationEventSink = NULL;
+static std::vector<POINT> g_MSVectors;
 
 typedef BOOL (WINAPI *pSetWindowFeedbackSetting)(HWND hwnd, FEEDBACK_TYPE feedback, DWORD dwFlags, UINT32 size, const VOID *configuration);
 
+void ResetVector() {
+	g_MSVectors.clear();
+}
+void ReducePoint(int n) {
+	int s = g_MSVectors.size();
+	if (s < n) return;
+
+	POINT pb = g_MSVectors[s - n], pe = g_MSVectors.back();
+	double x = (pb.x + pe.x) * .5, y = (pb.y + pe.y) * .5,
+		dx = pb.x - pe.x, dy = pb.y - pe.y, l = SQRT_SUM(dx, dy) + 1e-6;
+	BOOL find = FALSE;
+	for (int i = s - n; i < s && !find; i ++) {
+		POINT pc = g_MSVectors[i];
+		double d = fabs(dy * (pc.x - pb.x) - dx * (pc.y - pb.y)) / l,
+			r = SQRT_SUM(pb.x - x, pb.y - y);
+		find = (d > l * gSettings.mgDistanceIn || r > l * gSettings.mgRadiusIn);
+	}
+	if (!find) {
+		g_MSVectors.erase(g_MSVectors.end() - n, g_MSVectors.end());
+		g_MSVectors.push_back(pb);
+		g_MSVectors.push_back(pe);
+	}
+	/*
+	else {
+		HDC hdc = GetDC(NULL);
+		HPEN hpen = CreatePen(PS_SOLID, 5, RGB(128, 128, 255));
+		HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+		MoveToEx(hdc, pb.x, pb.y, NULL);
+		LineTo(hdc, pe.x, pe.y);
+		DeleteObject(SelectObject(hdc, hOld));
+		ReleaseDC(NULL, hdc);
+	}
+	*/
+}
+void AddPoint(POINT pt) {
+	g_MSVectors.push_back(pt);
+	ReducePoint(gSettings.mgPointCount);
+}
+void GetVector() {
+	/*
+	HDC hdc = GetDC(NULL);
+	HPEN hpen = CreatePen(PS_SOLID, 20, RGB(0, 128, 255));
+	HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+	*/
+	for (int n = gSettings.mgPointCount - 1; n >= 3; n --)
+		ReducePoint(n);
+	int len = g_MSVectors.size(), j = 0, d = 0;
+	for (std::vector<POINT>::iterator i = g_MSVectors.begin(); i < g_MSVectors.end() - 1 && j < MAX_VECTOR_LENGTH; i ++) {
+		std::vector<POINT>::iterator b = i, e = i + 1;
+		double k = fabs((b->y - e->y) / (b->x - e->x + 1e-6));
+		TCHAR c = j > 0 ? gStatus.vectorStr[j-1] : 0;
+		if (k > gSettings.mgSlope) c = e->y > b->y ? L'd' : L'u';
+		else if (k < 1.0/gSettings.mgSlope) c = e->x > b->x ? L'r' : L'l';
+		else if (e->x > b->x) c = e->y > b->y ? L'R' : L'U';
+		else c = e->y > b->y ? L'D' : L'L';
+		if (j == 0 || gStatus.vectorStr[j-1] != c)
+			gStatus.vectorStr[j ++] = c;
+		/*
+		MoveToEx(hdc, b->x, b->y, NULL);
+		LineTo(hdc, b->x, b->y);
+		MoveToEx(hdc, e->x, e->y, NULL);
+		LineTo(hdc, e->x, e->y);
+		TCHAR sz[64];
+		_stprintf_s(sz, 64, L"%d,%d: %d\0", b->x, b->y, d);
+		TextOut(hdc, b->x, b->y, sz, wcslen(sz));
+		_stprintf_s(sz, 64, L"%d,%d: %d\0", e->x, e->y, ++d);
+		TextOut(hdc, e->x, e->y, sz, wcslen(sz));
+		*/
+	}
+	if (j < MAX_VECTOR_LENGTH)
+		gStatus.vectorStr[j] = 0;
+	/*
+	DeleteObject(SelectObject(hdc, hOld));
+	ReleaseDC(NULL, hdc);
+	*/
+}
+
 void KeepGesture(long x, long y, long s, long r) {
 	if (gStatus.gestureId == GID_PAN) {
-		if (gSettings.panVkCode != 0)
-			SimulateKey((WORD)gSettings.panVkCode, 0);
+		if (gStatus.panVkState != 0)
+			SimulateKey((WORD)gStatus.panVkState, 0);
 	}
 	else if (gStatus.gestureId == GID_ZOOM) {
 		int i = FindInArray(gSettings.zoomArr, MAX_SETTING_STEPS, s);
@@ -40,12 +118,15 @@ void ChangeGesture(DWORD newState, long param) {
 	// close old state
 	if (oldState == GID_PAN) {
 		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
-		if (gSettings.panVkCode != 0)
-			SimulateKey((WORD)gSettings.panVkCode, KEYEVENTF_KEYUP);
+		if (gStatus.panVkState != 0)
+			SimulateKey((WORD)gStatus.panVkState, KEYEVENTF_KEYUP);
+		gStatus.panVkState = 0;
 	}
 	else if (oldState == GID_ZOOM) {
+		g_pIManipProc->CompleteManipulation();
 	}
 	else if (oldState == GID_ROTATE) {
+		g_pIManipProc->CompleteManipulation();
 	}
 //	if (g_dwGestureState != GID_BEGIN)
 //		LogText(TEXT("gesture %x off\r\n"), g_dwGestureState);
@@ -53,8 +134,9 @@ void ChangeGesture(DWORD newState, long param) {
 	gStatus.gestureId = newState;
 	// begin new
 	if (newState == GID_PAN) {
-		if (gSettings.panVkCode != 0)
-			SimulateKey((WORD)gSettings.panVkCode, 0);
+		gStatus.panVkState = gSettings.panVkCode;
+		if (gStatus.panVkState != 0)
+			SimulateKey((WORD)gStatus.panVkState, 0);
 		SimulateMouse(0, 0, 0, MOUSEEVENTF_MOVE);
 		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
 	}
@@ -97,9 +179,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (msg->message == 0x0ff2) {
 			// Do not use msg->time!
 			gStatus.penHoverTick = tick;
-			GetCursorPos(&gStatus.penHoverPos);
 		}
-		BOOL bEnableTouch = (tick - gStatus.penHoverTick > gSettings.touchTimeout);
+		BOOL bEnableTouch = (tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
 
 		// Block events from touch
 		if ((msg->message == WM_MOUSEMOVE && gStatus.gestureId != GID_PAN) ||
@@ -119,19 +200,54 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				msg->message = WM_USER + msg->message;
 		}
 
+		if (msg->message == WM_MOUSEMOVE) {
+			gStatus.penHoverPos.x = LOWORD(msg->lParam);
+			gStatus.penHoverPos.y = HIWORD(msg->lParam);
+			ClientToScreen(msg->hwnd, &gStatus.penHoverPos);
+		}
+
 		// Handle extra key down or long press
 		if ((msg->message == WM_KEYDOWN && msg->wParam == gSettings.vkCode) &&
 			gStatus.vkDownTick == 0) {
 			gStatus.vkDownTick = tick;
-			gStatus.vkMsgSent = FALSE;
+			gStatus.vkMsgSent = gStatus.vkIsMoving = FALSE;
+			gStatus.vkPenPos = gStatus.penHoverPos;
+			ResetVector();
 		}
-		BOOL bVkTimeout = (tick - gStatus.vkDownTick > gSettings.vkTimeout);
+		BOOL bVkTimeout = (tick - gStatus.vkDownTick > gSettings.vkTimeout),
+			bVkMGTimeout = (tick - gStatus.vkDownTick > gSettings.mgEnableTimeout);
 		if (((msg->message == WM_KEYUP && msg->wParam == gSettings.vkCode) || 
-				(gStatus.vkDownTick > 0 && bVkTimeout)) &&
+				(gStatus.vkDownTick > 0 && bVkTimeout && !gStatus.vkIsMoving)) &&
 			!gStatus.vkMsgSent) {
-			PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, bVkTimeout,
-				gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+			if (gStatus.vkIsMoving && bVkMGTimeout) {
+				GetVector();
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 1, 0, 0);
+			}
+			else {
+				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, bVkTimeout ? 1 : 0,
+					gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+			}
 			gStatus.vkMsgSent = TRUE;
+		}
+		if (msg->message == WM_MOUSEMOVE && gStatus.vkDownTick != 0) {
+			AddPoint(gStatus.penHoverPos);
+			if (!gStatus.vkIsMoving &&
+				SQUA_SUM(gStatus.vkPenPos.x - gStatus.penHoverPos.x, gStatus.vkPenPos.y - gStatus.penHoverPos.y) >
+					(LONG)SQUA(gSettings.mgEnableDistance)) {
+				gStatus.vkIsMoving = TRUE;
+			}
+			if (gStatus.vkIsMoving && bVkMGTimeout && !gStatus.vkMsgSent) {
+				HDC hdc = GetDC(NULL);
+				HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
+				HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+				MoveToEx(hdc, gStatus.vkPenPos.x, gStatus.vkPenPos.y, NULL);
+				LineTo(hdc, gStatus.penHoverPos.x, gStatus.penHoverPos.y);
+				DeleteObject(SelectObject(hdc, hOld));
+				ReleaseDC(NULL, hdc);
+				gStatus.vkPenPos = gStatus.penHoverPos;
+			}
+			msg->message = WM_USER + msg->message;
 		}
 		if (msg->message == WM_KEYUP && msg->wParam == gSettings.vkCode) {
 			gStatus.vkDownTick = 0;
@@ -155,7 +271,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 						ChangeGesture(GID_ROTATE, r);
 				}
 				if ((gStatus.gestureId == GID_ZOOM || gStatus.gestureId == GID_ROTATE) &&
-					(gStatus.fingerCount != 2 || (x*x + y*y) > 80*80))
+					(gStatus.fingerCount != 2 || SQUA_SUM(x, y) > (LONG)SQUA(gSettings.guestureCancelDistance)))
 					ChangeGesture(GID_BEGIN, 0);
 
 				// one finger gesture (pan)
@@ -170,7 +286,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				if (gStatus.fingerCount != 1 && gStatus.gestureId == GID_PAN)
 					ChangeGesture(GID_BEGIN, 0);
 
-				if (tick - gStatus.fingerTick[2] < gSettings.palmTimeout)
+				// cancel all gesture if more than 2 fingers was on
+				if (tick - gStatus.fingerTick[2] < gSettings.guestureEnableTimeout)
 					ChangeGesture(GID_BEGIN, 0);
 				else
 					KeepGesture(x, y, s, r);
@@ -219,16 +336,16 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					for (UINT i = 0; i < cTi; i ++) {
 						if (pTi[i].dwFlags & TOUCHEVENTF_DOWN) {
 							gStatus.fingerCount = cTi;
-							g_pIManipProc->ProcessDown(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y));
+							g_pIManipProc->ProcessDownWithTime(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y), tick);
 							PostThreadMessage(gStatus.threadId, WM_USER + WM_GESTURE + 1, gStatus.fingerCount, MAKELONG(pTi[i].x/100, pTi[i].y/100));
 						}
 						if (pTi[i].dwFlags & TOUCHEVENTF_UP) {
 							gStatus.fingerCount --;
-							g_pIManipProc->ProcessUp(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y));
+							g_pIManipProc->ProcessUpWithTime(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y), tick);
 							PostThreadMessage(gStatus.threadId, WM_USER + WM_GESTURE + 2, gStatus.fingerCount, MAKELONG(pTi[i].x/100, pTi[i].y/100));
 						}
 						if (pTi[i].dwFlags & TOUCHEVENTF_MOVE)
-							g_pIManipProc->ProcessMove(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y));
+							g_pIManipProc->ProcessMoveWithTime(pTi[i].dwID, static_cast<FLOAT>(pTi[i].x), static_cast<FLOAT>(pTi[i].y), tick);
 					}
 					CloseTouchInputHandle(hTi);
 				}
@@ -241,6 +358,7 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			IsPainterWindow(cs->hwnd)) {
 			if (tick - gStatus.painterLeaveTick > gSettings.painterLeaveTimeout) {
 				SimulateMouse(0, 0, 0, MOUSEEVENTF_MOVE);
+				PostMessage(cs->hwnd, 0x0ff2, 0, 0);
 			}
 			gStatus.painterLeaveTick = tick;
 		}

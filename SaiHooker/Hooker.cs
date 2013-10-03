@@ -14,7 +14,7 @@ namespace SaiHooker
         [DispId(2)]
         void OnVirtualKey(int longPress, int x, int y);
         [DispId(3)]
-        void OnCommand(int id);
+        void OnMouseGesture(string vec);
     }
 
     [Guid("8E1D1128-0685-4C1D-8475-916B2BDE241A")]
@@ -76,6 +76,12 @@ namespace SaiHooker
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnVirtualKey((int)msg->wParam, x, y);
                 }
+                if (msg->message == WM_USER + WM_COMMAND + 1 && s_this.OnMouseGesture != null)
+                {
+                    StringBuilder sz = new StringBuilder(64);
+                    GetVectorStr(sz, sz.Capacity);
+                    s_this.OnMouseGesture(sz.ToString());
+                }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
         }
@@ -110,8 +116,8 @@ namespace SaiHooker
         public delegate void VirtualKeyHandle(int longPress, int x, int y);
         public event VirtualKeyHandle OnVirtualKey;
 
-        public delegate void CommandHandle(int id);
-        public event CommandHandle OnCommand;
+        public delegate void CommandHandle(string vec);
+        public event CommandHandle OnMouseGesture;
 
         public uint Hook()
         {
@@ -140,6 +146,11 @@ namespace SaiHooker
             return SetPanningVk(k);
         }
 
+        public void SimulateKey(int vkCode, bool keyDown)
+        {
+            SimulateKeyEvent(vkCode, keyDown);
+        }
+
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern uint SetSaiHook(IntPtr hInst);
 
@@ -151,6 +162,12 @@ namespace SaiHooker
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern int SetPanningVk(int l);
+
+        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern int GetVectorStr(StringBuilder szBuf, int size);
+
+        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern void SimulateKeyEvent(int vkCode, bool keyDown);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr LoadLibrary(String dllToLoad);

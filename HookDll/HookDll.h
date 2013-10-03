@@ -36,4 +36,8 @@ extern "C" {
 	HOOKDLL_API int _stdcall LockTouch(int lock);
 
 	HOOKDLL_API int _stdcall SetPanningVk(int vk);
+
+	HOOKDLL_API int _stdcall GetVectorStr(TCHAR* szBuf, int size);
+
+	HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down);
 }

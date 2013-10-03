@@ -9,11 +9,13 @@
 	<style>
 		body { margin: 0; padding: 0; }
 		.hidden { display: none; }
+		.big { font-size: 120%; }
 		.tab { display: inline-block; margin: 5px; }
 		.tab.active { font-weight: bold; }
 		.tab-content { margin: 5px; display: none; }
 		.tab-content.active { display: block; }
 		.tab-content button { padding:7px; margin:3px; }
+		span.field { margin: 5px; font-size: 110%; }
 	</style>
 	<!-- HTA tag does not work in IE10 -->
 	<HTA:Application
@@ -32,35 +34,52 @@
 <body>
     <object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
     <object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-	<label class="tab active" for="rad0" onclick="sendKeys('n')">UI</label>
-	<label class="tab" for="rad1" onclick="sendKeys('n')">Pens</label>
-	<label class="tab" for="rad2" onclick="sendKeys('^t')">Trans</label>
-	<label class="tab" for="rad4" onclick="sendKeys('q')">Select</label>
+	<label class="tab active" for="rad0">UI</label>
+	<label class="tab" for="rad1">Pens</label>
+	<label class="tab" for="rad2">Trans</label>
+	<label class="tab" for="rad4">Select</label>
 	<label class="tab" for="rad3">More</label>
 	<div for="rad0" class="tab-content active">
 		<button onclick="sendKeys('{TAB}')">Tab</button>
 		<button onclick="sendKeys('{F11}')">F11</button>
 		<button onclick="sendKeys('h')">Flip</button>
-		<button onclick="sendKeys('d')">Clr</button>
-		<button onclick="sendKeys('^f')">Fill</button>
+		<button onclick="sendKeys('^{TAB}')">View</button>
 	</div>
 	<div for="rad1" class="tab-content">
-		<button onclick="sendKeys('e')">[E]</button>
+		<button onclick="sendKeys('n')">[N]</button>
 		<button onclick="sendKeys('c')">[C]</button>
+		<button onclick="sendKeys('e')">[E]</button>
 		<button onclick="sendKeys('s')">[S]</button>
 		<button onclick="sendKeys('a')">[A]</button>
 	</div>
 	<div for="rad2" class="tab-content">
-		<button onclick="$('.tab:first').trigger('click');sendKeys('{ENTER}')">Accept</button>
-		<button onclick="$('.tab:first').trigger('click');sendKeys('{ESCAPE}')">Cancel</button>
+		<button onclick="sendKeys('^t')">Trans</button>
+		<button onclick="sendKeys('{ENTER}')">Accept</button>
+		<button onclick="sendKeys('{ESCAPE}')">Cancel</button>
 	</div>
 	<div for="rad3" class="tab-content">
-		<span style="margin: 5px">
-			<input id="disableTouch" type="checkbox"
-				onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock
+		Key: 
+		<span class="field">
+			<input type="checkbox" value="16" onchange="hooker.SimulateKey(this.value, this.checked)" />Shift
 		</span>
-		<span style="margin: 5px">
-			Pan+<select id="panningKey" style="font-size: 120%"
+		<span class="field">
+			<input type="checkbox" value="17" onchange="hooker.SimulateKey(this.value, this.checked)" />Ctrl
+		</span>
+		<span class="field">
+			<input type="checkbox" value="18" onchange="hooker.SimulateKey(this.value, this.checked)" />Alt
+		</span>
+		<br />
+		<br />
+		<span class="field">
+			<input class="auto-load" type="checkbox"
+				initvalue="hooker.DisableTouch(-1)"
+				onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock All touches
+		</span>
+		<br />
+		<br />
+		<span class="field">
+			Pan+<select class="auto-load big"
+				initvalue="hooker.SetPanningKey(-1)"
 				onchange="hooker.SetPanningKey(parseInt(this.value))">
 				<option value="0">None</option>
 				<option value="32">Space</option>
@@ -73,9 +92,11 @@
 	</div>
 	<div for="rad4" class="tab-content">
 		<button onclick="sendKeys('^a')">All</button>
-		<button onclick="sendKeys('^c')">Copy</button>
-		<button onclick="sendKeys('^p')">Paste</button>
-		<button onclick="$('.tab:first').trigger('click');sendKeys('^d')">UnSel</button>
+		<button onclick="$('.tab:first').trigger('click');sendKeys('^d')">None</button>
+		<button onclick="sendKeys('^f')">Fill</button>
+		<button onclick="sendKeys('d')">Clr</button>
+		<!--button onclick="sendKeys('^c')">Copy</button>
+		<button onclick="sendKeys('^v')">Paste</button-->
 		<!--button onclick="sendKeys('{LEFT}')">&lt;</button>
 		<button onclick="sendKeys('{UP}')">&and;</button>
 		<button onclick="sendKeys('{DOWN}')">&or;</button>
@@ -83,32 +104,54 @@
 	</div>
 	<div id="log"></div>
 	<script id="popup" type="text/xml">
-		<!-- namespace is required for getElementById -->
-		<menu xmlns="http://www.w3.org/1999/xhtml">
-			<item id="1" text="Redu (&amp;R)" key="^y" />
-			<item id="2" text="Pen (&amp;N)" key="n" />
-			<item id="3" text="Eraser (&amp;E)" key="e" />
-			<item id="4" text="Move (&amp;M)" key="m" />
+		<menu>
+			<item text="Pen (&amp;N/l)" gst="l" key="n" />
+			<item text="Eraser (&amp;E/r)" gst="r" key="e" />
+			<item text="Move (&amp;M/d)" gst="d" key="m" />
+			<item text="Straw (&amp;L/D)" gst="D" key="l" />
 			<sep />
-			<menu text="More">
-                <item id="11" text="Undo (&amp;U)" key="^z" />
-                <item id="12" text="Clear (&amp;D)" key="d" />
-                <item id="13" text="Fullscreen (F11)" key="{F11}" />
-                <item id="14" text="Flip (&amp;H)" key="h" />
+			<item text="Redu (&amp;R/du)" gst="du" key="^y" />
+            <item text="Clear (&amp;D/dL)" gst="dL" key="d" />
+            <item text="Flip (&amp;H/dl)" gst="dl" key="h" />
+            <item text="Fill (C-F/dU)" gst="dU" key="^f" />
+			<sep />
+			<menu text="Select">
+                <item text="SelNone (C-D/u)" gst="u" key="^d" />
+                <item text="SelRect (&amp;Q/ul)" gst="ul" key="q" />
+                <item text="SelFree (&amp;U/ur)" gst="ur" key="u" />
+                <item text="SelPen (&amp;A/uD)" gst="uD" key="a" />
+                <item text="SelEraser (&amp;S/uR)" gst="uR" key="s" />
+                <item text="SelRegion (&amp;F/ud)" gst="ud" key="f" />
+			</menu>
+			<menu text="UI, File">
+                <item text="TAB (Tab/U)" gst="U" key="{TAB}" />
+                <item text="Fullscreen (F11/UD)" gst="UD" key="{F11}" />
+                <item text="NextView (C-Tab/Ul)" gst="Ul" key="^{TAB}" />
+                <item text="PrevView (C-S-Tab/Ud)" gst="Ud" key="^+{TAB}" />
+				<sep />
+                <item text="Open... (C-O/rl)" gst="rl" key="^o" />
+                <item text="SaveAs... (C-S-S/rd)" gst="rd" key="^+s" />
+                <item text="New... (C-N/rL)" gst="rL" key="^n" />
+                <item text="Close (C-W/rD)" gst="rD" key="^w" />
+			</menu>
+			<menu text="Trans, Edit">
+                <item text="Trans (C-T/RL)" gst="RL" key="^t" />
+				<item text="Accept (Enter/Ru)" gst="Ru" key="{ENTER}" />
+				<item text="Cancel (Escape/Rl)" gst="Rl" key="{ESCAPE}" />
                 <sep />
-                <item id="111" text="Select (&amp;Q)" key="q" />
-                <item id="112" text="Select All (C-A)" key="^a" />
-                <item id="113" text="Copy (C-C)" key="^c" />
-                <item id="114" text="Paste (C-V)" key="^v" />
-                <item id="113" text="Select None (C-D)" key="^d" />
+                <item text="Cut (C-X/Lr)" gst="Lr" key="^x" />
+                <item text="Copy (C-C/Ld)" gst="Ld" key="^c" />
+                <item text="Past (C-V/LR)" gst="LR" key="^v" />
+			</menu>
+			<menu text="Pens, Mix">
+                <item text="Color (&amp;C/lu)" gst="lu" key="c" />
+                <item text="Spray (&amp;B/ld)" gst="ld" key="b" />
                 <sep />
-                <item id="121" text="Color (&amp;C)" key="c" />
-                <item id="122" text="Fill (&amp;R)" key="r" />
-                <item id="123" text="SPen (&amp;A)" key="a" />
-                <item id="124" text="SEraser (&amp;S)" key="s" />
+                <item text="Size+ (&amp;]/L)" gst="L" key="]" />
+                <item text="Size- (&amp;[/R)" gst="R" key="[" />
 			</menu>
 			<sep />
-			<item id="0" text="Cancel" />
+			<item text="Cancel" />
 		</menu>
 	</script>
     <script>
@@ -116,49 +159,64 @@
 			wndutil.ActiveSaiWindow();
 			wscript.SendKeys(k);
 		}
+		function logText(t, c, a) {
+			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
+		}
 
         window.hooker = document.getElementById('hooker');
         window.wndutil = document.getElementById('wndutil');
         window.wscript = new ActiveXObject("WScript.Shell");
 
         hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
-			document.getElementById('log').innerHTML +=
-				'<div>msg: '+msg+' ('+wParam+', '+lParam+')</div>';
+			logText('got msg: '+msg+' ('+wParam+', '+lParam+')');
         });
-        hooker.attachEvent("OnVirtualKey", function (longPress, x, y) {
-            if (longPress) {
-				var xml = document.getElementById('popup').innerHTML;
-				var id = wndutil.PopupMenu(xml, x, y);
-				var parser = new DOMParser();
-				var doc = parser.parseFromString(xml, 'text/xml');
-				var node = doc.getElementById(id)
-				wndutil.ActiveSaiWindow();
-				if (node && node.attributes['key'])
-					wscript.SendKeys(node.attributes['key'].value);
-            }
-            else {
+        hooker.attachEvent("OnMouseGesture", function (vec) {
+			var item = $('#popup').data('doc').find('[gst='+vec+']');
+			item.attr('key') ? wscript.SendKeys(item.attr('key')) :
+				logText('unknown gesture: '+vec);
+		});
+        hooker.attachEvent("OnVirtualKey", function (msg, x, y) {
+			if (msg == 0) {
                 wscript.SendKeys('^z');
+			}
+            else if (msg == 1) {
+				var pop = $('#popup'),
+					id = wndutil.PopupMenu(pop.data('xml'), x, y),
+					item = pop.data('doc').find('[cid='+id+']');
+				wndutil.ActiveSaiWindow();
+				item.attr('key') && wscript.SendKeys(item.attr('key'));
             }
         });
         window.onload = function () {
             wndutil.SetupToolWindow(document.title);
-			$('#disableTouch')[0].checked = hooker.DisableTouch(-1);
-			var c = $('#panningKey').children('option'),
-				p = c.filter('[value='+hooker.SetPanningKey(-1)+']');
-			(p[0] || c[0]).selected = true;
+			$('input[type=checkbox].auto-load').each(function(i, e) {
+				var v = $(e).attr('initvalue');
+				if (v) e.checked = eval(v);
+			});
+			$('select.auto-load').each(function(i, e) {
+				var c = $(e).children('option'),
+					v = $(e).attr('initvalue'),
+					p = c.filter('[value="'+(v ? eval(v) : '')+'"]');
+				(p[0] || c[0]).selected = true;
+			});
 
 			$('label.tab').click(function(e) {
 				$(this).addClass('active').siblings('.tab').removeClass('active');
 				$('.tab-content[for="'+$(this).attr('for')+'"]').addClass('active')
 					.siblings('.tab-content').removeClass('active');
 			});
+
+			var pop = $('#popup'), doc = $(pop.html());
+			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
+			pop.data('doc', doc).data('xml', (new XMLSerializer()).serializeToString(doc[0]));
         }
         window.onbeforeunload = function () {
             hooker.UnHook();
         }
 		window.ontimer = function () {
             var errno = hooker.Hook();
-            document.title = 'Sai Hooker: ' + (errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
+			document.title = 'Sai Hooker: ' +
+				(errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
 		}
 
         window.resizeTo(280, 120);

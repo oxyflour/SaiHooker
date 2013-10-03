@@ -95,3 +95,11 @@ HOOKDLL_API int _stdcall SetPanningVk(int vk) {
 		gSettings.panVkCode = vk;
 	return gSettings.panVkCode;
 }
+
+HOOKDLL_API int _stdcall GetVectorStr(TCHAR* szBuf, int size) {
+	return StringCbCopy(szBuf, size, gStatus.vectorStr);
+}
+
+HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
+	SimulateKey(vk, down ? 0 : KEYEVENTF_KEYUP);
+}
