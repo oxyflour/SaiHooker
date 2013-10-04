@@ -9,13 +9,16 @@ Default Windows touch gestures are disabled, because they are not compatible wit
 
 ###Extra toolbar window
 The HTA (index.hta) is actually a simple html file...
+
 You can modify the HTA file to satisfy your needs, or even create new ones if you like.
+
 
 ###Extra popup menu
 BACKSPACE key is hooked in this app. Click on BACKSPACE sends CTRL-Z(Undo) to SAI, while long press on the key will popup a menu where the digitizer pen hovers. This action is defined in the index.hta with 'OnVirtualKey' Event, and the menu can be customized by modifing the 'popup' xml. It will become useful if your pen has at least one button and you assign BACKSPACE key to the button in the driver setting panel.
 
 ###Mouse Gesture
 Press BACKSPACE and move your pen to use this feature. The actions of the pen movement is also connected to the 'popup' xml with the 'gst' attribute (u=up, U=up-right, r=right, R=right-down, d=down, D=down-left, l=left, L=left-top).
+
 
 ##How to use
 ###Install/Uninstall
