@@ -225,8 +225,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 1, 0, 0);
 			}
 			else {
-				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, bVkTimeout ? 1 : 0,
-					gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+				POINT pt; GetCursorPos(&pt);
+				if (IsPainterWindow(WindowFromPoint(pt)))
+					PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, bVkTimeout ? 1 : 0,
+						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
 			}
 			gStatus.vkMsgSent = TRUE;
 		}
