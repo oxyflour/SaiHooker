@@ -2,7 +2,7 @@
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+	<meta http-equiv="X-UA-Compatible" content="IE=IE10" />
 	<meta charset="utf-8" />
 	<title>SAI HOOKER TEST</title>
 	<script src="jquery-1.8.0.min.js"></script>
@@ -28,7 +28,6 @@
 		maximizebutton="no"
 		contextmenu="no"
 		sysmenu="yes"
-		showintaskbar="no"
 		singleinstance="yes" />
 </head>
 <body>
@@ -184,7 +183,8 @@
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
 					item = pop.data('doc').find('[cid='+id+']');
 				wndutil.ActiveSaiWindow();
-				item.attr('key') && wscript.SendKeys(item.attr('key'));
+				alert(id)
+//				item.attr('key') && wscript.SendKeys(item.attr('key'));
 			}
 		});
 		window.onload = function () {
@@ -208,7 +208,7 @@
 
 			var pop = $('#popup'), doc = $(pop.html());
 			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
-			pop.data('doc', doc).data('xml', (new XMLSerializer()).serializeToString(doc[0]));
+			pop.data('doc', doc).data('xml', doc[0].outerHTML);
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();
