@@ -123,10 +123,8 @@ void ChangeGesture(DWORD newState, long param) {
 		gStatus.panVkState = 0;
 	}
 	else if (oldState == GID_ZOOM) {
-		g_pIManipProc->CompleteManipulation();
 	}
 	else if (oldState == GID_ROTATE) {
-		g_pIManipProc->CompleteManipulation();
 	}
 //	if (g_dwGestureState != GID_BEGIN)
 //		LogText(TEXT("gesture %x off\r\n"), g_dwGestureState);
@@ -303,8 +301,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 		// TOUCHDOWN or TOUCHUP
 		if (msg->message == WM_USER + WM_GESTURE + 1 || msg->message == WM_USER + WM_GESTURE + 2) {
-			if (msg->wParam == 0 && msg->message == WM_USER + WM_GESTURE + 2)
+			if (msg->wParam == 0 && msg->message == WM_USER + WM_GESTURE + 2) {
 				ChangeGesture(GID_BEGIN, 0);
+				g_pIManipProc->CompleteManipulation();
+			}
 			WORD x = LOWORD(msg->lParam), y = HIWORD(msg->lParam);
 			if (gStatus.fingerCount > 0 && gStatus.fingerCount <= MAX_STATUS_FINGERS) {
 				gStatus.fingerPos[gStatus.fingerCount - 1].x = x;
