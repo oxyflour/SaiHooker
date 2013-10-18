@@ -225,7 +225,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 1, 0, 0);
 			}
 			else {
-				POINT pt; GetCursorPos(&pt);
+				POINT pt;
+				GetCursorPos(&pt);
 				if (IsPainterWindow(WindowFromPoint(pt)))
 					PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, bVkTimeout ? 1 : 0,
 						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
