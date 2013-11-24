@@ -87,7 +87,7 @@
 				<option value="18">Alt</option>
 			</select>
 		</span>
-		<!--button onclick="wndutil.PopupMenu(document.getElementById('popup').innerHTML, screenX, screenY);">Menu</button-->
+		<button onclick="wndutil.PopupMenu($('#popup').data('xml'), 200, 500)">Menu</button>
 	</div>
 	<div for="rad4" class="tab-content">
 		<button onclick="sendKeys('^a')">All</button>
@@ -183,8 +183,7 @@
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
 					item = pop.data('doc').find('[cid='+id+']');
 				wndutil.ActiveSaiWindow();
-				alert(id)
-//				item.attr('key') && wscript.SendKeys(item.attr('key'));
+				item.attr('key') && wscript.SendKeys(item.attr('key'));
 			}
 		});
 		window.onload = function () {
@@ -219,7 +218,7 @@
 				(errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
 		}
 
-		window.resizeTo(280, 120);
+		window.resizeTo(300, 120);
 		window.ontimer();
 		setInterval(window.ontimer, 2000)
 	</script>
