@@ -8,6 +8,26 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaiHooker", "SaiHooker\SaiH
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HookDll", "HookDll\HookDll.vcxproj", "{27C0434E-32C7-48A2-A1C9-A2C211DF9D37}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "latest_build", "latest_build\", "{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/latest_build"
+		Debug.AspNetCompiler.PhysicalPath = "latest_build\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\latest_build\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/latest_build"
+		Release.AspNetCompiler.PhysicalPath = "latest_build\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\latest_build\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "1278"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +60,16 @@ Global
 		{27C0434E-32C7-48A2-A1C9-A2C211DF9D37}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{27C0434E-32C7-48A2-A1C9-A2C211DF9D37}.Release|Win32.ActiveCfg = Release|Win32
 		{27C0434E-32C7-48A2-A1C9-A2C211DF9D37}.Release|Win32.Build.0 = Release|Win32
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Release|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8DB09E2C-E2C7-4F0B-907D-1A769E9D8FC6}.Release|Win32.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
