@@ -72,19 +72,20 @@ namespace SaiHooker
         {
             foreach (XmlNode n in node.ChildNodes)
             {
-                if (n.Name == "menu") {
+                String name = n.Name.ToLower();
+                if (name == "menu") {
                     IntPtr hSub = CreatePopupMenu();
                     ParseMenu(hSub, n);
                     AppendMenu(hParent, MF_STRING | MF_POPUP, (uint)(long)hSub,
                         n.Attributes["text"].Value.ToString());
                 }
-                else if (n.Name == "item")
+                else if (name == "item")
                 {
                     if (n.Attributes["hidden"] == null)
                         AppendMenu(hParent, MF_STRING, uint.Parse(n.Attributes["cid"].Value.ToString()),
                             n.Attributes["text"].Value.ToString());
                 }
-                else if (n.Name == "sep")
+                else if (name == "sep")
                 {
                     AppendMenu(hParent, MF_SEPARATOR, 0, null);
                 }
