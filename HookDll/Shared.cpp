@@ -13,8 +13,7 @@ SETTINGS gSettings = {
 	500,
 
 	VK_SPACE,
-	VK_BACK,
-	300,
+	500,
 
 	120,
 	35,
@@ -43,12 +42,10 @@ STATUS gStatus = {
 	{0},
 	{0},
 
-//	FALSE,
-//	0,
-
+	FALSE,
+	FALSE,
 	0,
-	FALSE,
-	FALSE,
+	0,
 	{0, 0},
 
 	0,

@@ -205,6 +205,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 
 		// Handle extra key down or long press
+		/*
 		if ((msg->message == WM_KEYDOWN && msg->wParam == gSettings.vkCode) &&
 			gStatus.vkDownTick == 0) {
 			gStatus.vkDownTick = tick;
@@ -252,6 +253,70 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 		if (msg->message == WM_KEYUP && msg->wParam == gSettings.vkCode) {
 			gStatus.vkDownTick = 0;
+		}
+		*/
+		if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
+			msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP) {
+			BOOL bDown = msg->message == WM_KEYDOWN || msg->message == WM_SYSKEYDOWN;
+			if (msg->wParam == VK_CONTROL)
+				gStatus.isCtrlDown = bDown;
+			if (msg->message == WM_SYSKEYDOWN || msg->wParam == VK_MENU)
+				gStatus.isAltDown = bDown;
+		}
+		if ((gStatus.isCtrlDown && gStatus.isAltDown) && !gStatus.vkDownTick) {
+			gStatus.vkDownTick = tick;
+			gStatus.vkStateId = 0;
+			gStatus.vkPenPos = gStatus.penHoverPos;
+			ResetVector();
+		}
+		else if ((!gStatus.isCtrlDown && !gStatus.isAltDown) && gStatus.vkDownTick) {
+			if (gStatus.vkStateId == 0) {
+				POINT pt; GetCursorPos(&pt);
+				if (IsPainterWindow(WindowFromPoint(pt)))
+					PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, 0,
+						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+			}
+			else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+				GetVector();
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 1, 0, 0);
+			}
+			gStatus.vkDownTick = 0;
+		}
+		if (gStatus.vkDownTick) {
+			if (msg->message == WM_MOUSEMOVE) {
+				AddPoint(gStatus.penHoverPos);
+				if (gStatus.vkStateId == 0) {
+					if (SQUA_SUM(gStatus.vkPenPos.x - gStatus.penHoverPos.x, gStatus.vkPenPos.y - gStatus.penHoverPos.y) >
+						(LONG)SQUA(gSettings.mgEnableDistance))
+						gStatus.vkStateId = WM_MOUSEMOVE;
+				}
+				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+					HDC hdc = GetDC(NULL);
+					HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
+					HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+					MoveToEx(hdc, gStatus.vkPenPos.x, gStatus.vkPenPos.y, NULL);
+					LineTo(hdc, gStatus.penHoverPos.x, gStatus.penHoverPos.y);
+					DeleteObject(SelectObject(hdc, hOld));
+					ReleaseDC(NULL, hdc);
+					gStatus.vkPenPos = gStatus.penHoverPos;
+				}
+			}
+			else if (msg->message == WM_LBUTTONDOWN) {
+				// simply giveup
+				gStatus.vkStateId = WM_APP;
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+			}
+			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout) {
+					if (gStatus.vkStateId == 0) {
+					// popup menu
+					POINT pt; GetCursorPos(&pt);
+					if (IsPainterWindow(WindowFromPoint(pt)))
+						PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, 1,
+							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+					gStatus.vkStateId = WM_APP;
+				}
+			}
 		}
 
 		// The following messages (WM_USER + WM_GESTURE + 0/1/2) are posted from g_pManipulationEventSink

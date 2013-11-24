@@ -17,7 +17,6 @@ struct SETTINGS {
 	DWORD painterLeaveTimeout;
 
 	DWORD panVkCode;
-	DWORD vkCode;
 	DWORD vkTimeout;
 
 	DWORD mgEnableTimeout;
@@ -50,12 +49,10 @@ struct STATUS {
 	POINT fingerPos[MAX_STATUS_FINGERS];
 	DWORD fingerTick[MAX_STATUS_FINGERS];
 
-//	BOOL panKeyDown;
-//	DWORD palmTick;
-
+	BOOL isCtrlDown;
+	BOOL isAltDown;
 	DWORD vkDownTick;
-	BOOL vkMsgSent;
-	BOOL vkIsMoving;
+	DWORD vkStateId;
 	POINT vkPenPos;
 
 	DWORD painterLeaveTick;
