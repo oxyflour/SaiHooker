@@ -1,8 +1,0 @@
-#################
-## tlb is required for regasm
-#################
-
-!*.tlb
-
-*.exp
-*.lib
