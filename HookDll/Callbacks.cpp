@@ -327,8 +327,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 			if (bEnableTouch) {
 				// two finger gesture (zoom, rotate)
-				if (gStatus.fingerCount == 2 && tick - gStatus.fingerTick[1] > 100 &&
-					tick - gStatus.fingerTick[2] > 800 && tick - gStatus.fingerTick[3] > 800) {
+				if (gStatus.fingerCount == 2 && tick - gStatus.fingerDownTick[2] > 100 &&
+					tick - gStatus.fingerDownTick[3] > 800 && tick - gStatus.fingerDownTick[4] > 800) {
 					if ((r > gSettings.rotateTriMin && r < gSettings.rotateTriMax) &&
 						(s < gSettings.zoomTriMin || s > gSettings.zoomTriMax))
 						ChangeGesture(GID_ZOOM, s);
@@ -341,8 +341,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					ChangeGesture(GID_BEGIN, 0);
 
 				// one finger gesture (pan)
-				if (gStatus.fingerCount == 1 && tick - gStatus.fingerTick[0] > 50 &&
-					tick - gStatus.fingerTick[1] > 800 && tick - gStatus.fingerTick[2] > 800 &&
+				if (gStatus.fingerCount == 1 && tick - gStatus.fingerDownTick[1] > 50 &&
+					tick - gStatus.fingerDownTick[2] > 800 && tick - gStatus.fingerDownTick[3] > 800 &&
 					gStatus.gestureId != GID_PAN) {
 					POINT pt; GetCursorPos(&pt);
 					if (IsPainterWindow(WindowFromPoint(pt))) {
@@ -353,7 +353,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					ChangeGesture(GID_BEGIN, 0);
 
 				// cancel all gesture if more than 2 fingers was on
-				if (tick - gStatus.fingerTick[2] < gSettings.guestureEnableTimeout)
+				if (tick - gStatus.fingerDownTick[3] < gSettings.guestureEnableTimeout)
 					ChangeGesture(GID_BEGIN, 0);
 				else
 					KeepGesture(x, y, s, r);
@@ -365,16 +365,24 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		// TOUCHDOWN or TOUCHUP
-		if (msg->message == WM_USER + WM_GESTURE + 1 || msg->message == WM_USER + WM_GESTURE + 2) {
-			if (msg->wParam == 0 && msg->message == WM_USER + WM_GESTURE + 2) {
+		DWORD n = gStatus.fingerCount;
+		if (msg->message == WM_USER + WM_GESTURE + 1) {
+			if (n > 0 && n <= MAX_STATUS_FINGERS)
+				gStatus.fingerDownTick[n - 1] = tick;
+		}
+		else if (msg->message == WM_USER + WM_GESTURE + 2) {
+			if (n >= 0 && n < MAX_STATUS_FINGERS)
+				gStatus.fingerUpTick[n] = tick;
+			if (n == 0) {
+				// give up all gesture beacuse there are no fingers touching now
 				ChangeGesture(GID_BEGIN, 0);
 				g_pIManipProc->CompleteManipulation();
-			}
-			WORD x = LOWORD(msg->lParam), y = HIWORD(msg->lParam);
-			if (gStatus.fingerCount > 0 && gStatus.fingerCount <= MAX_STATUS_FINGERS) {
-				gStatus.fingerPos[gStatus.fingerCount - 1].x = x;
-				gStatus.fingerPos[gStatus.fingerCount - 1].y = y;
-				gStatus.fingerTick[gStatus.fingerCount - 1] = tick;
+				for (int i = 1; i < MAX_STATUS_FINGERS; i ++) {
+					if (gStatus.fingerDownTick[i] - tick < 200) {
+						PostMessage(gSettings.nofityWnd, WM_USER+WM_APP, n, 0);
+						break;
+					}
+				}
 			}
 		}
 	}

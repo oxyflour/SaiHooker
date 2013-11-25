@@ -39,6 +39,8 @@ STATUS gStatus = {
 
 	GID_BEGIN,
 	0,
+//	{0},
+//	{0},
 	{0},
 	{0},
 

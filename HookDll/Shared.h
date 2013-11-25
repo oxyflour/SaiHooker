@@ -46,8 +46,10 @@ struct STATUS {
 	// gesture id (GID_XXX) and how many fingers is on
 	DWORD gestureId;
 	DWORD fingerCount;
-	POINT fingerPos[MAX_STATUS_FINGERS];
-	DWORD fingerTick[MAX_STATUS_FINGERS];
+//	POINT fingerPos[MAX_STATUS_FINGERS];
+//	DWORD fingerTick[MAX_STATUS_FINGERS];
+	DWORD fingerDownTick[MAX_STATUS_FINGERS];
+	DWORD fingerUpTick[MAX_STATUS_FINGERS];
 
 	BOOL isCtrlDown;
 	BOOL isAltDown;
