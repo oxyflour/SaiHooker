@@ -327,8 +327,11 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 			if (bEnableTouch) {
 				// two finger gesture (zoom, rotate)
-				if (gStatus.fingerCount == 2 && tick - gStatus.fingerDownTick[2] > 100 &&
-					tick - gStatus.fingerDownTick[3] > 800 && tick - gStatus.fingerDownTick[4] > 800) {
+				if (gStatus.fingerCount == 2 &&
+					tick - gStatus.fingerDownTick[2] > 100 &&
+					tick - gStatus.fingerDownTick[3] > 800 &&
+					tick - gStatus.fingerDownTick[4] > 800 &&
+					1) {
 					if ((r > gSettings.rotateTriMin && r < gSettings.rotateTriMax) &&
 						(s < gSettings.zoomTriMin || s > gSettings.zoomTriMax))
 						ChangeGesture(GID_ZOOM, s);
@@ -341,8 +344,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					ChangeGesture(GID_BEGIN, 0);
 
 				// one finger gesture (pan)
-				if (gStatus.fingerCount == 1 && tick - gStatus.fingerDownTick[1] > 50 &&
-					tick - gStatus.fingerDownTick[2] > 800 && tick - gStatus.fingerDownTick[3] > 800 &&
+				if (gStatus.fingerCount == 1 &&
+					tick - gStatus.fingerDownTick[1] > 50 &&
+					tick - gStatus.fingerDownTick[2] > 800 &&
+					tick - gStatus.fingerDownTick[3] > 800 &&
 					gStatus.gestureId != GID_PAN) {
 					POINT pt; GetCursorPos(&pt);
 					if (IsPainterWindow(WindowFromPoint(pt))) {
@@ -371,19 +376,21 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.fingerDownTick[n - 1] = tick;
 		}
 		else if (msg->message == WM_USER + WM_GESTURE + 2) {
-			if (n >= 0 && n < MAX_STATUS_FINGERS)
-				gStatus.fingerUpTick[n] = tick;
 			if (n == 0) {
 				// give up all gesture beacuse there are no fingers touching now
 				ChangeGesture(GID_BEGIN, 0);
 				g_pIManipProc->CompleteManipulation();
-				for (int i = 1; i < MAX_STATUS_FINGERS; i ++) {
-					if (gStatus.fingerDownTick[i] - tick < 200) {
-						PostMessage(gSettings.nofityWnd, WM_USER+WM_APP, n, 0);
+				// check tap
+				for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
+					if (tick - gStatus.fingerDownTick[i] < 200) {
+						if (bEnableTouch)
+							PostMessage(gSettings.nofityWnd, WM_USER+WM_APP+1, i, 0);
 						break;
 					}
 				}
 			}
+			if (n >= 0 && n < MAX_STATUS_FINGERS)
+				gStatus.fingerUpTick[n] = tick;
 		}
 	}
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
