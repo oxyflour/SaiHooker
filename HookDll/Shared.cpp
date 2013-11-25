@@ -14,6 +14,7 @@ SETTINGS gSettings = {
 
 	VK_SPACE,
 	500,
+	200,
 
 	120,
 	35,

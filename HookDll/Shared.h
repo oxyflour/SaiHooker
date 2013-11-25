@@ -18,6 +18,7 @@ struct SETTINGS {
 
 	DWORD panVkCode;
 	DWORD vkTimeout;
+	DWORD fingerTapInteval;
 
 	DWORD mgEnableTimeout;
 	DWORD mgEnableDistance;

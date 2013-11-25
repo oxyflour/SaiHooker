@@ -381,10 +381,12 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				ChangeGesture(GID_BEGIN, 0);
 				g_pIManipProc->CompleteManipulation();
 				// check tap
+				WORD x = LOWORD(msg->lParam), y = HIWORD(msg->lParam);
 				for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
-					if (tick - gStatus.fingerDownTick[i] < 200) {
+					if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
 						if (bEnableTouch)
-							PostMessage(gSettings.nofityWnd, WM_USER+WM_APP+1, i, 0);
+							PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 2, i,
+								x + y * 0x10000);
 						break;
 					}
 				}

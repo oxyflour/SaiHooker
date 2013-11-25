@@ -15,6 +15,8 @@ namespace SaiHooker
         void OnVirtualKey(int longPress, int x, int y);
         [DispId(3)]
         void OnMouseGesture(string vec);
+        [DispId(4)]
+        void OnFingerTap(int n, int x, int y);
     }
 
     [Guid("8E1D1128-0685-4C1D-8475-916B2BDE241A")]
@@ -76,6 +78,11 @@ namespace SaiHooker
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnVirtualKey((int)msg->wParam, x, y);
                 }
+                if (msg->message == WM_USER + WM_COMMAND + 2 && s_this.OnFingerTap != null)
+                {
+                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
+                    s_this.OnFingerTap((int)msg->wParam, x, y);
+                }
                 if (msg->message == WM_USER + WM_COMMAND + 1 && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
@@ -116,8 +123,11 @@ namespace SaiHooker
         public delegate void VirtualKeyHandle(int longPress, int x, int y);
         public event VirtualKeyHandle OnVirtualKey;
 
-        public delegate void CommandHandle(string vec);
-        public event CommandHandle OnMouseGesture;
+        public delegate void MouseGestureHandle(string vec);
+        public event MouseGestureHandle OnMouseGesture;
+
+        public delegate void FingerTapHandle(int n, int x, int y);
+        public event FingerTapHandle OnFingerTap;
 
         public uint Hook()
         {

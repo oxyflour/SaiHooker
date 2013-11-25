@@ -178,13 +178,18 @@
 			if (msg == 0) {
 				wscript.SendKeys('^z');
 			}
-			else if (msg == 1) {
+		});
+		hooker.attachEvent("OnFingerTap", function (n, x, y) {
+		    if (n == 1) {
 				var pop = $('#popup'),
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
 					item = pop.data('doc').find('[cid='+id+']');
 				wndutil.ActiveSaiWindow();
 				item.attr('key') && wscript.SendKeys(item.attr('key'));
-			}
+		    }
+		    else if (n == 2) {
+				wscript.SendKeys('{F11}');
+		    }
 		});
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
