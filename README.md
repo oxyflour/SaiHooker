@@ -10,14 +10,14 @@ Default Windows touch gestures are disabled, because they are not compatible wit
 ###Extra toolbar window
 The HTA (index.hta) is actually a simple html file...
 
-You can modify the HTA file to satisfy your needs, or even create new ones if you like.
+You can modify the HTA file to satisfy your needs (make it looking better, add more buttons, etc.), or even create new ones if you like.
 
+###Multi-finger Tap event
+By default a two-finger tap popups a context menu defined in the 'popup' xml in index.hta, and a three-finger tap toggles fullscreen for SAI window (F11). See 'OnFingerTap' event in index.hta if you want different actions.
 
-###Extra popup menu
-BACKSPACE key is hooked in this app. Click on BACKSPACE sends CTRL-Z(Undo) to SAI, while long press on the key will popup a menu where the digitizer pen hovers. This action is defined in the index.hta with 'OnVirtualKey' Event, and the menu can be customized by modifing the 'popup' xml. It will become useful if your pen has at least one button and you assign BACKSPACE key to the button in the driver setting panel.
-
-###Mouse Gesture
-Press BACKSPACE and move your pen to use this feature. The actions of the pen movement is also connected to the 'popup' xml with the 'gst' attribute (u=up, U=up-right, r=right, R=right-down, d=down, D=down-left, l=left, L=left-top).
+###Ctrl+Alt Actions and Pen Gesture
+Shortly press Ctrl+Alt without moving the pen sends CTRL-Z to SAI, which is useful if your pen has at least one button and you assign Ctrl+Alt to that button in the SAI setting panel. This action is also defined in the index.hta by 'OnVirtualKey' event and thus can be easily modified.
+Hold on Ctrl+Alt and move your pen to use predefined pen gestures. The actions of the pen movement is connected to the 'popup' xml in index.hta with the 'gst' attribute (u=up, U=up-right, r=right, R=right-down, d=down, D=down-left, l=left, L=left-top).
 
 
 ##How to use
