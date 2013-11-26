@@ -167,6 +167,7 @@
 		window.wscript = new ActiveXObject("WScript.Shell");
 
 		hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
+			// debug only
 			logText('got msg: '+msg+' ('+wParam+', '+lParam+')');
 		});
 		hooker.attachEvent("OnMouseGesture", function (vec) {
@@ -175,21 +176,27 @@
 				logText('unknown gesture: '+vec);
 		});
 		hooker.attachEvent("OnVirtualKey", function (msg, x, y) {
+			// press
 			if (msg == 0) {
 				wscript.SendKeys('^z');
 			}
+			// hold on
+			else {
+			}
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
-		    if (n == 1) {
+			// two finger tap
+			if (n == 1) {
 				var pop = $('#popup'),
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
 					item = pop.data('doc').find('[cid='+id+']');
 				wndutil.ActiveSaiWindow();
 				item.attr('key') && wscript.SendKeys(item.attr('key'));
-		    }
-		    else if (n == 2) {
+			}
+			// three finger tap
+			else if (n == 2) {
 				wscript.SendKeys('{F11}');
-		    }
+			}
 		});
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
@@ -210,6 +217,7 @@
 					.siblings('.tab-content').removeClass('active');
 			});
 
+			// prepare xml text for PopupMenu
 			var pop = $('#popup'), doc = $(pop.html());
 			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
 			pop.data('doc', doc).data('xml', doc[0].outerHTML);
