@@ -385,9 +385,11 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				WORD x = LOWORD(msg->lParam), y = HIWORD(msg->lParam);
 				for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
 					if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
-						if (bEnableTouch)
+						if (bEnableTouch) {
+							POINT pt; GetCursorPos(&pt);
 							PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 2, i,
-								x + y * 0x10000);
+								pt.x + pt.y * 0x10000);
+						}
 						break;
 					}
 				}
