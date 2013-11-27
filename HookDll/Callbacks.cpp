@@ -348,7 +348,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					tick - gStatus.fingerDownTick[1] > 50 &&
 					tick - gStatus.fingerDownTick[2] > 800 &&
 					tick - gStatus.fingerDownTick[3] > 800 &&
-					gStatus.gestureId != GID_PAN) {
+					gStatus.gestureId != GID_PAN &&
+					SQUA_SUM(x, y) > (LONG)SQUA(gSettings.panTriggerDistance)) {
 					POINT pt; GetCursorPos(&pt);
 					if (IsPainterWindow(WindowFromPoint(pt))) {
 						ChangeGesture(GID_PAN, 0);

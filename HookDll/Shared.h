@@ -27,6 +27,7 @@ struct SETTINGS {
 	double mgDistanceIn;
 	double mgRadiusIn;
 
+	DWORD panTriggerDistance;
 	DWORD guestureCancelDistance;
 	double zoomTriMin;
 	double zoomTriMax;
