@@ -186,7 +186,13 @@
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
 			// two finger tap
-			if (n == 1) {
+		    if (n == 0) {
+		        hooker.SimulateKey(18, true);
+		        hooker.SimulateMouse(x, y, true);
+		        hooker.SimulateMouse(x, y, 0);
+		        hooker.SimulateKey(18, 0);
+		    }
+			else if (n == 1) {
 				var pop = $('#popup'),
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
 					item = pop.data('doc').find('[cid='+id+']');

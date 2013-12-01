@@ -103,3 +103,7 @@ HOOKDLL_API int _stdcall GetVectorStr(TCHAR* szBuf, int size) {
 HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
 	SimulateKey(vk, down ? 0 : KEYEVENTF_KEYUP);
 }
+
+HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
+	SimulateMouse(x, y, 0, down ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP);
+}

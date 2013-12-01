@@ -161,6 +161,11 @@ namespace SaiHooker
             SimulateKeyEvent(vkCode, keyDown);
         }
 
+        public void SimulateMouse(int x, int y, bool keyDown)
+        {
+            SimulateMouseEvent(x, y, keyDown);
+        }
+
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern uint SetSaiHook(IntPtr hInst);
 
@@ -178,6 +183,9 @@ namespace SaiHooker
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateKeyEvent(int vkCode, bool keyDown);
+
+        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern void SimulateMouseEvent(int x, int y, bool keyDown);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr LoadLibrary(String dllToLoad);

@@ -40,4 +40,6 @@ extern "C" {
 	HOOKDLL_API int _stdcall GetVectorStr(TCHAR* szBuf, int size);
 
 	HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down);
+
+	HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down);
 }
