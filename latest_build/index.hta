@@ -110,8 +110,8 @@
 			<item text="Straw (&amp;L/D)" gst="D" key="l" />
 			<sep />
 			<item text="Redu (&amp;R/du)" gst="du" key="^y" />
-			<item text="Clear (&amp;D/dL)" gst="dL" key="d" />
-			<item text="Flip (&amp;H/dl)" gst="dl" key="h" />
+			<item text="Clear (&amp;D/dL,dl)" gst="dL" key="d" />
+			<item hidden="true" gst="dl" key="d" />
 			<item text="Fill (C-F/dU)" gst="dU" key="^f" />
 			<sep />
 			<menu text="Select">
@@ -145,6 +145,7 @@
 			<menu text="Pens, Mix">
 				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
 				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
+			    <item text="Flip (&amp;H/lr)" gst="lr" key="h" />
 				<sep />
 				<item text="Size+ (&amp;]/L)" gst="L" key="]" />
 				<item text="Size- (&amp;[/R)" gst="R" key="[" />
@@ -185,13 +186,16 @@
 			}
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
-			// two finger tap
+			// one finger tap
 		    if (n == 0) {
+                /*
 		        hooker.SimulateKey(18, true);
 		        hooker.SimulateMouse(x, y, true);
 		        hooker.SimulateMouse(x, y, 0);
 		        hooker.SimulateKey(18, 0);
+                */
 		    }
+			// two finger tap
 			else if (n == 1) {
 				var pop = $('#popup'),
 					id = wndutil.PopupMenu(pop.data('xml'), x, y),
