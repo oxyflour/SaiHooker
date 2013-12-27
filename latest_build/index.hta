@@ -145,7 +145,7 @@
 			<menu text="Pens, Mix">
 				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
 				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
-			    <item text="Flip (&amp;H/lr)" gst="lr" key="h" />
+				<item text="Flip (&amp;H/lr)" gst="lr" key="h" />
 				<sep />
 				<item text="Size+ (&amp;]/L)" gst="L" key="]" />
 				<item text="Size- (&amp;[/R)" gst="R" key="[" />
@@ -187,14 +187,14 @@
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
 			// one finger tap
-		    if (n == 0) {
+			if (n == 0) {
                 /*
-		        hooker.SimulateKey(18, true);
-		        hooker.SimulateMouse(x, y, true);
-		        hooker.SimulateMouse(x, y, 0);
-		        hooker.SimulateKey(18, 0);
+				hooker.SimulateKey(18, true);
+				hooker.SimulateMouse(x, y, true);
+				hooker.SimulateMouse(x, y, 0);
+				hooker.SimulateKey(18, 0);
                 */
-		    }
+			}
 			// two finger tap
 			else if (n == 1) {
 				var pop = $('#popup'),
@@ -210,9 +210,9 @@
 			// four finger tap
 			else if (n == 3) {
                 // send WIN+D event
-		        hooker.SimulateKey(0x5b, true);
+				hooker.SimulateKey(0x5b, true);
 				wscript.SendKeys('d');
-		        hooker.SimulateKey(0x5b, 0);
+				hooker.SimulateKey(0x5b, 0);
 			}
 		});
 		window.onload = function () {
