@@ -207,6 +207,13 @@
 			else if (n == 2) {
 				wscript.SendKeys('{F11}');
 			}
+			// four finger tap
+			else if (n == 3) {
+                // send WIN+D event
+		        hooker.SimulateKey(0x5b, true);
+				wscript.SendKeys('d');
+		        hooker.SimulateKey(0x5b, 0);
+			}
 		});
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
