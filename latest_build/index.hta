@@ -110,8 +110,8 @@
 			<item text="Straw (&amp;L/D)" gst="D" key="l" />
 			<sep />
 			<item text="Redu (&amp;R/du)" gst="du" key="^y" />
-			<item text="Clear (&amp;D/dL,dl)" gst="dL" key="d" />
-			<item hidden="true" gst="dl" key="d" />
+			<item text="Clear (&amp;D/dL)" gst="dL" key="d" />
+			<item text="Flip (&amp;H/dl)" gst="dl" key="h" />
 			<item text="Fill (C-F/dU)" gst="dU" key="^f" />
 			<sep />
 			<menu text="Select">
@@ -185,15 +185,20 @@
 			}
 			// hold on
 			else {
-				hooker.SimulateKey(18, true);
-				hooker.SimulateMouse(x, y, true);
-				hooker.SimulateMouse(x, y, 0);
-				hooker.SimulateKey(18, 0);
 			}
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
 			// one finger tap
 			if (n == 0) {
+				var tapTick = (new Date()).getTime();
+				// double tap detection
+				if (tapTick - window.tapTick < 200) {
+					hooker.SimulateKey(18, true);
+					hooker.SimulateMouse(x, y, true);
+					hooker.SimulateMouse(x, y, 0);
+					hooker.SimulateKey(18, 0);
+				}
+				window.tapTick = tapTick;
 			}
 			// two finger tap
 			else if (n == 1) {
