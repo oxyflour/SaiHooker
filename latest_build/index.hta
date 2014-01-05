@@ -143,9 +143,11 @@
 				<item text="Past (C-V/LR)" gst="LR" key="^v" />
 			</menu>
 			<menu text="Pens, Mix">
+				<item text="Mark (&amp;I/lr)" gst="lr" key="i" />
 				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
 				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
-				<item text="Flip (&amp;H/lr)" gst="lr" key="h" />
+				<item text="Pain (&amp;V/lU)" gst="lU" key="v" />
+				<item text="Blur (&amp;J/lR)" gst="lR" key="j" />
 				<sep />
 				<item text="Size+ (&amp;]/L)" gst="L" key="]" />
 				<item text="Size- (&amp;[/R)" gst="R" key="[" />
@@ -183,17 +185,15 @@
 			}
 			// hold on
 			else {
+				hooker.SimulateKey(18, true);
+				hooker.SimulateMouse(x, y, true);
+				hooker.SimulateMouse(x, y, 0);
+				hooker.SimulateKey(18, 0);
 			}
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
 			// one finger tap
 			if (n == 0) {
-                /*
-				hooker.SimulateKey(18, true);
-				hooker.SimulateMouse(x, y, true);
-				hooker.SimulateMouse(x, y, 0);
-				hooker.SimulateKey(18, 0);
-                */
 			}
 			// two finger tap
 			else if (n == 1) {
