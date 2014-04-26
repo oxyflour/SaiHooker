@@ -6,10 +6,11 @@
 #include "cmanipulationeventsink.h"
 
 //CManipulationEventSink::CManipulationEventSink(IManipulationProcessor *manip, HWND hWnd)
-CManipulationEventSink::CManipulationEventSink(IManipulationProcessor *manip, DWORD dwThread)
+CManipulationEventSink::CManipulationEventSink(IManipulationProcessor *manip, DWORD dwThread, DWORD dwMsg)
 {
 //    m_hWnd = hWnd;
 	m_dwThread = dwThread;
+	m_dwMsg = dwMsg;
 
 
     //Set initial ref count to 1.
@@ -116,7 +117,7 @@ HRESULT STDMETHODCALLTYPE CManipulationEventSink::ManipulationDelta(
 
 	WORD dx = (WORD)(cumulativeTranslationX/100 + 0x8000), dy = (WORD)(cumulativeTranslationY/100 + 0x8000),
 		s = (WORD)(cumulativeScale*100 + 0x8000), r = (WORD)(cumulativeRotation*100 + 0x8000);
-	PostThreadMessage(m_dwThread, WM_USER + WM_GESTURE, MAKELONG(s, r), MAKELONG(dx, dy));
+	PostThreadMessage(m_dwThread, m_dwMsg, MAKELONG(s, r), MAKELONG(dx, dy));
 
 	/*
     

@@ -11,7 +11,7 @@ class CManipulationEventSink : _IManipulationEvents
 {
 public:
 //    CManipulationEventSink(IManipulationProcessor *manip, HWND hWnd);
-    CManipulationEventSink(IManipulationProcessor *manip, DWORD dwThread);
+    CManipulationEventSink(IManipulationProcessor *manip, DWORD dwThread, DWORD dwMsg);
 
     int GetStartedEventCount();
     int GetDeltaEventCount();
@@ -74,4 +74,5 @@ private:
     
 //    HWND m_hWnd;
 	DWORD m_dwThread;
+	DWORD m_dwMsg;
 };     
