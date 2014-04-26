@@ -24,9 +24,6 @@ CHookDll::CHookDll()
 }
 */
 
-#define SAI_WINDOW_CLASS TEXT("sfl_window_class")
-#define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
-
 static HHOOK gMsgHook = NULL;
 static HHOOK gProcHook = NULL;
 
@@ -50,7 +47,9 @@ HOOKDLL_API HWND _stdcall SetNotifyWindow(HWND hWnd) {
 
 HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 	HWND hWnd = GetSaiWindow();
-	DWORD dwThread = hWnd == NULL ? 0 : GetWindowThreadProcessId(hWnd, NULL);
+	DWORD dwProcess = 0, dwThread = 0;
+	if (hWnd != NULL)
+		dwThread = GetWindowThreadProcessId(hWnd, &dwProcess);
 	if (gStatus.threadId != dwThread)
 		UnsetSaiHook();
 	if (gStatus.threadId != dwThread) {
@@ -58,12 +57,10 @@ HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 			gMsgHook = SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, hInst, dwThread);
 			gProcHook = SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndRetProc, hInst, dwThread);
 		}
-//		LogText(TEXT("thread hook: hooked to thread %d (%d, %d)\r\n"), dwThread, gMsgHook, gProcHook);
-//		PostMessage(gSettings.nofityWnd, WM_USER+WM_APP, dwThread, 1);
 		gStatus.threadId = dwThread;
 	}
 	if (dwThread == 0)
-		return 1444; //Invalid Thread Identifier
+		return 1444; // Invalid Thread Identifier
 	else
 		return gMsgHook != NULL && gProcHook != NULL ? 0 : GetLastError();
 }
@@ -73,11 +70,8 @@ HOOKDLL_API void _stdcall UnsetSaiHook() {
 		UnhookWindowsHookEx(gMsgHook);
 	if (gProcHook != NULL)
 		UnhookWindowsHookEx(gProcHook);
-	if (gStatus.threadId != 0) {
+	if (gStatus.threadId != 0)
 		EnumThreadWindows(gStatus.threadId, SendQuitMsgProc, NULL);
-//		LogText(TEXT("thread hook: unhooked\r\n"));
-//		PostMessage(gSettings.nofityWnd, WM_USER+WM_APP, 0, 2);
-	}
 	gStatus.threadId = 0;
 	gMsgHook = gProcHook = NULL;
 }

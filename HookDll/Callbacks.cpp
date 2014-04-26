@@ -273,13 +273,13 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			if (gStatus.vkStateId == 0) {
 				POINT pt; GetCursorPos(&pt);
 				if (IsPainterWindow(WindowFromPoint(pt)))
-					PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, 0,
+					PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 0,
 						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
 			}
 			else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 				GetVector();
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
-				PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 1, 0, 0);
+				PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
 			}
 			gStatus.vkDownTick = 0;
 		}
@@ -303,7 +303,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 			else if (msg->message == WM_LBUTTONDOWN) {
-				// simply giveup
+				// simply give up
 				gStatus.vkStateId = WM_APP;
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 			}
@@ -312,7 +312,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					// popup menu
 					POINT pt; GetCursorPos(&pt);
 					if (IsPainterWindow(WindowFromPoint(pt)))
-						PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND, 1,
+						PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 1,
 							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
 					gStatus.vkStateId = WM_APP;
 				}
@@ -387,7 +387,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
 						if (bEnableTouch) {
 							POINT pt; GetCursorPos(&pt);
-							PostMessage(gSettings.nofityWnd, WM_USER + WM_COMMAND + 2, i,
+							PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
 								pt.x + pt.y * 0x10000);
 						}
 						break;

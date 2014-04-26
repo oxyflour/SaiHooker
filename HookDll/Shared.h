@@ -2,6 +2,14 @@
 #define MAX_VECTOR_LENGTH 64
 #define MAX_STATUS_FINGERS 5
 
+#define SAI_WINDOW_CLASS TEXT("sfl_window_class")
+#define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
+
+#define WM_USER_DEBUG (WM_USER + WM_APP)
+#define WM_USER_VIRTUALKEY (WM_USER + WM_COMMAND)
+#define WM_USER_FINGERTAP (WM_USER + WM_COMMAND + 2)
+#define WM_USER_GESTURE (WM_USER + WM_COMMAND + 1)
+
 #define SQUA(x) ((x)*(x))
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));

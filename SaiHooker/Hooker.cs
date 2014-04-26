@@ -33,6 +33,11 @@ namespace SaiHooker
         const uint WM_USER = 0x0400;
         const uint WM_COMMAND = 0x0111;
 
+        const uint WM_USER_DEBUG = WM_USER + WM_APP;
+        const uint WM_USER_VIRTUALKEY = WM_USER + WM_COMMAND;
+        const uint WM_USER_FINGERTAP = WM_USER_VIRTUALKEY + 2;
+        const uint WM_USER_GESTURE = WM_USER_VIRTUALKEY + 1;
+
         [StructLayout(LayoutKind.Sequential)]
         struct POINT
         {
@@ -69,21 +74,21 @@ namespace SaiHooker
             {
 //                MSG msg = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
                 MSG* msg = (MSG*)lParam;
-                if (msg->message >= WM_USER + WM_APP && msg->message <= WM_USER + WM_APP + 16 && s_this.OnHookEvent != null)
+                if (msg->message >= WM_USER_DEBUG && msg->message <= WM_USER_DEBUG + 16 && s_this.OnHookEvent != null)
                 {
                     s_this.OnHookEvent((int)msg->message, (int)(ulong)msg->wParam, (int)msg->lParam);
                 }
-                if (msg->message == WM_USER + WM_COMMAND && s_this.OnVirtualKey != null)
+                if (msg->message == WM_USER_VIRTUALKEY && s_this.OnVirtualKey != null)
                 {
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnVirtualKey((int)msg->wParam, x, y);
                 }
-                if (msg->message == WM_USER + WM_COMMAND + 2 && s_this.OnFingerTap != null)
+                if (msg->message == WM_USER_FINGERTAP && s_this.OnFingerTap != null)
                 {
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnFingerTap((int)msg->wParam, x, y);
                 }
-                if (msg->message == WM_USER + WM_COMMAND + 1 && s_this.OnMouseGesture != null)
+                if (msg->message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
                     GetVectorStr(sz, sz.Capacity);
