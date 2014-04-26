@@ -165,18 +165,13 @@ void InitTouchWindow(HWND hwnd) {
 	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
 	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
 }
-void CheckFingerTap(DWORD tick, WORD x, WORD y, BOOL bEnableTouch) {
-	// give up all gesture beacuse there are no fingers touching now
-	ChangeGesture(GID_BEGIN, 0);
-	g_pIManipProc->CompleteManipulation();
+void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 	// check tap
 	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
 		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
-			if (bEnableTouch) {
-				POINT pt; GetCursorPos(&pt);
-				PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
-					pt.x + pt.y * 0x10000);
-			}
+			POINT pt; GetCursorPos(&pt);
+			PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
+				pt.x + pt.y * 0x10000);
 			break;
 		}
 	}
@@ -352,8 +347,13 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.fingerDownTick[n - 1] = tick;
 		}
 		else if (msg->message == WM_GESTURE_UP) {
-			if (n == 0)
-				CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam), bEnableTouch);
+			if (n == 0) {
+				// give up all gesture beacuse there are no fingers touching now
+				ChangeGesture(GID_BEGIN, 0);
+				g_pIManipProc->CompleteManipulation();
+				if (bEnableTouch)
+					CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
+			}
 			if (n >= 0 && n < MAX_STATUS_FINGERS)
 				gStatus.fingerUpTick[n] = tick;
 		}
