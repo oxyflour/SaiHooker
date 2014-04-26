@@ -147,35 +147,6 @@ void ChangeGesture(DWORD newState, long param) {
 //	if (g_dwGestureState != GID_BEGIN)
 //		LogText(TEXT("gesture %x on (%d/0x%x)\r\n"), g_dwGestureState, param, param);
 }
-void InitTouchWindow(HWND hwnd) {
-	BOOL val = FALSE;
-	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
-		(HANDLE)(TABLET_DISABLE_FLICKS | TABLET_DISABLE_PRESSANDHOLD | TABLET_DISABLE_FLICKFALLBACKKEYS));
-
-	HINSTANCE hInst = LoadLibrary(TEXT("user32.dll"));
-	pSetWindowFeedbackSetting pfn = (pSetWindowFeedbackSetting)GetProcAddress(hInst, "SetWindowFeedbackSetting");
-	if (pfn != NULL) {
-		pfn(hwnd, FEEDBACK_TOUCH_CONTACTVISUALIZATION, 0, sizeof(BOOL), &val);
-		pfn(hwnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &val);
-		pfn(hwnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &val);
-	}
-	FreeLibrary(hInst);
-
-	// Do not register touch window if you want WM_GESTURE
-	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
-	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
-}
-void CheckFingerTap(DWORD tick, WORD x, WORD y) {
-	// check tap
-	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
-		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
-			POINT pt; GetCursorPos(&pt);
-			PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
-				pt.x + pt.y * 0x10000);
-			break;
-		}
-	}
-}
 void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 		// two finger gesture (zoom, rotate)
 		if (gStatus.fingerCount == 2 &&
@@ -215,6 +186,37 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 		else
 			KeepGesture(x, y, s, r);
 }
+
+void InitTouchWindow(HWND hwnd) {
+	BOOL val = FALSE;
+	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
+		(HANDLE)(TABLET_DISABLE_FLICKS | TABLET_DISABLE_PRESSANDHOLD | TABLET_DISABLE_FLICKFALLBACKKEYS));
+
+	HINSTANCE hInst = LoadLibrary(TEXT("user32.dll"));
+	pSetWindowFeedbackSetting pfn = (pSetWindowFeedbackSetting)GetProcAddress(hInst, "SetWindowFeedbackSetting");
+	if (pfn != NULL) {
+		pfn(hwnd, FEEDBACK_TOUCH_CONTACTVISUALIZATION, 0, sizeof(BOOL), &val);
+		pfn(hwnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &val);
+		pfn(hwnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &val);
+	}
+	FreeLibrary(hInst);
+
+	// Do not register touch window if you want WM_GESTURE
+	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
+	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
+}
+void CheckFingerTap(DWORD tick, WORD x, WORD y) {
+	// check tap
+	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
+		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
+			POINT pt; GetCursorPos(&pt);
+			PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
+				pt.x + pt.y * 0x10000);
+			break;
+		}
+	}
+}
+
 LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 	if (nCode == HC_ACTION) {
@@ -224,7 +226,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		// Init
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
-
 		// setup touch lock timeout
 		if (msg->message == 0x0ff2) {
 			// Do not use msg->time!
@@ -269,28 +270,29 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.isCtrlDown = bDown;
 			if (msg->message == WM_SYSKEYDOWN || msg->wParam == VK_MENU)
 				gStatus.isAltDown = bDown;
-		}
-		// if CTRL and ALT are both down
-		if ((gStatus.isCtrlDown && gStatus.isAltDown) && !gStatus.vkDownTick) {
-			gStatus.vkDownTick = tick;
-			gStatus.vkStateId = 0;
-			gStatus.vkPenPos = gStatus.penHoverPos;
-			ResetVector();
-		}
-		// if CTRL and ALT are both up
-		else if ((!gStatus.isCtrlDown && !gStatus.isAltDown) && gStatus.vkDownTick) {
-			if (gStatus.vkStateId == 0) {
-				POINT pt; GetCursorPos(&pt);
-				if (IsPainterWindow(WindowFromPoint(pt)))
-					PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 0,
-						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+
+			// if CTRL and ALT are both down
+			if ((gStatus.isCtrlDown && gStatus.isAltDown) && !gStatus.vkDownTick) {
+				gStatus.vkDownTick = tick;
+				gStatus.vkStateId = 0;
+				gStatus.vkPenPos = gStatus.penHoverPos;
+				ResetVector();
 			}
-			else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-				GetVector();
-				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
-				PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
+			// if CTRL and ALT are both up
+			else if ((!gStatus.isCtrlDown && !gStatus.isAltDown) && gStatus.vkDownTick) {
+				if (gStatus.vkStateId == 0) {
+					POINT pt; GetCursorPos(&pt);
+					if (IsPainterWindow(WindowFromPoint(pt)))
+						PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 0,
+							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+				}
+				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+					GetVector();
+					InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
+				}
+				gStatus.vkDownTick = 0;
 			}
-			gStatus.vkDownTick = 0;
 		}
 
 		/*
@@ -316,7 +318,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 			else if (msg->message == WM_LBUTTONDOWN) {
-				// simply give up
 				gStatus.vkStateId = WM_APP;
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 1, 0);
