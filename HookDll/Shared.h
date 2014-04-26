@@ -5,6 +5,8 @@
 #define SAI_WINDOW_CLASS TEXT("sfl_window_class")
 #define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
 
+#define WT_PACKET (WM_USER + 0x7FF0)
+
 #define WM_USER_DEBUG (WM_USER + WM_APP)
 #define WM_USER_QUIT (WM_USER + WM_QUIT)
 #define WM_USER_VIRTUALKEY (WM_USER + WM_COMMAND)

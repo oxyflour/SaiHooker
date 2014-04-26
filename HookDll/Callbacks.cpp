@@ -227,7 +227,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
 		// setup touch lock timeout
-		if (msg->message == 0x0ff2) {
+		if (msg->message == WT_PACKET) {
 			// Do not use msg->time!
 			gStatus.penHoverTick = tick;
 		}
