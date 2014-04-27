@@ -55,6 +55,8 @@ struct STATUS {
 	// SAI thread id
 	DWORD threadId;
 
+	BOOL bEnableTouch;
+
 	// pen hover time & position
 	DWORD penHoverTick;
 	POINT penHoverPos;

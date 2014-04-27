@@ -36,6 +36,8 @@ SETTINGS gSettings = {
 STATUS gStatus = {
 	0,
 
+	FALSE,
+
 	0,
 	{0, 0},
 

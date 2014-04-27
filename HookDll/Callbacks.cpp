@@ -234,11 +234,9 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
 		// setup touch lock timeout
-		if (msg->message == WT_PACKET) {
-			// Do not use msg->time!
+		if (msg->message == WT_PACKET)
 			gStatus.penHoverTick = tick;
-		}
-		BOOL bEnableTouch = (tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
+		gStatus.bEnableTouch = (tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
 
 		/*
 		 * Block events from touch
@@ -252,7 +250,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			msg->message == WM_LBUTTONDBLCLK || msg->message == WM_RBUTTONDBLCLK ||
 			msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_VSCROLL || msg->message == WM_HSCROLL) {
-			if ((!bEnableTouch ||
+			if ((!gStatus.bEnableTouch ||
 					gSettings.lockTouch ||
 					gStatus.gestureId != GID_BEGIN ||
 					IsPainterWindow(msg->hwnd)) &&
@@ -365,7 +363,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (msg->message == WM_GESTURE_PROC) {
 			SHORT x = LOWORD(msg->lParam) - 0x8000, y = HIWORD(msg->lParam) - 0x8000,
 				s = LOWORD(msg->wParam) - 0x8000, r = HIWORD(msg->wParam) - 0x8000;
-			bEnableTouch ? HandleGesture(tick, x, y, s, r) : ChangeGesture(GID_BEGIN, 0);
+			gStatus.bEnableTouch ? HandleGesture(tick, x, y, s, r) : ChangeGesture(GID_BEGIN, 0);
 		}
 		DWORD n = gStatus.fingerCount;
 		if (msg->message == WM_GESTURE_DOWN) {
@@ -377,7 +375,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				// give up all gesture beacuse there are no fingers touching now
 				ChangeGesture(GID_BEGIN, 0);
 				g_pIManipProc->CompleteManipulation();
-				if (bEnableTouch)
+				if (gStatus.bEnableTouch)
 					CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
 			}
 			if (n >= 0 && n < MAX_STATUS_FINGERS)
