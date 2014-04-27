@@ -101,3 +101,24 @@ HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
 HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
 	SimulateMouse(x, y, 0, down ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP);
 }
+
+HOOKDLL_API int _stdcall AddButton(TCHAR* szText, int left, int right, int top, int bottom, int index) {
+	for (int i = 0; i < MAX_BUTTON_COUNT && index < 0; i ++) {
+		if (gSettings.ButtonRects[i].str[0] == 0) {
+			index = i;
+			break;
+		}
+	}
+	if (index >= 0 && index < MAX_BUTTON_COUNT) {
+		BUTTON_RECT* prt = gSettings.ButtonRects + index;
+		if (szText)
+			StringCbCopy(prt->str, MAX_BUTTON_TEXT, szText);
+		else
+			prt->str[0] = 0;
+		prt->left = left;
+		prt->right = right;
+		prt->top = top;
+		prt->bottom = bottom;
+	}
+	return index;
+}

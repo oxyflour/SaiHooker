@@ -20,6 +20,8 @@ namespace SaiHooker
         const int WS_EX_TOPMOST = 0x00000008;
         const int WS_EX_NOACTIVATE = 0x08000000;
         const int WS_EX_TOOLWINDOW = 0x00000080;
+        const int WS_EX_TRANSPARENT = 0x00000020;
+        const int WS_EX_LAYERED = 0x00080000;
 
         const int HWND_TOPMOST = -1;
 
@@ -68,6 +70,11 @@ namespace SaiHooker
             return ret;
         }
 
+        public int AddTextButton(string text, int left, int right, int top, int bottom, int index)
+        {
+            return AddButton(text, left, right, top, bottom, index);
+        }
+
         void ParseMenu(IntPtr hParent, XmlNode node)
         {
             foreach (XmlNode n in node.ChildNodes)
@@ -99,6 +106,9 @@ namespace SaiHooker
 
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr SetNotifyWindow(IntPtr hWnd);
+
+        [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern int AddButton(string text, int left, int right, int top, int bottom, int index);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr FindWindowEx(IntPtr hParent, IntPtr hPrev, String lpClassName, String lpWndName);

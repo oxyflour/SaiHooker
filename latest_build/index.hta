@@ -246,6 +246,11 @@
 			var pop = $('#popup'), doc = $(pop.html());
 			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
 			pop.data('doc', doc).data('xml', doc[0].outerHTML);
+
+            // add buttons
+			wndutil.AddTextButton('+', -20,  20, -60, -20, -1);
+			wndutil.AddTextButton('*', -60, -20, -20,  20, -1);
+			wndutil.AddTextButton('#',  20,  60, -20,  20, -1);
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();

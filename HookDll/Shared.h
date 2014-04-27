@@ -1,6 +1,8 @@
 #define MAX_SETTING_STEPS 64
 #define MAX_VECTOR_LENGTH 64
 #define MAX_STATUS_FINGERS 5
+#define MAX_BUTTON_COUNT 64
+#define MAX_BUTTON_TEXT 128
 
 #define SAI_WINDOW_CLASS TEXT("sfl_window_class")
 #define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
@@ -19,6 +21,15 @@
 #define SQUA(x) ((x)*(x))
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
+
+struct BUTTON_RECT {
+	TCHAR str[MAX_BUTTON_TEXT];
+	BOOL checked;
+	int left;
+	int right;
+	int top;
+	int bottom;
+};
 
 struct SETTINGS {
 	DWORD lockTouch;
@@ -49,6 +60,8 @@ struct SETTINGS {
 	double rotateTriMin;
 	double rotateTriMax;
 	double rotateArr[MAX_SETTING_STEPS];
+
+	BUTTON_RECT ButtonRects[MAX_BUTTON_COUNT];
 };
 
 struct STATUS {
