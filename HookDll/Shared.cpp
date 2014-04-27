@@ -48,8 +48,10 @@ STATUS gStatus = {
 
 	FALSE,
 	FALSE,
+	FALSE,
 	0,
 	0,
+	{0, 0},
 	{0, 0},
 
 	0,

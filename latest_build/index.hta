@@ -33,74 +33,76 @@
 <body>
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-	<label class="tab active" for="rad0">UI</label>
-	<label class="tab" for="rad1">Pens</label>
-	<label class="tab" for="rad2">Trans</label>
-	<label class="tab" for="rad4">Select</label>
-	<label class="tab" for="rad3">More</label>
-	<div for="rad0" class="tab-content active">
-		<button onclick="sendKeys('{TAB}')">Tab</button>
-		<button onclick="sendKeys('{F11}')">F11</button>
-		<button onclick="sendKeys('h')">Flip</button>
-		<button onclick="sendKeys('^{TAB}')">View</button>
-	</div>
-	<div for="rad1" class="tab-content">
-		<button onclick="sendKeys('n')">[N]</button>
-		<button onclick="sendKeys('c')">[C]</button>
-		<button onclick="sendKeys('e')">[E]</button>
-		<button onclick="sendKeys('s')">[S]</button>
-		<button onclick="sendKeys('a')">[A]</button>
-	</div>
-	<div for="rad2" class="tab-content">
-		<button onclick="sendKeys('^t')">Trans</button>
-		<button onclick="sendKeys('{ENTER}')">Accept</button>
-		<button onclick="sendKeys('{ESCAPE}')">Cancel</button>
-	</div>
-	<div for="rad3" class="tab-content">
-		Key: 
-		<span class="field">
-			<input type="checkbox" value="16" onchange="hooker.SimulateKey(this.value, this.checked)" />Shift
-		</span>
-		<span class="field">
-			<input type="checkbox" value="17" onchange="hooker.SimulateKey(this.value, this.checked)" />Ctrl
-		</span>
-		<span class="field">
-			<input type="checkbox" value="18" onchange="hooker.SimulateKey(this.value, this.checked)" />Alt
-		</span>
-		<br />
-		<br />
-		<span class="field">
-			<input class="auto-load" type="checkbox"
-				initvalue="hooker.DisableTouch(-1)"
-				onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock All touches
-		</span>
-		<br />
-		<br />
-		<span class="field">
-			Pan+<select class="auto-load big"
-				initvalue="hooker.SetPanningKey(-1)"
-				onchange="hooker.SetPanningKey(parseInt(this.value))">
-				<option value="0">None</option>
-				<option value="32">Space</option>
-				<option value="16">Shift</option>
-				<option value="17">Ctrl</option>
-				<option value="18">Alt</option>
-			</select>
-		</span>
-		<!--button onclick="wndutil.PopupMenu($('#popup').data('xml'), 200, 500)">Menu</!--button-->
-	</div>
-	<div for="rad4" class="tab-content">
-		<button onclick="sendKeys('^a')">All</button>
-		<button onclick="$('.tab:first').trigger('click');sendKeys('^d')">None</button>
-		<button onclick="sendKeys('^f')">Fill</button>
-		<button onclick="sendKeys('d')">Clr</button>
-		<!--button onclick="sendKeys('^c')">Copy</button>
-		<button onclick="sendKeys('^v')">Paste</button-->
-		<!--button onclick="sendKeys('{LEFT}')">&lt;</button>
-		<button onclick="sendKeys('{UP}')">&and;</button>
-		<button onclick="sendKeys('{DOWN}')">&or;</button>
-		<button onclick="sendKeys('{RIGHT}')">&gt;</button-->
-	</div>
+    <div class="hidden">
+        <label class="tab active" for="rad0">UI</label>
+        <label class="tab" for="rad1">Pens</label>
+        <label class="tab" for="rad2">Trans</label>
+        <label class="tab" for="rad4">Select</label>
+        <label class="tab" for="rad3">More</label>
+        <div for="rad0" class="tab-content active">
+            <button onclick="sendKeys('{TAB}')">Tab</button>
+            <button onclick="sendKeys('{F11}')">F11</button>
+            <button onclick="sendKeys('h')">Flip</button>
+            <button onclick="sendKeys('^{TAB}')">View</button>
+        </div>
+        <div for="rad1" class="tab-content">
+            <button onclick="sendKeys('n')">[N]</button>
+            <button onclick="sendKeys('c')">[C]</button>
+            <button onclick="sendKeys('e')">[E]</button>
+            <button onclick="sendKeys('s')">[S]</button>
+            <button onclick="sendKeys('a')">[A]</button>
+        </div>
+        <div for="rad2" class="tab-content">
+            <button onclick="sendKeys('^t')">Trans</button>
+            <button onclick="sendKeys('{ENTER}')">Accept</button>
+            <button onclick="sendKeys('{ESCAPE}')">Cancel</button>
+        </div>
+        <div for="rad3" class="tab-content">
+            Key: 
+            <span class="field">
+                <input type="checkbox" value="16" onchange="hooker.SimulateKey(this.value, this.checked)" />Shift
+            </span>
+            <span class="field">
+                <input type="checkbox" value="17" onchange="hooker.SimulateKey(this.value, this.checked)" />Ctrl
+            </span>
+            <span class="field">
+                <input type="checkbox" value="18" onchange="hooker.SimulateKey(this.value, this.checked)" />Alt
+            </span>
+            <br />
+            <br />
+            <span class="field">
+                <input class="auto-load" type="checkbox"
+                    initvalue="hooker.DisableTouch(-1)"
+                    onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock All touches
+            </span>
+            <br />
+            <br />
+            <span class="field">
+                Pan+<select class="auto-load big"
+                    initvalue="hooker.SetPanningKey(-1)"
+                    onchange="hooker.SetPanningKey(parseInt(this.value))">
+                    <option value="0">None</option>
+                    <option value="32">Space</option>
+                    <option value="16">Shift</option>
+                    <option value="17">Ctrl</option>
+                    <option value="18">Alt</option>
+                </select>
+            </span>
+            <!--button onclick="wndutil.PopupMenu($('#popup').data('xml'), 200, 500)">Menu</!--button-->
+        </div>
+        <div for="rad4" class="tab-content">
+            <button onclick="sendKeys('^a')">All</button>
+            <button onclick="$('.tab:first').trigger('click');sendKeys('^d')">None</button>
+            <button onclick="sendKeys('^f')">Fill</button>
+            <button onclick="sendKeys('d')">Clr</button>
+            <!--button onclick="sendKeys('^c')">Copy</button>
+            <button onclick="sendKeys('^v')">Paste</button-->
+            <!--button onclick="sendKeys('{LEFT}')">&lt;</button>
+            <button onclick="sendKeys('{UP}')">&and;</button>
+            <button onclick="sendKeys('{DOWN}')">&or;</button>
+            <button onclick="sendKeys('{RIGHT}')">&gt;</button-->
+        </div>
+    </div>
 	<div id="log"></div>
 	<script id="popup" type="text/xml">
 		<menu>
@@ -254,7 +256,7 @@
 				(errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
 		}
 
-		window.resizeTo(300, 120);
+		window.resizeTo(300, 320);
 		window.ontimer();
 		setInterval(window.ontimer, 2000)
 	</script>

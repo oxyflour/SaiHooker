@@ -216,6 +216,13 @@ void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 		}
 	}
 }
+void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
+	HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
+	HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+	MoveToEx(hdc, ptFrom.x, ptFrom.y, NULL);
+	LineTo(hdc, ptTo.x, ptTo.y);
+	DeleteObject(SelectObject(hdc, hOld));
+}
 
 LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
@@ -264,33 +271,35 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		 */
 		// check if CTRL or ALT is down
 		if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
-			msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP) {
-			BOOL bDown = msg->message == WM_KEYDOWN || msg->message == WM_SYSKEYDOWN;
+			msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP ||
+			msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
 			if (msg->wParam == VK_CONTROL)
-				gStatus.isCtrlDown = bDown;
-			if (msg->message == WM_SYSKEYDOWN || msg->wParam == VK_MENU)
-				gStatus.isAltDown = bDown;
+				gStatus.isCtrlDown = msg->message == WM_KEYDOWN;
+			else if (msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP || msg->wParam == VK_MENU)
+				gStatus.isAltDown = msg->message == WM_SYSKEYDOWN || msg->message == WM_KEYDOWN;
+			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
+				gStatus.isLeftDown = msg->message == WM_LBUTTONDOWN;
 
 			// if CTRL and ALT are both down
 			if ((gStatus.isCtrlDown && gStatus.isAltDown) && !gStatus.vkDownTick) {
 				gStatus.vkDownTick = tick;
 				gStatus.vkStateId = 0;
-				gStatus.vkPenPos = gStatus.penHoverPos;
+				gStatus.vkDownPos = gStatus.penHoverPos;
 				ResetVector();
 			}
 			// if CTRL and ALT are both up
-			else if ((!gStatus.isCtrlDown && !gStatus.isAltDown) && gStatus.vkDownTick) {
+			else if ((!gStatus.isCtrlDown && !gStatus.isAltDown && !gStatus.isLeftDown) && gStatus.vkDownTick) {
 				if (gStatus.vkStateId == 0) {
 					POINT pt; GetCursorPos(&pt);
-					if (IsPainterWindow(WindowFromPoint(pt)))
+					if (IsPainterWindow(WindowFromPoint(pt)) && tick - gStatus.vkDownTick < gSettings.vkTimeout)
 						PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 0,
 							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
-					InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
 				}
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkDownTick = 0;
 			}
 		}
@@ -300,28 +309,43 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		 */
 		if (gStatus.vkDownTick) {
 			if (msg->message == WM_MOUSEMOVE) {
+				HDC hdc = GetDC(NULL);
 				AddPoint(gStatus.penHoverPos);
 				if (gStatus.vkStateId == 0) {
-					if (SQUA_SUM(gStatus.vkPenPos.x - gStatus.penHoverPos.x, gStatus.vkPenPos.y - gStatus.penHoverPos.y) >
-						(LONG)SQUA(gSettings.mgEnableDistance))
+					if (SQUA_SUM(gStatus.vkDownPos.x - gStatus.penHoverPos.x, gStatus.vkDownPos.y - gStatus.penHoverPos.y) >
+						(LONG)SQUA(gSettings.mgEnableDistance)) {
+						gStatus.vkStrokePos = gStatus.vkDownPos;
 						gStatus.vkStateId = WM_MOUSEMOVE;
+					}
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-					HDC hdc = GetDC(NULL);
-					HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
-					HPEN hOld = (HPEN)SelectObject(hdc, hpen);
-					MoveToEx(hdc, gStatus.vkPenPos.x, gStatus.vkPenPos.y, NULL);
-					LineTo(hdc, gStatus.penHoverPos.x, gStatus.penHoverPos.y);
-					DeleteObject(SelectObject(hdc, hOld));
-					ReleaseDC(NULL, hdc);
-					gStatus.vkPenPos = gStatus.penHoverPos;
+					StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
+					gStatus.vkStrokePos = gStatus.penHoverPos;
 				}
+				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
+					// to be finished
+				}
+				TextOut(hdc, gStatus.vkDownPos.x, gStatus.vkDownPos.y, TEXT("X"), 1);
+				ReleaseDC(NULL, hdc);
 			}
 			else if (msg->message == WM_LBUTTONDOWN) {
-				gStatus.vkStateId = WM_APP;
+				gStatus.vkStateId = WM_LBUTTONDOWN;
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 1, 0);
+				// block
+				msg->message = WM_USER + msg->message;
+				// reset CTRL & ALT
+				SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
+				SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
 			}
+			else if (msg->message == WM_LBUTTONUP) {
+				gStatus.vkStateId = WM_APP;
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 2, 0);
+				// block message
+				msg->message = WM_USER + msg->message;
+			}
+			/*
 			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout) {
 				if (gStatus.vkStateId == 0) {
 					// popup menu
@@ -332,6 +356,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					gStatus.vkStateId = WM_APP;
 				}
 			}
+			*/
 		}
 
 		/*

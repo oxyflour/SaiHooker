@@ -69,9 +69,11 @@ struct STATUS {
 
 	BOOL isCtrlDown;
 	BOOL isAltDown;
+	BOOL isLeftDown;
 	DWORD vkDownTick;
 	DWORD vkStateId;
-	POINT vkPenPos;
+	POINT vkDownPos;
+	POINT vkStrokePos;
 
 	DWORD painterLeaveTick;
 
