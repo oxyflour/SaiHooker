@@ -187,6 +187,45 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 			KeepGesture(x, y, s, r);
 }
 
+struct BUTTON_RECT {
+	TCHAR* str;
+	BOOL clicked;
+	int left;
+	int right;
+	int top;
+	int bottom;
+};
+BUTTON_RECT rts[] = {
+	{TEXT("X"), FALSE, -20, 20, -60, -20},
+	{TEXT("Y"), FALSE, -20, 20,  20,  60},
+};
+void DrawToolWindow(HDC hdc) {
+	POINT pt = gStatus.vkDownPos, ck = gStatus.penHoverPos;
+	for (size_t i = 0; i < sizeof(rts)/sizeof(BUTTON_RECT); i ++) {
+		BUTTON_RECT rt  = rts[i];
+		if (rt.clicked)
+			SetBkColor(hdc, RGB(100, 100, 100));
+		else if (ck.x > pt.x + rt.left && ck.x < pt.x + rt.right &&
+			ck.y > pt.y + rt.top && ck.y < pt.y + rt.bottom)
+			SetBkColor(hdc, RGB(180, 180, 180));
+		else
+			SetBkColor(hdc, RGB(255, 255, 255));
+		SetTextAlign(hdc, TA_CENTER);
+		TextOut(hdc, pt.x+(rt.left+rt.right)/2, pt.y+(rt.top+rt.bottom)/2, rt.str, _tcsclen(rt.str));
+	}
+}
+int GetClickedWindow() {
+	POINT pt = gStatus.vkDownPos, ck = gStatus.penHoverPos;
+	for (size_t i = 0; i < sizeof(rts)/sizeof(BUTTON_RECT); i ++) {
+		BUTTON_RECT rt  = rts[i];
+		rt.clicked = (ck.x > pt.x + rt.left && ck.x < pt.x + rt.right &&
+			ck.y > pt.y + rt.top && ck.y < pt.y + rt.bottom);
+		if (rt.clicked)
+			return i;
+	}
+	return -1;
+}
+
 void InitTouchWindow(HWND hwnd) {
 	BOOL val = FALSE;
 	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
@@ -270,23 +309,26 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		// check if CTRL or ALT is down
 		if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP ||
-			msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+			msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
+			msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
 			if (msg->wParam == VK_CONTROL)
 				gStatus.isCtrlDown = msg->message == WM_KEYDOWN;
 			else if (msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP || msg->wParam == VK_MENU)
 				gStatus.isAltDown = msg->message == WM_SYSKEYDOWN || msg->message == WM_KEYDOWN;
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
 				gStatus.isLeftDown = msg->message == WM_LBUTTONDOWN;
+			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
+				gStatus.isRightDown = msg->message == WM_RBUTTONDOWN;
+				msg->message += WM_USER;
+			}
 
-			// if CTRL and ALT are both down
-			if ((gStatus.isCtrlDown && gStatus.isAltDown) && !gStatus.vkDownTick) {
+			if ((gStatus.isRightDown) && !gStatus.vkDownTick) {
 				gStatus.vkDownTick = tick;
 				gStatus.vkStateId = 0;
 				gStatus.vkDownPos = gStatus.penHoverPos;
 				ResetVector();
 			}
-			// if CTRL and ALT are both up
-			else if ((!gStatus.isCtrlDown && !gStatus.isAltDown && !gStatus.isLeftDown) && gStatus.vkDownTick) {
+			else if ((!gStatus.isRightDown && !gStatus.isLeftDown) && gStatus.vkDownTick) {
 				if (gStatus.vkStateId == 0) {
 					POINT pt; GetCursorPos(&pt);
 					if (IsPainterWindow(WindowFromPoint(pt)) && tick - gStatus.vkDownTick < gSettings.vkTimeout)
@@ -321,40 +363,27 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					gStatus.vkStrokePos = gStatus.penHoverPos;
 				}
 				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
-					// to be finished
+					DrawToolWindow(hdc);
 				}
-				TextOut(hdc, gStatus.vkDownPos.x, gStatus.vkDownPos.y, TEXT("X"), 1);
+				ReleaseDC(NULL, hdc);
+				msg->message += WM_USER;
+			}
+			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+				gStatus.vkStateId = WM_LBUTTONDOWN;
+				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, msg->message == WM_LBUTTONDOWN ? 8 : 9, GetClickedWindow());
+				msg->message += WM_USER;
+			}
+			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout && gStatus.vkStateId == 0) {
+				POINT pt; GetCursorPos(&pt);
+				if (IsPainterWindow(WindowFromPoint(pt)))
+					PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 1,
+						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+				gStatus.vkStateId = WM_LBUTTONDOWN;
+
+				HDC hdc = GetDC(NULL);
+				DrawToolWindow(hdc);
 				ReleaseDC(NULL, hdc);
 			}
-			else if (msg->message == WM_LBUTTONDOWN) {
-				gStatus.vkStateId = WM_LBUTTONDOWN;
-				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
-				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 1, 0);
-				// block
-				msg->message = WM_USER + msg->message;
-				// reset CTRL & ALT
-				SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
-				SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
-			}
-			else if (msg->message == WM_LBUTTONUP) {
-				gStatus.vkStateId = WM_APP;
-				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
-				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 2, 0);
-				// block message
-				msg->message = WM_USER + msg->message;
-			}
-			/*
-			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout) {
-				if (gStatus.vkStateId == 0) {
-					// popup menu
-					POINT pt; GetCursorPos(&pt);
-					if (IsPainterWindow(WindowFromPoint(pt)))
-						PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 1,
-							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
-					gStatus.vkStateId = WM_APP;
-				}
-			}
-			*/
 		}
 
 		/*

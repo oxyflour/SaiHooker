@@ -72,6 +72,7 @@ struct STATUS {
 	BOOL isCtrlDown;
 	BOOL isAltDown;
 	BOOL isLeftDown;
+	BOOL isRightDown;
 	DWORD vkDownTick;
 	DWORD vkStateId;
 	POINT vkDownPos;
