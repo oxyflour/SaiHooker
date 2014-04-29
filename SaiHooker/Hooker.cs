@@ -14,7 +14,7 @@ namespace SaiHooker
         [DispId(2)]
         void OnVirtualKey(int longPress, int x, int y);
         [DispId(3)]
-        void OnMouseGesture(string vec);
+        void OnMouseGesture(string vec, int key);
         [DispId(4)]
         void OnFingerTap(int n, int x, int y);
     }
@@ -92,7 +92,7 @@ namespace SaiHooker
                 {
                     StringBuilder sz = new StringBuilder(64);
                     GetVectorStr(sz, sz.Capacity);
-                    s_this.OnMouseGesture(sz.ToString());
+                    s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam);
                 }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
@@ -128,7 +128,7 @@ namespace SaiHooker
         public delegate void VirtualKeyHandle(int longPress, int x, int y);
         public event VirtualKeyHandle OnVirtualKey;
 
-        public delegate void MouseGestureHandle(string vec);
+        public delegate void MouseGestureHandle(string vec, int key);
         public event MouseGestureHandle OnMouseGesture;
 
         public delegate void FingerTapHandle(int n, int x, int y);

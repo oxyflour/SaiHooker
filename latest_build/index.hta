@@ -176,10 +176,15 @@
 			// debug only
 			logText('got msg: '+msg+' ('+wParam+', '+lParam+')');
 		});
-		hooker.attachEvent("OnMouseGesture", function (vec) {
-			var item = $('#popup').data('doc').find('[gst='+vec+']');
-			item.attr('key') ? wscript.SendKeys(item.attr('key')) :
-				logText('unknown gesture: '+vec);
+		hooker.attachEvent("OnMouseGesture", function (vec, key) {
+		    if (key) {
+		        logText(vec);
+		    }
+		    else {
+		        var item = $('#popup').data('doc').find('[gst=' + vec + ']');
+		        item.attr('key') ? wscript.SendKeys(item.attr('key')) :
+                    logText('unknown gesture: ' + vec);
+		    }
 		});
 		hooker.attachEvent("OnVirtualKey", function (msg, x, y) {
 			// press

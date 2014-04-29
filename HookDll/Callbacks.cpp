@@ -34,31 +34,15 @@ void ReducePoint(int n) {
 		g_MSVectors.push_back(pb);
 		g_MSVectors.push_back(pe);
 	}
-	/*
-	else {
-		HDC hdc = GetDC(NULL);
-		HPEN hpen = CreatePen(PS_SOLID, 5, RGB(128, 128, 255));
-		HPEN hOld = (HPEN)SelectObject(hdc, hpen);
-		MoveToEx(hdc, pb.x, pb.y, NULL);
-		LineTo(hdc, pe.x, pe.y);
-		DeleteObject(SelectObject(hdc, hOld));
-		ReleaseDC(NULL, hdc);
-	}
-	*/
 }
 void AddPoint(POINT pt) {
 	g_MSVectors.push_back(pt);
 	ReducePoint(gSettings.mgPointCount);
 }
 void GetVector() {
-	/*
-	HDC hdc = GetDC(NULL);
-	HPEN hpen = CreatePen(PS_SOLID, 20, RGB(0, 128, 255));
-	HPEN hOld = (HPEN)SelectObject(hdc, hpen);
-	*/
 	for (int n = gSettings.mgPointCount - 1; n >= 3; n --)
 		ReducePoint(n);
-	int len = g_MSVectors.size(), j = 0, d = 0;
+	int j = 0;
 	for (std::vector<POINT>::iterator i = g_MSVectors.begin(); i < g_MSVectors.end() - 1 && j < MAX_VECTOR_LENGTH; i ++) {
 		std::vector<POINT>::iterator b = i, e = i + 1;
 		double k = fabs((b->y - e->y) / (b->x - e->x + 1e-6));
@@ -69,24 +53,9 @@ void GetVector() {
 		else c = e->y > b->y ? L'D' : L'L';
 		if (j == 0 || gStatus.vectorStr[j-1] != c)
 			gStatus.vectorStr[j ++] = c;
-		/*
-		MoveToEx(hdc, b->x, b->y, NULL);
-		LineTo(hdc, b->x, b->y);
-		MoveToEx(hdc, e->x, e->y, NULL);
-		LineTo(hdc, e->x, e->y);
-		TCHAR sz[64];
-		_stprintf_s(sz, 64, L"%d,%d: %d\0", b->x, b->y, d);
-		TextOut(hdc, b->x, b->y, sz, wcslen(sz));
-		_stprintf_s(sz, 64, L"%d,%d: %d\0", e->x, e->y, ++d);
-		TextOut(hdc, e->x, e->y, sz, wcslen(sz));
-		*/
 	}
 	if (j < MAX_VECTOR_LENGTH)
 		gStatus.vectorStr[j] = 0;
-	/*
-	DeleteObject(SelectObject(hdc, hOld));
-	ReleaseDC(NULL, hdc);
-	*/
 }
 
 void KeepGesture(long x, long y, long s, long r) {
@@ -309,11 +278,13 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.isAltDown = msg->message == WM_SYSKEYDOWN || msg->message == WM_KEYDOWN;
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
 				gStatus.isLeftDown = msg->message == WM_LBUTTONDOWN;
-			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
+			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
 				gStatus.isRightDown = msg->message == WM_RBUTTONDOWN;
-				msg->message += WM_USER;
-			}
 
+			// block right mouse button
+			if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
+				msg->message += WM_USER;
+			// trigger on/off mouse gesture
 			if ((gStatus.isRightDown) && !gStatus.vkDownTick) {
 				gStatus.vkDownTick = tick;
 				gStatus.vkStateId = 0;
@@ -361,10 +332,14 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				msg->message += WM_USER;
 			}
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+				if (gStatus.vkStateId == WM_MOUSEMOVE) {
+					GetVector();
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
+				}
 				gStatus.vkStateId = WM_LBUTTONDOWN;
-				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG,
-					msg->message == WM_LBUTTONDOWN ? 8 : 9,
-					GetClickedButton(msg->message == WM_LBUTTONDOWN));
+//				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG,
+//					msg->message == WM_LBUTTONDOWN ? 8 : 9,
+//					GetClickedButton(msg->message == WM_LBUTTONDOWN));
 				msg->message += WM_USER;
 
 				HDC hdc = GetDC(NULL);
@@ -372,10 +347,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				ReleaseDC(NULL, hdc);
 			}
 			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout && gStatus.vkStateId == 0) {
-//				POINT pt; GetCursorPos(&pt);
-//				if (IsPainterWindow(WindowFromPoint(pt)))
-//					PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 1,
-//						gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
 				gStatus.vkStateId = WM_LBUTTONDOWN;
 
 				HDC hdc = GetDC(NULL);
