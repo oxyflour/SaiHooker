@@ -126,8 +126,8 @@
 				<item text="SelRegion (&amp;F/ud)" gst="ud" key="f" />
 			</menu>
 			<menu text="UI, File">
-				<item text="TAB (Tab/U)" key="{TAB}" />
-				<item text="Fullscreen (F11/UD)" key="{F11}" />
+				<item text="TAB (Tab/U)" gst="U" key="{TAB}" />
+				<item text="Fullscreen (F11/UD)" gst="UD" key="{F11}" />
 				<item text="NextView (C-Tab/Ul)" key="^{TAB}" />
 				<item text="PrevView (C-S-Tab/Ud)" key="^+{TAB}" />
 				<sep />
@@ -174,14 +174,26 @@
 
 		hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
 		    if (msg == 1) {
-		        if (wParam == 0) // x
-		            wscript.SendKeys(lParam ? '{DEL}' : '{END}');
-                else // y
-		            wscript.SendKeys(lParam ? '{PGUP}' : '{PGDN}');
+		        if (wParam & 2)
+		            wscript.SendKeys(wParam & 1 ? '{PGUP}' : '{PGDN}');
+                else
+		            wscript.SendKeys(wParam & 1 ? '{DEL}' : '{END}');
 		    }
 		    else if (msg == 2) {
-                if (wParam == 1)
-		            wscript.SendKeys(lParam ? '{]}' : '{[}');
+		        if (wParam & 2)
+		            wscript.SendKeys(wParam & 1 ? '{]}' : '{[}');
+		        else {
+		            var k = {
+		                32: 'n',
+		                33: 'b',
+		                34: 'v',
+                        35: 'c',
+                        36: 'e',
+                        37: 'a',
+                        38: 's'
+		            }[lParam];
+		            k && wscript.SendKeys(k);
+		        }
 		    }
 		    else // debug only
 		        logText('debug: ' + msg + ' (' + wParam + ', ' + lParam + ')');
@@ -197,7 +209,7 @@
 		                hooker.SimulateDragStep(1, 20, 20);
 		            },
                     l: function () {
-		                hooker.SimulateDragStep(2, 20, 20);
+		                hooker.SimulateDragStep(2, 30, 20);
 		            }
 		        }[vec] || function () {
 		            logText('unknown stroke: ' + vec);

@@ -319,10 +319,11 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
 					if (gSettings.mgStepMsg) {
 						int delta = 0;
+						DWORD ms = WM_USER_DEBUG + gSettings.mgStepMsg;
 						while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
-							PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, delta > 0 ? 0 : 1);
+							PostMessage(gSettings.nofityWnd, ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
 						while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
-							PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 1, delta > 0 ? 0 : 1);
+							PostMessage(gSettings.nofityWnd, ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
 					}
 				}
 			}
