@@ -174,12 +174,23 @@
 
 		hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
 			// debug only
-			logText('got msg: '+msg+' ('+wParam+', '+lParam+')');
+			logText('debug: '+msg+' ('+wParam+', '+lParam+')');
 		});
-		hooker.attachEvent("OnMouseGesture", function (vec, key) {
-		    if (key) {
-		        logText('stroke[' + key + ']:' + vec);
+		hooker.attachEvent("OnMouseGesture", function (vec, key, x, y) {
+            // left mouse button is down
+		    if (key == 1) {
+		        ({
+		            '': function () {
+		                hooker.SimulateDragWith(0x20, false, false, false);
+		            },
+                    u: function () {
+//		                hooker.SimulateDragByStep(id, dx, dy);
+		            }
+		        }[vec] || function () {
+		            logText('unknown stroke: ' + vec);
+		        })();
 		    }
+            // no button down
 		    else {
 		        if (vec) {
 		            var item = $('#popup').data('doc').find('[gst=' + vec + ']');

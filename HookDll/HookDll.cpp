@@ -101,3 +101,19 @@ HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
 HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
 	SimulateMouse(x, y, 0, down ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP);
 }
+
+HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt) {
+	DRAG_KEY *pdk = &gSettings.mgDrag;
+	if (pdk->enabled)
+		return;
+	pdk->enabled = TRUE;
+	if (pdk->ctrl = ctrl)
+		SimulateKey(VK_CONTROL, 0);
+	if (pdk->shift = shift)
+		SimulateKey(VK_SHIFT, 0);
+	if (pdk->alt = alt)
+		SimulateKey(VK_MENU, 0);
+	if (pdk->vk = vk > 0 ? (WORD)vk : 0)
+		SimulateKey(vk, 0);
+	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
+}

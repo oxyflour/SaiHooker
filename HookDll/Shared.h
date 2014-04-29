@@ -21,6 +21,14 @@
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
 
+struct DRAG_KEY {
+	BOOL enabled;
+	WORD vk;
+	BOOL ctrl;
+	BOOL shift;
+	BOOL alt;
+};
+
 struct SETTINGS {
 	DWORD lockTouch;
 
@@ -41,6 +49,13 @@ struct SETTINGS {
 	double mgSlope;
 	double mgDistanceIn;
 	double mgRadiusIn;
+
+	DRAG_KEY mgDrag;
+	DWORD mgStepMsg;
+	DWORD mgStepIdxX;
+	double mgStepX[MAX_SETTING_STEPS];
+	DWORD mgStepIdxY;
+	double mgStepY[MAX_SETTING_STEPS];
 
 	DWORD panTriggerDistance;
 	DWORD guestureCancelDistance;

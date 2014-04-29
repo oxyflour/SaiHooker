@@ -257,24 +257,40 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			// block right mouse button
 			if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
 				msg->message += WM_USER;
-			// trigger on/off mouse gesture
-			if ((gStatus.isRightDown) && !gStatus.vkDownTick) {
+
+			// trigger on
+			if (gStatus.isRightDown && !gStatus.vkDownTick) {
 				gStatus.vkDownTick = tick;
 				gStatus.vkStateId = 0;
 				gStatus.vkDownPos = gStatus.penHoverPos;
 				ResetVector();
 			}
-			else if ((!gStatus.isRightDown && !gStatus.isLeftDown) && gStatus.vkDownTick) {
+			else if (!gStatus.isRightDown && !gStatus.isLeftDown && gStatus.vkDownTick) {
+				POINT pt = gStatus.penHoverPos;
+				int lppos = pt.x + pt.y * 0x10000;
 				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout) {
 					GetVectorEmpty();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, lppos);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, lppos);
 				}
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkDownTick = 0;
+				if (gSettings.mgDrag.enabled) {
+					DRAG_KEY *pdk = &gSettings.mgDrag;
+					pdk->enabled = FALSE;
+					SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
+					if (pdk->vk)
+						SimulateKey(pdk->vk, KEYEVENTF_KEYUP);
+					if (pdk->ctrl)
+						SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
+					if (pdk->shift)
+						SimulateKey(VK_SHIFT, KEYEVENTF_KEYUP);
+					if (pdk->alt)
+						SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
+				}
 			}
 		}
 
@@ -296,21 +312,39 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
 					gStatus.vkStrokePos = gStatus.penHoverPos;
 					ReleaseDC(NULL, hdc);
+					msg->message += WM_USER;
 				}
-				msg->message += WM_USER;
+				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
+					POINT pt = gStatus.penHoverPos;
+					double *ls = gSettings.mgStepX;
+					DWORD idx = gSettings.mgStepIdxX;
+					if (idx - 1 > 0 && pt.x < ls[idx]) {
+						gSettings.mgStepIdxX --;
+						PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, -1);
+					}
+					if (idx + 1 < MAX_SETTING_STEPS - 1 && pt.x > ls[idx + 1]) {
+						gSettings.mgStepIdxX ++;
+						PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, 1);
+					}
+				}
 			}
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+				POINT pt = gStatus.penHoverPos;
+				int lppos = pt.x + pt.y * 0x10000;
 				if (gStatus.vkStateId == 0) {
 					GetVectorEmpty();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
 				}
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkStateId = WM_LBUTTONDOWN;
-				msg->message += WM_USER;
+				if (!gSettings.mgDrag.enabled)
+					msg->message += WM_USER;
+				else
+					PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 0, 0);
 			}
 		}
 

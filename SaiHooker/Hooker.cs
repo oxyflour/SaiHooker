@@ -12,7 +12,7 @@ namespace SaiHooker
         [DispId(1)]
         void OnHookEvent(int msg, int wParam, int lParam);
         [DispId(3)]
-        void OnMouseGesture(string vec, int key);
+        void OnMouseGesture(string vec, int key, int x, int y);
         [DispId(4)]
         void OnFingerTap(int n, int x, int y);
     }
@@ -73,13 +73,14 @@ namespace SaiHooker
                 MSG* msg = (MSG*)lParam;
                 if (msg->message >= WM_USER_DEBUG && msg->message <= WM_USER_DEBUG + 16 && s_this.OnHookEvent != null)
                 {
-                    s_this.OnHookEvent((int)msg->message, (int)(ulong)msg->wParam, (int)msg->lParam);
+                    s_this.OnHookEvent((int)msg->message - (int)WM_USER_DEBUG, (int)(ulong)msg->wParam, (int)msg->lParam);
                 }
                 if (msg->message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
                     GetVectorStr(sz, sz.Capacity);
-                    s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam);
+                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
+                    s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam, x, y);
                 }
                 if (msg->message == WM_USER_FINGERTAP && s_this.OnFingerTap != null)
                 {
@@ -117,7 +118,7 @@ namespace SaiHooker
         public delegate void HookEventHandle(int msg, int wParam, int lParam);
         public event HookEventHandle OnHookEvent;
 
-        public delegate void MouseGestureHandle(string vec, int key);
+        public delegate void MouseGestureHandle(string vec, int key, int x, int y);
         public event MouseGestureHandle OnMouseGesture;
 
         public delegate void FingerTapHandle(int n, int x, int y);
@@ -160,6 +161,11 @@ namespace SaiHooker
             SimulateMouseEvent(x, y, keyDown);
         }
 
+        public void SimulateDragWith(int vk, bool ctrl, bool shift, bool alt)
+        {
+            SimulateDragWithKey(vk, ctrl, shift, alt);
+        }
+
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern uint SetSaiHook(IntPtr hInst);
 
@@ -180,6 +186,9 @@ namespace SaiHooker
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateMouseEvent(int x, int y, bool keyDown);
+
+        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern void SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr LoadLibrary(String dllToLoad);
