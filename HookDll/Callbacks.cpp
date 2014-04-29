@@ -302,6 +302,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
+					InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				}
 				gStatus.vkStateId = WM_LBUTTONDOWN;
 				msg->message += WM_USER;
