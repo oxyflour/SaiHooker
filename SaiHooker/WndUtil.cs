@@ -70,11 +70,6 @@ namespace SaiHooker
             return ret;
         }
 
-        public int AddTextButton(string text, int left, int right, int top, int bottom, int index)
-        {
-            return AddButton(text, left, right, top, bottom, index);
-        }
-
         void ParseMenu(IntPtr hParent, XmlNode node)
         {
             foreach (XmlNode n in node.ChildNodes)
@@ -107,8 +102,10 @@ namespace SaiHooker
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr SetNotifyWindow(IntPtr hWnd);
 
+        /*
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern int AddButton(string text, int left, int right, int top, int bottom, int index);
+        */
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr FindWindowEx(IntPtr hParent, IntPtr hPrev, String lpClassName, String lpWndName);

@@ -60,8 +60,6 @@ struct SETTINGS {
 	double rotateTriMin;
 	double rotateTriMax;
 	double rotateArr[MAX_SETTING_STEPS];
-
-	BUTTON_RECT ButtonRects[MAX_BUTTON_COUNT];
 };
 
 struct STATUS {
@@ -77,8 +75,6 @@ struct STATUS {
 	// gesture id (GID_XXX) and how many fingers is on
 	DWORD gestureId;
 	DWORD fingerCount;
-//	POINT fingerPos[MAX_STATUS_FINGERS];
-//	DWORD fingerTick[MAX_STATUS_FINGERS];
 	DWORD fingerDownTick[MAX_STATUS_FINGERS];
 	DWORD fingerUpTick[MAX_STATUS_FINGERS];
 

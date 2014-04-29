@@ -42,6 +42,4 @@ extern "C" {
 	HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down);
 
 	HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down);
-
-	HOOKDLL_API int _stdcall AddButton(TCHAR* szText, int left, int right, int top, int bottom, int index);
 }

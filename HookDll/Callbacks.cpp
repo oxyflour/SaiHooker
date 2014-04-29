@@ -156,36 +156,6 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 			KeepGesture(x, y, s, r);
 }
 
-void DrawToolButtons(HDC hdc) {
-	POINT pt = gStatus.vkDownPos, ck = gStatus.penHoverPos;
-	for (size_t i = 0; i < MAX_BUTTON_COUNT && gSettings.ButtonRects[i].str[0]; i ++) {
-		BUTTON_RECT *prt  = gSettings.ButtonRects + i;
-		RECT rt = { pt.x+prt->left, pt.y+prt->top, pt.x+prt->right, pt.y+prt->bottom };
-		if (prt->checked)
-			SetTextColor(hdc, RGB(10, 10, 10));
-		else if (ck.x > rt.left && ck.x < rt.right &&
-			ck.y > rt.top && ck.y < rt.bottom)
-			SetTextColor(hdc, RGB(100, 100, 100));
-		else
-			SetTextColor(hdc, RGB(180, 180, 180));
-		DrawText(hdc, prt->str, -1, &rt, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-	}
-}
-int GetClickedButton(BOOL click) {
-	int index = -1;
-	POINT pt = gStatus.vkDownPos, ck = gStatus.penHoverPos;
-	for (size_t i = 0; i < MAX_BUTTON_COUNT && gSettings.ButtonRects[i].str[0]; i ++) {
-		BUTTON_RECT *prt  = gSettings.ButtonRects + i;
-		RECT rt = { pt.x+prt->left, pt.y+prt->top, pt.x+prt->right, pt.y+prt->bottom };
-		BOOL checked = ck.x > rt.left && ck.x < rt.right &&
-			ck.y > rt.top && ck.y < rt.bottom;
-		prt->checked = click && checked;
-		if (checked)
-			index = i;
-	}
-	return index;
-}
-
 void InitTouchWindow(HWND hwnd) {
 	BOOL val = FALSE;
 	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
@@ -312,7 +282,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		 */
 		if (gStatus.vkDownTick) {
 			if (msg->message == WM_MOUSEMOVE) {
-				HDC hdc = GetDC(NULL);
 				AddPoint(gStatus.penHoverPos);
 				if (gStatus.vkStateId == 0) {
 					if (SQUA_SUM(gStatus.vkDownPos.x - gStatus.penHoverPos.x, gStatus.vkDownPos.y - gStatus.penHoverPos.y) >
@@ -322,13 +291,11 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					}
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+					HDC hdc = GetDC(NULL);
 					StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
 					gStatus.vkStrokePos = gStatus.penHoverPos;
+					ReleaseDC(NULL, hdc);
 				}
-				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
-					DrawToolButtons(hdc);
-				}
-				ReleaseDC(NULL, hdc);
 				msg->message += WM_USER;
 			}
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
@@ -337,21 +304,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
 				}
 				gStatus.vkStateId = WM_LBUTTONDOWN;
-//				PostMessage(gSettings.nofityWnd, WM_USER_DEBUG,
-//					msg->message == WM_LBUTTONDOWN ? 8 : 9,
-//					GetClickedButton(msg->message == WM_LBUTTONDOWN));
 				msg->message += WM_USER;
-
-				HDC hdc = GetDC(NULL);
-				DrawToolButtons(hdc);
-				ReleaseDC(NULL, hdc);
 			}
 			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout && gStatus.vkStateId == 0) {
 				gStatus.vkStateId = WM_LBUTTONDOWN;
-
-				HDC hdc = GetDC(NULL);
-				DrawToolButtons(hdc);
-				ReleaseDC(NULL, hdc);
 			}
 		}
 
