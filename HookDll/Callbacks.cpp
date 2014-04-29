@@ -57,6 +57,9 @@ void GetVector() {
 	if (j < MAX_VECTOR_LENGTH)
 		gStatus.vectorStr[j] = 0;
 }
+void GetVectorEmpty() {
+	gStatus.vectorStr[0] = 0;
+}
 
 void KeepGesture(long x, long y, long s, long r) {
 	if (gStatus.gestureId == GID_PAN) {
@@ -262,11 +265,9 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				ResetVector();
 			}
 			else if ((!gStatus.isRightDown && !gStatus.isLeftDown) && gStatus.vkDownTick) {
-				if (gStatus.vkStateId == 0) {
-					POINT pt; GetCursorPos(&pt);
-					if (IsPainterWindow(WindowFromPoint(pt)) && tick - gStatus.vkDownTick < gSettings.vkTimeout)
-						PostMessage(gSettings.nofityWnd, WM_USER_VIRTUALKEY, 0,
-							gStatus.penHoverPos.x + gStatus.penHoverPos.y * 0x10000);
+				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout) {
+					GetVectorEmpty();
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, 0);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
@@ -299,16 +300,17 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				msg->message += WM_USER;
 			}
 			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
-				if (gStatus.vkStateId == WM_MOUSEMOVE) {
+				if (gStatus.vkStateId == 0) {
+					GetVectorEmpty();
+					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
+				}
+				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, 0);
-					InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				}
+				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkStateId = WM_LBUTTONDOWN;
 				msg->message += WM_USER;
-			}
-			else if (tick - gStatus.vkDownTick > gSettings.vkTimeout && gStatus.vkStateId == 0) {
-				gStatus.vkStateId = WM_LBUTTONDOWN;
 			}
 		}
 

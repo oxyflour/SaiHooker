@@ -11,9 +11,8 @@
 
 #define WM_USER_DEBUG (WM_USER + WM_APP)
 #define WM_USER_QUIT (WM_USER + WM_QUIT)
-#define WM_USER_VIRTUALKEY (WM_USER + WM_COMMAND)
-#define WM_USER_FINGERTAP (WM_USER + WM_COMMAND + 2)
 #define WM_USER_GESTURE (WM_USER + WM_COMMAND + 1)
+#define WM_USER_FINGERTAP (WM_USER + WM_COMMAND + 2)
 #define WM_GESTURE_PROC (WM_USER + WM_GESTURE)
 #define WM_GESTURE_DOWN (WM_USER + WM_GESTURE + 1)
 #define WM_GESTURE_UP (WM_USER + WM_GESTURE + 2)
@@ -21,15 +20,6 @@
 #define SQUA(x) ((x)*(x))
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
-
-struct BUTTON_RECT {
-	TCHAR str[MAX_BUTTON_TEXT];
-	BOOL checked;
-	int left;
-	int right;
-	int top;
-	int bottom;
-};
 
 struct SETTINGS {
 	DWORD lockTouch;

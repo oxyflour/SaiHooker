@@ -11,8 +11,6 @@ namespace SaiHooker
     {
         [DispId(1)]
         void OnHookEvent(int msg, int wParam, int lParam);
-        [DispId(2)]
-        void OnVirtualKey(int longPress, int x, int y);
         [DispId(3)]
         void OnMouseGesture(string vec, int key);
         [DispId(4)]
@@ -34,9 +32,8 @@ namespace SaiHooker
         const uint WM_COMMAND = 0x0111;
 
         const uint WM_USER_DEBUG = WM_USER + WM_APP;
-        const uint WM_USER_VIRTUALKEY = WM_USER + WM_COMMAND;
-        const uint WM_USER_FINGERTAP = WM_USER_VIRTUALKEY + 2;
-        const uint WM_USER_GESTURE = WM_USER_VIRTUALKEY + 1;
+        const uint WM_USER_GESTURE = WM_USER + WM_COMMAND + 1;
+        const uint WM_USER_FINGERTAP = WM_USER + WM_COMMAND + 2;
 
         [StructLayout(LayoutKind.Sequential)]
         struct POINT
@@ -78,21 +75,16 @@ namespace SaiHooker
                 {
                     s_this.OnHookEvent((int)msg->message, (int)(ulong)msg->wParam, (int)msg->lParam);
                 }
-                if (msg->message == WM_USER_VIRTUALKEY && s_this.OnVirtualKey != null)
-                {
-                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
-                    s_this.OnVirtualKey((int)msg->wParam, x, y);
-                }
-                if (msg->message == WM_USER_FINGERTAP && s_this.OnFingerTap != null)
-                {
-                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
-                    s_this.OnFingerTap((int)msg->wParam, x, y);
-                }
                 if (msg->message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
                     GetVectorStr(sz, sz.Capacity);
                     s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam);
+                }
+                if (msg->message == WM_USER_FINGERTAP && s_this.OnFingerTap != null)
+                {
+                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
+                    s_this.OnFingerTap((int)msg->wParam, x, y);
                 }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
@@ -124,9 +116,6 @@ namespace SaiHooker
 
         public delegate void HookEventHandle(int msg, int wParam, int lParam);
         public event HookEventHandle OnHookEvent;
-
-        public delegate void VirtualKeyHandle(int longPress, int x, int y);
-        public event VirtualKeyHandle OnVirtualKey;
 
         public delegate void MouseGestureHandle(string vec, int key);
         public event MouseGestureHandle OnMouseGesture;
