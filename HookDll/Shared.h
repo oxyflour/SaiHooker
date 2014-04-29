@@ -29,6 +29,12 @@ struct DRAG_KEY {
 	BOOL alt;
 };
 
+struct ARRAY_LIST {
+	DWORD index;
+	DWORD size;
+	double list[MAX_SETTING_STEPS];
+};
+
 struct SETTINGS {
 	DWORD lockTouch;
 
@@ -52,10 +58,8 @@ struct SETTINGS {
 
 	DRAG_KEY mgDrag;
 	DWORD mgStepMsg;
-	DWORD mgStepIdxX;
-	double mgStepX[MAX_SETTING_STEPS];
-	DWORD mgStepIdxY;
-	double mgStepY[MAX_SETTING_STEPS];
+	ARRAY_LIST mgStepX;
+	ARRAY_LIST mgStepY;
 
 	DWORD panTriggerDistance;
 	DWORD guestureCancelDistance;
@@ -106,6 +110,7 @@ extern SETTINGS gSettings;
 extern STATUS gStatus;
 
 int FindInArray(double *arr, int size, double value);
+int ListIndex(ARRAY_LIST *pl, double val);
 BOOL IsPainterWindow(HWND hWnd);
 HWND GetLogWindow();
 void LogText(TCHAR *szBuf, ...);

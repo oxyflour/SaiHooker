@@ -166,6 +166,11 @@ namespace SaiHooker
             SimulateDragWithKey(vk, ctrl, shift, alt);
         }
 
+        public void SimulateDragStep(int msg, int dx, int dy)
+        {
+            SimulateDragByStep(msg, dx, dy);
+        }
+
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern uint SetSaiHook(IntPtr hInst);
 
@@ -189,6 +194,9 @@ namespace SaiHooker
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt);
+
+        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
+        private static extern void SimulateDragByStep(int msg, int dx, int dy);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr LoadLibrary(String dllToLoad);

@@ -173,18 +173,31 @@
 		window.wscript = new ActiveXObject("WScript.Shell");
 
 		hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
-			// debug only
-			logText('debug: '+msg+' ('+wParam+', '+lParam+')');
+		    if (msg == 1) {
+		        if (wParam == 0) // x
+		            wscript.SendKeys(lParam ? '{DEL}' : '{END}');
+                else // y
+		            wscript.SendKeys(lParam ? '{PGUP}' : '{PGDN}');
+		    }
+		    else if (msg == 2) {
+                if (wParam == 1)
+		            wscript.SendKeys(lParam ? '{]}' : '{[}');
+		    }
+		    else // debug only
+		        logText('debug: ' + msg + ' (' + wParam + ', ' + lParam + ')');
 		});
 		hooker.attachEvent("OnMouseGesture", function (vec, key, x, y) {
             // left mouse button is down
 		    if (key == 1) {
 		        ({
 		            '': function () {
-		                hooker.SimulateDragWith(0x20, false, false, false);
+//		                hooker.SimulateDragWith(0x20, false, false, false);
 		            },
                     u: function () {
-//		                hooker.SimulateDragByStep(id, dx, dy);
+		                hooker.SimulateDragStep(1, 20, 20);
+		            },
+                    l: function () {
+		                hooker.SimulateDragStep(2, 20, 20);
 		            }
 		        }[vec] || function () {
 		            logText('unknown stroke: ' + vec);

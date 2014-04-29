@@ -117,3 +117,16 @@ HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, boo
 		SimulateKey(vk, 0);
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
 }
+
+HOOKDLL_API void _stdcall SimulateDragByStep(int msg, int dx, int dy) {
+	gSettings.mgStepMsg = msg;
+	POINT pt = gStatus.penHoverPos;
+	for (DWORD i = 0; i < gSettings.mgStepX.size; i ++) {
+		double j = 0.5 + i - gSettings.mgStepX.size / 2;
+		gSettings.mgStepX.list[i] = pt.x + j * dx;
+		gSettings.mgStepY.list[i] = pt.y + j * dy;
+	}
+	int delta = 0;
+	while(delta = ListIndex(&gSettings.mgStepX, pt.x));
+	while(delta = ListIndex(&gSettings.mgStepY, pt.y));
+}

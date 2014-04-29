@@ -25,10 +25,8 @@ SETTINGS gSettings = {
 
 	{0},
 	0,
-	0,
-	{0},
-	0,
-	{0},
+	{0, RTL_FIELD_SIZE(ARRAY_LIST, list)/sizeof(double), 0},
+	{0, RTL_FIELD_SIZE(ARRAY_LIST, list)/sizeof(double), 0},
 
 	10,
 	80,
@@ -78,6 +76,18 @@ int FindInArray(double *arr, int size, double value) {
 	int i;
 	for(i = 0; i < size - 1 && !(arr[i] <= value && arr[i+1] > value); i ++);
 	return i;
+}
+
+int ListIndex(ARRAY_LIST *pl, double val) {
+	if (pl->index >= 1 && val < pl->list[pl->index]) {
+		pl->index --;
+		return -1;
+	}
+	if (pl->index + 1 < pl->size - 1 && val > pl->list[pl->index + 1]) {
+		pl->index ++;
+		return 1;
+	}
+	return 0;
 }
 
 BOOL IsPainterWindow(HWND hWnd) {

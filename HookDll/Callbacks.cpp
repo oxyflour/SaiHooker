@@ -278,6 +278,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				}
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkDownTick = 0;
+
+				gSettings.mgStepMsg = 0;
 				if (gSettings.mgDrag.enabled) {
 					DRAG_KEY *pdk = &gSettings.mgDrag;
 					pdk->enabled = FALSE;
@@ -315,16 +317,12 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					msg->message += WM_USER;
 				}
 				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
-					POINT pt = gStatus.penHoverPos;
-					double *ls = gSettings.mgStepX;
-					DWORD idx = gSettings.mgStepIdxX;
-					if (idx - 1 > 0 && pt.x < ls[idx]) {
-						gSettings.mgStepIdxX --;
-						PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, -1);
-					}
-					if (idx + 1 < MAX_SETTING_STEPS - 1 && pt.x > ls[idx + 1]) {
-						gSettings.mgStepIdxX ++;
-						PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, 1);
+					if (gSettings.mgStepMsg) {
+						int delta = 0;
+						while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
+							PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 0, delta > 0 ? 0 : 1);
+						while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
+							PostMessage(gSettings.nofityWnd, WM_USER_DEBUG + gSettings.mgStepMsg, 1, delta > 0 ? 0 : 1);
 					}
 				}
 			}
