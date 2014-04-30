@@ -32,7 +32,8 @@ struct DRAG_KEY {
 	BOOL alt;
 };
 
-struct ARRAY_LIST {
+struct EVENT_TRIGGER {
+	UINT msg;
 	DWORD index;
 	DWORD size;
 	double list[MAX_SETTING_STEPS];
@@ -57,9 +58,8 @@ struct SETTINGS {
 	double mgRadiusIn;
 
 	DRAG_KEY mgDrag;
-	DWORD mgStepMsg;
-	ARRAY_LIST mgStepX;
-	ARRAY_LIST mgStepY;
+	EVENT_TRIGGER mgStepX;
+	EVENT_TRIGGER mgStepY;
 
 	DWORD panTriggerDistance;
 	DWORD guestureCancelDistance;
@@ -110,7 +110,7 @@ extern SETTINGS gSettings;
 extern STATUS gStatus;
 
 int FindInArray(double *arr, int size, double value);
-int ListIndex(ARRAY_LIST *pl, double val);
+int ListIndex(EVENT_TRIGGER *pl, double val);
 BOOL IsPainterWindow(HWND hWnd);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);

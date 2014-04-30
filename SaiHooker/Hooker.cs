@@ -71,7 +71,7 @@ namespace SaiHooker
             {
 //                MSG msg = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
                 MSG* msg = (MSG*)lParam;
-                if (msg->message >= WM_USER_DEBUG && msg->message <= WM_USER_DEBUG + 16 && s_this.OnHookEvent != null)
+                if (msg->message >= WM_USER_DEBUG && msg->message <= WM_USER_DEBUG + 64 && s_this.OnHookEvent != null)
                 {
                     s_this.OnHookEvent((int)msg->message - (int)WM_USER_DEBUG, (int)(ulong)msg->wParam, (int)msg->lParam);
                 }
@@ -166,9 +166,9 @@ namespace SaiHooker
             SimulateDragWithKey(vk, ctrl, shift, alt);
         }
 
-        public void SimulateDragStep(int msg, int dx, int dy)
+        public void RegisterNotify(int msg, string evt, string steps)
         {
-            SimulateDragByStep(msg, dx, dy);
+            RegisterEventNotify(msg, evt, steps);
         }
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
@@ -196,7 +196,7 @@ namespace SaiHooker
         private static extern void SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern void SimulateDragByStep(int msg, int dx, int dy);
+        private static extern void RegisterEventNotify(int msg, string evt, string steps);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr LoadLibrary(String dllToLoad);

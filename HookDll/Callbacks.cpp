@@ -47,6 +47,11 @@ void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
 	LineTo(hdc, ptTo.x, ptTo.y);
 	DeleteObject(SelectObject(hdc, hOld));
 }
+void CheckEventTrigger(EVENT_TRIGGER *pe, double val) {
+	int delta = 0;
+	if (pe->msg) while (delta = ListIndex(pe, val))
+		PostNotify(WM_USER_DEBUG + pe->msg, delta > 0 ? 0 : 1, pe->index);
+}
 
 void MsVectorReset() {
 	g_MSVectors.clear();
@@ -218,14 +223,8 @@ void MouseGestureKeep(UINT message) {
 			ReleaseDC(NULL, hdc);
 		}
 		else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
-			if (gSettings.mgStepMsg) {
-				int delta = 0;
-				DWORD ms = WM_USER_DEBUG + gSettings.mgStepMsg;
-				while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
-					PostNotify(ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
-				while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
-					PostNotify(ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
-			}
+			CheckEventTrigger(&gSettings.mgStepX, gStatus.penHoverPos.x);
+			CheckEventTrigger(&gSettings.mgStepY, gStatus.penHoverPos.y);
 		}
 	}
 	else if (message == WM_LBUTTONDOWN) {
@@ -261,7 +260,7 @@ void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 	gStatus.vkDownTick = 0;
 
-	gSettings.mgStepMsg = 0;
+	gSettings.mgStepX.msg = gSettings.mgStepY.msg = 0;
 	if (gSettings.mgDrag.enabled) {
 		DRAG_KEY *pdk = &gSettings.mgDrag;
 		pdk->enabled = FALSE;

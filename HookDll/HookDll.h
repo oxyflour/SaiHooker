@@ -45,5 +45,5 @@ extern "C" {
 
 	HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt);
 
-	HOOKDLL_API void _stdcall SimulateDragByStep(int msg, int dx, int dy);
+	HOOKDLL_API void _stdcall RegisterEventNotify(int msg, TCHAR *evt, TCHAR *steps);
 }

@@ -22,9 +22,8 @@ SETTINGS gSettings = {
 	0.55,
 
 	{0},
-	0,
-	{0, RTL_FIELD_SIZE(ARRAY_LIST, list)/sizeof(double), 0},
-	{0, RTL_FIELD_SIZE(ARRAY_LIST, list)/sizeof(double), 0},
+	{0, 0, 0},
+	{0, 0, 0},
 
 	10,
 	80,
@@ -75,7 +74,7 @@ int FindInArray(double *arr, int size, double value) {
 	return i;
 }
 
-int ListIndex(ARRAY_LIST *pl, double val) {
+int ListIndex(EVENT_TRIGGER *pl, double val) {
 	int delta = 0;
 	if (pl->index >= 1 && val < pl->list[pl->index])
 		delta = -1;

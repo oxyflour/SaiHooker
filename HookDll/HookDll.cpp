@@ -115,15 +115,27 @@ HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, boo
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
 }
 
-HOOKDLL_API void _stdcall SimulateDragByStep(int msg, int dx, int dy) {
-	gSettings.mgStepMsg = msg;
-	POINT pt = gStatus.penHoverPos;
-	for (DWORD i = 0; i < gSettings.mgStepX.size; i ++) {
-		double j = 0.5 + i - gSettings.mgStepX.size / 2;
-		gSettings.mgStepX.list[i] = pt.x + j * dx;
-		gSettings.mgStepY.list[i] = pt.y + j * dy;
+HOOKDLL_API void _stdcall RegisterEventNotify(int msg, TCHAR *evt, TCHAR *steps) {
+	EVENT_TRIGGER *pe = NULL;
+	double val = 0;
+	if (!_tcscmp(evt, TEXT("ms-x"))) {
+		pe = &gSettings.mgStepX;
+		val = gStatus.penHoverPos.x;
 	}
-	int delta = 0;
-	while(delta = ListIndex(&gSettings.mgStepX, pt.x));
-	while(delta = ListIndex(&gSettings.mgStepY, pt.y));
+	else if (!_tcscmp(evt, TEXT("ms-y"))) {
+		pe = &gSettings.mgStepY;
+		val = gStatus.penHoverPos.y;
+	}
+	if (pe) {
+		pe->msg = msg;
+		pe->size = pe->index = 0;
+		for (int i = 0, j = 0, n = _tcslen(steps); i <= n && pe->size < MAX_SETTING_STEPS; i ++) {
+			if (steps[i] == ',' || steps[i] == '\0') {
+				steps[i] = '\0';
+				pe->list[pe->size ++] = _ttof(steps + j) + val;
+				j = ++i;
+			}
+		}
+		while(ListIndex(pe, val));
+	}
 }

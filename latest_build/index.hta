@@ -167,36 +167,33 @@
 		function logText(t, c, a) {
 			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
 		}
+		function createSteps(d, n, b) {
+		    var ls = [], b = b || 0;
+		    for (var i = 0; i < (n || 10); i++) {
+		        b += d;
+		        ls.push(b);
+		        ls.push(-b);
+		    }
+		    return ls.sort(function (a, b) {
+		        return a - b;
+		    }).join(',');
+		}
 
 		window.hooker = document.getElementById('hooker');
 		window.wndutil = document.getElementById('wndutil');
 		window.wscript = new ActiveXObject("WScript.Shell");
 
 		hooker.attachEvent("OnHookEvent", function (msg, wParam, lParam) {
-		    if (msg == 1) {
-		        if (wParam & 2)
-		            wscript.SendKeys(wParam & 1 ? '{PGUP}' : '{PGDN}');
-                else
-		            wscript.SendKeys(wParam & 1 ? '{DEL}' : '{END}');
-		    }
-		    else if (msg == 2) {
-		        if (wParam & 2)
-		            wscript.SendKeys(wParam & 1 ? '{]}' : '{[}');
-		        else {
-		            var k = {
-		                32: 'n',
-		                33: 'b',
-		                34: 'v',
-                        35: 'c',
-                        36: 'e',
-                        37: 'a',
-                        38: 's'
-		            }[lParam];
-		            k && wscript.SendKeys(k);
-		        }
-		    }
-		    else // debug only
-		        logText('debug: ' + msg + ' (' + wParam + ', ' + lParam + ')');
+		    if (msg == 1)
+		        wscript.SendKeys(wParam ? '{DEL}' : '{END}');
+            else if (msg == 2)
+                wscript.SendKeys(wParam ? '{PGUP}' : '{PGDN}');
+            else if (msg == 3)
+                wscript.SendKeys(('nbvceas').charAt(lParam - 9));
+            else if (msg == 4)
+                wscript.SendKeys(wParam ? '{]}' : '{[}');
+            else
+	            logText('debug: ' + msg + ' (' + wParam + ', ' + lParam + ')');
 		});
 		hooker.attachEvent("OnMouseGesture", function (vec, key, x, y) {
             // left mouse button is down
@@ -212,10 +209,12 @@
                         */
 		            },
                     u: function () {
-		                hooker.SimulateDragStep(1, 15, 20);
+		                hooker.RegisterNotify(1, 'ms-x', createSteps(15));
+		                hooker.RegisterNotify(2, 'ms-y', createSteps(20));
 		            },
                     l: function () {
-		                hooker.SimulateDragStep(2, 30, 20);
+		                hooker.RegisterNotify(3, 'ms-x', createSteps(30));
+		                hooker.RegisterNotify(4, 'ms-y', createSteps(20));
 		            }
 		        }[vec] || function () {
 		            logText('unknown stroke: ' + vec);
