@@ -240,11 +240,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		 * Test if virtual key is down
 		 */
 		// check if CTRL or ALT is down
-		if (IsPainterWindow(msg->hwnd) &&
-			(msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
+		if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 				msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP ||
 				msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
-				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)) {
+				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
 			if (msg->wParam == VK_CONTROL)
 				gStatus.isCtrlDown = msg->message == WM_KEYDOWN;
 			else if (msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP || msg->wParam == VK_MENU)
@@ -255,7 +254,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.isRightDown = msg->message == WM_RBUTTONDOWN;
 
 			// block right mouse button
-			if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
+			if ((msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
+					IsPainterWindow(WindowFromPoint(gStatus.penHoverPos)))
 				msg->message += WM_USER;
 
 			// trigger on
@@ -327,9 +327,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					}
 				}
 			}
-			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+			else if (msg->message == WM_LBUTTONDOWN) {
 				POINT pt = gStatus.penHoverPos;
 				int lppos = pt.x + pt.y * 0x10000;
+				InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
 				if (gStatus.vkStateId == 0) {
 					GetVectorEmpty();
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
@@ -338,10 +339,12 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					GetVector();
 					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
 				}
-				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkStateId = WM_LBUTTONDOWN;
 				if (!gSettings.mgDrag.enabled)
 					msg->message += WM_USER;
+			}
+			else if (msg->message == WM_LBUTTONUP) {
+				msg->message += WM_USER;
 			}
 		}
 
