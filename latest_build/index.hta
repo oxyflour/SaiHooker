@@ -213,17 +213,9 @@
 		            },
                     u: function () {
 		                hooker.SimulateDragStep(1, 15, 20);
-		                setTimeout(function () {
-		                    wndutil.TextOut('\u2195 Zoom In/Out', x - 10, y - 30);
-		                    wndutil.TextOut('\u2194 Rotate', x + 20, y - 10);
-		                }, 100);
 		            },
                     l: function () {
 		                hooker.SimulateDragStep(2, 30, 20);
-		                setTimeout(function () {
-		                    wndutil.TextOut('\u2195 Pen Size', x - 10, y - 30);
-		                    wndutil.TextOut('\u2194 Pen Type', x + 20, y - 10);
-		                }, 100);
 		            }
 		        }[vec] || function () {
 		            logText('unknown stroke: ' + vec);
@@ -236,14 +228,15 @@
 		            item.attr('key') ? wscript.SendKeys(item.attr('key')) :
                         logText('unknown gesture: ' + vec);
 		        }
-                else
-				    wscript.SendKeys('^z');
+		        else {
+    		        wscript.SendKeys('^z');
+		        }
 		    }
 		});
 		hooker.attachEvent("OnFingerTap", function (n, x, y) {
 			// one finger tap
 			if (n == 0) {
-				var tapTick = (new Date()).getTime();
+				var tapTick = Date.now();
 				// double tap detection
 				if (tapTick - window.tapTick < 200) {
                     // ALT + Click
