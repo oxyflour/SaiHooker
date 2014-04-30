@@ -230,11 +230,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				msg->message = WM_USER + msg->message;
 		}
 		// remember mouse position
-		if (msg->message == WM_MOUSEMOVE) {
-			gStatus.penHoverPos.x = LOWORD(msg->lParam);
-			gStatus.penHoverPos.y = HIWORD(msg->lParam);
-			ClientToScreen(msg->hwnd, &gStatus.penHoverPos);
-		}
+		if (msg->message == WM_MOUSEMOVE)
+			gStatus.penHoverPos = msg->pt;
 
 		/*
 		 * Test if virtual key is down
