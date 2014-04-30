@@ -48,10 +48,10 @@ void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
 	DeleteObject(SelectObject(hdc, hOld));
 }
 
-void ResetVector() {
+void MsVectorReset() {
 	g_MSVectors.clear();
 }
-void ReducePoint(int n) {
+void MsVectorReduce(int n) {
 	int s = g_MSVectors.size();
 	if (s < n) return;
 
@@ -71,13 +71,13 @@ void ReducePoint(int n) {
 		g_MSVectors.push_back(pe);
 	}
 }
-void AddPoint(POINT pt) {
+void MsVectorAdd(POINT pt) {
 	g_MSVectors.push_back(pt);
-	ReducePoint(gSettings.mgPointCount);
+	MsVectorReduce(gSettings.mgPointCount);
 }
-void GetVector() {
+void MsVectorToString() {
 	for (int n = gSettings.mgPointCount - 1; n >= 3; n --)
-		ReducePoint(n);
+		MsVectorReduce(n);
 	int j = 0;
 	for (std::vector<POINT>::iterator i = g_MSVectors.begin(); i < g_MSVectors.end() - 1 && j < MAX_VECTOR_LENGTH; i ++) {
 		std::vector<POINT>::iterator b = i, e = i + 1;
@@ -93,11 +93,11 @@ void GetVector() {
 	if (j < MAX_VECTOR_LENGTH)
 		gStatus.vectorStr[j] = 0;
 }
-void GetVectorEmpty() {
+void MsVectorToEmpty() {
 	gStatus.vectorStr[0] = 0;
 }
 
-void KeepGesture(long x, long y, long s, long r) {
+void TouchGestureKeep(long x, long y, long s, long r) {
 	if (gStatus.gestureId == GID_PAN) {
 		if (gStatus.panVkState != 0)
 			SimulateKey((WORD)gStatus.panVkState, 0);
@@ -119,7 +119,7 @@ void KeepGesture(long x, long y, long s, long r) {
 		}
 	}
 }
-void ChangeGesture(DWORD newState, long param) {
+void TouchGestureChange(DWORD newState, long param) {
 	DWORD oldState = gStatus.gestureId;
 	if (oldState == newState)
 		return;
@@ -155,7 +155,7 @@ void ChangeGesture(DWORD newState, long param) {
 //	if (g_dwGestureState != GID_BEGIN)
 //		LogText(TEXT("gesture %x on (%d/0x%x)\r\n"), g_dwGestureState, param, param);
 }
-void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
+void TouchGestureHandle(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 		// two finger gesture (zoom, rotate)
 		if (gStatus.fingerCount == 2 &&
 			tick - gStatus.fingerDownTick[2] > 100 &&
@@ -164,14 +164,14 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 			1) {
 			if ((r > gSettings.rotateTriMin && r < gSettings.rotateTriMax) &&
 				(s < gSettings.zoomTriMin || s > gSettings.zoomTriMax))
-				ChangeGesture(GID_ZOOM, s);
+				TouchGestureChange(GID_ZOOM, s);
 			else if ((r < gSettings.rotateTriMin || r > gSettings.rotateTriMax) &&
 				(s > gSettings.zoomTriMin && s < gSettings.zoomTriMax))
-				ChangeGesture(GID_ROTATE, r);
+				TouchGestureChange(GID_ROTATE, r);
 		}
 		if ((gStatus.gestureId == GID_ZOOM || gStatus.gestureId == GID_ROTATE) &&
 			(gStatus.fingerCount != 2 || SQUA_SUM(x, y) > (LONG)SQUA(gSettings.guestureCancelDistance)))
-			ChangeGesture(GID_BEGIN, 0);
+			TouchGestureChange(GID_BEGIN, 0);
 
 		// one finger gesture (pan)
 		if (gStatus.fingerCount == 1 &&
@@ -182,28 +182,28 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 			SQUA_SUM(x, y) > (LONG)SQUA(gSettings.panTriggerDistance)) {
 			POINT pt; GetCursorPos(&pt);
 			if (IsPainterWindow(WindowFromPoint(pt))) {
-				ChangeGesture(GID_PAN, 0);
+				TouchGestureChange(GID_PAN, 0);
 			}
 		}
 		if (gStatus.fingerCount != 1 && gStatus.gestureId == GID_PAN)
-			ChangeGesture(GID_BEGIN, 0);
+			TouchGestureChange(GID_BEGIN, 0);
 
 		// cancel all gesture if more than 2 fingers was on
 		if (tick - gStatus.fingerDownTick[3] < gSettings.guestureEnableTimeout)
-			ChangeGesture(GID_BEGIN, 0);
+			TouchGestureChange(GID_BEGIN, 0);
 		else
-			KeepGesture(x, y, s, r);
+			TouchGestureKeep(x, y, s, r);
 }
 
 void MouseGestureBegin(DWORD tick) {
 	gStatus.vkDownTick = tick;
 	gStatus.vkStateId = 0;
 	gStatus.vkDownPos = gStatus.penHoverPos;
-	ResetVector();
+	MsVectorReset();
 }
 void MouseGestureKeep(UINT message) {
 	if (message == WM_MOUSEMOVE) {
-		AddPoint(gStatus.penHoverPos);
+		MsVectorAdd(gStatus.penHoverPos);
 		if (gStatus.vkStateId == 0) {
 			if (SQUA_SUM(gStatus.vkDownPos.x - gStatus.penHoverPos.x, gStatus.vkDownPos.y - gStatus.penHoverPos.y) >
 				(LONG)SQUA(gSettings.mgEnableDistance)) {
@@ -233,11 +233,11 @@ void MouseGestureKeep(UINT message) {
 		int lppos = pt.x + pt.y * 0x10000;
 		InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
 		if (gStatus.vkStateId == 0) {
-			GetVectorEmpty();
+			MsVectorToEmpty();
 			PostNotify(WM_USER_GESTURE, 1, lppos);
 		}
 		else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-			GetVector();
+			MsVectorToString();
 			PostNotify(WM_USER_GESTURE, 1, lppos);
 		}
 		gStatus.vkStateId = WM_LBUTTONDOWN;
@@ -251,11 +251,11 @@ void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	int lppos = pt.x + pt.y * 0x10000;
 	if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout &&
 			IsPainterWindow(hwnd)) {
-		GetVectorEmpty();
+		MsVectorToEmpty();
 		PostNotify(WM_USER_GESTURE, 0, lppos);
 	}
 	else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-		GetVector();
+		MsVectorToString();
 		PostNotify(WM_USER_GESTURE, 0, lppos);
 	}
 	InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
@@ -361,7 +361,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (msg->message == WM_GESTURE_PROC) {
 			SHORT x = LOWORD(msg->lParam) - 0x8000, y = HIWORD(msg->lParam) - 0x8000,
 				s = LOWORD(msg->wParam) - 0x8000, r = HIWORD(msg->wParam) - 0x8000;
-			gStatus.bEnableTouch ? HandleGesture(tick, x, y, s, r) : ChangeGesture(GID_BEGIN, 0);
+			gStatus.bEnableTouch ? TouchGestureHandle(tick, x, y, s, r) : TouchGestureChange(GID_BEGIN, 0);
 		}
 		DWORD n = gStatus.fingerCount;
 		if (msg->message == WM_GESTURE_DOWN) {
@@ -371,7 +371,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		else if (msg->message == WM_GESTURE_UP) {
 			if (n == 0) {
 				// give up all gesture beacuse there are no fingers touching now
-				ChangeGesture(GID_BEGIN, 0);
+				TouchGestureChange(GID_BEGIN, 0);
 				g_pIManipProc->CompleteManipulation();
 				if (gStatus.bEnableTouch)
 					CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
