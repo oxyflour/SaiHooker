@@ -205,7 +205,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
 		// setup touch lock timeout
-		if (msg->message == WT_PACKET)
+		if (msg->message == UNKNOWN_PEN_MSG || msg->message == WT_PACKET)
 			gStatus.penHoverTick = tick;
 		gStatus.bEnableTouch = !gSettings.lockTouch &&
 			(tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
