@@ -21,6 +21,8 @@
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
 
+#define PostNotify(msg, wp, lp) PostMessage(gSettings.nofityWnd, (msg), (wp), (lp));
+
 struct DRAG_KEY {
 	BOOL enabled;
 	WORD vk;
@@ -112,7 +114,5 @@ extern STATUS gStatus;
 int FindInArray(double *arr, int size, double value);
 int ListIndex(ARRAY_LIST *pl, double val);
 BOOL IsPainterWindow(HWND hWnd);
-HWND GetLogWindow();
-void LogText(TCHAR *szBuf, ...);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);

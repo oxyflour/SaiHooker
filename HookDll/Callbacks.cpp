@@ -182,8 +182,7 @@ void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
 		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
 			POINT pt; GetCursorPos(&pt);
-			PostMessage(gSettings.nofityWnd, WM_USER_FINGERTAP, i,
-				pt.x + pt.y * 0x10000);
+			PostNotify(WM_USER_FINGERTAP, i, pt.x + pt.y * 0x10000);
 			break;
 		}
 	}
@@ -208,7 +207,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		// setup touch lock timeout
 		if (msg->message == WT_PACKET)
 			gStatus.penHoverTick = tick;
-		gStatus.bEnableTouch = (tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
+		gStatus.bEnableTouch = !gSettings.lockTouch &&
+			(tick - gStatus.penHoverTick > gSettings.touchEnableTimeout);
 
 		/*
 		 * Block events from touch
@@ -223,11 +223,10 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_VSCROLL || msg->message == WM_HSCROLL) {
 			if ((!gStatus.bEnableTouch ||
-					gSettings.lockTouch ||
 					gStatus.gestureId != GID_BEGIN ||
 					IsPainterWindow(msg->hwnd)) &&
 				(GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH)
-				msg->message = WM_USER + msg->message;
+				msg->message += WM_USER;
 		}
 		// remember mouse position
 		if (msg->message == WM_MOUSEMOVE)
@@ -252,7 +251,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 			// block right mouse button
 			if ((msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
-					IsPainterWindow(WindowFromPoint(gStatus.penHoverPos)))
+					IsPainterWindow(WindowFromPoint(gStatus.penHoverPos)) &&
+					GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 
 			// trigger on
@@ -267,11 +267,11 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				int lppos = pt.x + pt.y * 0x10000;
 				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout) {
 					GetVectorEmpty();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, lppos);
+					PostNotify(WM_USER_GESTURE, 0, lppos);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 0, lppos);
+					PostNotify(WM_USER_GESTURE, 0, lppos);
 				}
 				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
 				gStatus.vkDownTick = 0;
@@ -311,16 +311,15 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
 					gStatus.vkStrokePos = gStatus.penHoverPos;
 					ReleaseDC(NULL, hdc);
-					msg->message += WM_USER;
 				}
 				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
 					if (gSettings.mgStepMsg) {
 						int delta = 0;
 						DWORD ms = WM_USER_DEBUG + gSettings.mgStepMsg;
 						while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
-							PostMessage(gSettings.nofityWnd, ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
+							PostNotify(ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
 						while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
-							PostMessage(gSettings.nofityWnd, ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
+							PostNotify(ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
 					}
 				}
 			}
@@ -330,19 +329,21 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
 				if (gStatus.vkStateId == 0) {
 					GetVectorEmpty();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
+					PostNotify(WM_USER_GESTURE, 1, lppos);
 				}
 				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
 					GetVector();
-					PostMessage(gSettings.nofityWnd, WM_USER_GESTURE, 1, lppos);
+					PostNotify(WM_USER_GESTURE, 1, lppos);
 				}
 				gStatus.vkStateId = WM_LBUTTONDOWN;
-				if (!gSettings.mgDrag.enabled)
-					msg->message += WM_USER;
 			}
-			else if (msg->message == WM_LBUTTONUP) {
+
+			// block
+			if ((msg->message == WM_MOUSEMOVE ||
+					msg->message == WM_LBUTTONDOWN ||
+					msg->message == WM_LBUTTONUP) &&
+					GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
-			}
 		}
 
 		/*

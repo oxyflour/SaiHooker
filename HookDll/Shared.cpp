@@ -93,26 +93,6 @@ BOOL IsPainterWindow(HWND hWnd) {
 	return (GetWindowLongPtr(hWnd, GWL_STYLE) & lStyle) == lStyle;
 }
 
-HWND GetLogWindow() {
-	static HWND hLog = NULL;
-	if (!IsWindow(hLog))
-		hLog = FindWindow(TEXT("HOOKLOG"), NULL);
-	return hLog;
-}
-
-void LogText(TCHAR *szBuf, ...) {
-	HWND hLog = GetLogWindow();
-	TCHAR sz[MAX_PATH];
-	if (hLog != NULL) {
-		va_list ap;
-		va_start(ap, szBuf);
-		StringCbVPrintf(sz, MAX_PATH, szBuf, ap);
-		va_end(ap);
-		COPYDATASTRUCT cds = {1, (_tcslen(sz) + 1) * sizeof(TCHAR), sz};
-		SendMessage(hLog, WM_COPYDATA, NULL, (LPARAM)&cds);
-	}
-}
-
 void SimulateKey(WORD vk, DWORD flags) {
 	KEYBDINPUT ki = {vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), flags, 0, LLMHF_INJECTED};
 	INPUT ip; ip.type = INPUT_KEYBOARD; ip.ki = ki;
