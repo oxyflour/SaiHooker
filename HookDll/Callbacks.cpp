@@ -12,6 +12,42 @@ static std::vector<POINT> g_MSVectors;
 
 typedef BOOL (WINAPI *pSetWindowFeedbackSetting)(HWND hwnd, FEEDBACK_TYPE feedback, DWORD dwFlags, UINT32 size, const VOID *configuration);
 
+void InitTouchWindow(HWND hwnd) {
+	BOOL val = FALSE;
+	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
+		(HANDLE)(TABLET_DISABLE_FLICKS | TABLET_DISABLE_PRESSANDHOLD | TABLET_DISABLE_FLICKFALLBACKKEYS));
+
+	HINSTANCE hInst = LoadLibrary(TEXT("user32.dll"));
+	pSetWindowFeedbackSetting pfn = (pSetWindowFeedbackSetting)GetProcAddress(hInst, "SetWindowFeedbackSetting");
+	if (pfn != NULL) {
+		pfn(hwnd, FEEDBACK_TOUCH_CONTACTVISUALIZATION, 0, sizeof(BOOL), &val);
+		pfn(hwnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &val);
+		pfn(hwnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &val);
+	}
+	FreeLibrary(hInst);
+
+	// Do not register touch window if you want WM_GESTURE
+	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
+	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
+}
+void CheckFingerTap(DWORD tick, WORD x, WORD y) {
+	// check tap
+	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
+		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
+			POINT pt; GetCursorPos(&pt);
+			PostNotify(WM_USER_FINGERTAP, i, pt.x + pt.y * 0x10000);
+			break;
+		}
+	}
+}
+void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
+	HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
+	HPEN hOld = (HPEN)SelectObject(hdc, hpen);
+	MoveToEx(hdc, ptFrom.x, ptFrom.y, NULL);
+	LineTo(hdc, ptTo.x, ptTo.y);
+	DeleteObject(SelectObject(hdc, hOld));
+}
+
 void ResetVector() {
 	g_MSVectors.clear();
 }
@@ -159,40 +195,86 @@ void HandleGesture(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
 			KeepGesture(x, y, s, r);
 }
 
-void InitTouchWindow(HWND hwnd) {
-	BOOL val = FALSE;
-	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
-		(HANDLE)(TABLET_DISABLE_FLICKS | TABLET_DISABLE_PRESSANDHOLD | TABLET_DISABLE_FLICKFALLBACKKEYS));
-
-	HINSTANCE hInst = LoadLibrary(TEXT("user32.dll"));
-	pSetWindowFeedbackSetting pfn = (pSetWindowFeedbackSetting)GetProcAddress(hInst, "SetWindowFeedbackSetting");
-	if (pfn != NULL) {
-		pfn(hwnd, FEEDBACK_TOUCH_CONTACTVISUALIZATION, 0, sizeof(BOOL), &val);
-		pfn(hwnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &val);
-		pfn(hwnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &val);
-	}
-	FreeLibrary(hInst);
-
-	// Do not register touch window if you want WM_GESTURE
-	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
-	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
+void MouseGestureBegin(DWORD tick) {
+	gStatus.vkDownTick = tick;
+	gStatus.vkStateId = 0;
+	gStatus.vkDownPos = gStatus.penHoverPos;
+	ResetVector();
 }
-void CheckFingerTap(DWORD tick, WORD x, WORD y) {
-	// check tap
-	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
-		if (tick - gStatus.fingerDownTick[i] < gSettings.fingerTapInteval) {
-			POINT pt; GetCursorPos(&pt);
-			PostNotify(WM_USER_FINGERTAP, i, pt.x + pt.y * 0x10000);
-			break;
+void MouseGestureKeep(UINT message) {
+	if (message == WM_MOUSEMOVE) {
+		AddPoint(gStatus.penHoverPos);
+		if (gStatus.vkStateId == 0) {
+			if (SQUA_SUM(gStatus.vkDownPos.x - gStatus.penHoverPos.x, gStatus.vkDownPos.y - gStatus.penHoverPos.y) >
+				(LONG)SQUA(gSettings.mgEnableDistance)) {
+				gStatus.vkStrokePos = gStatus.vkDownPos;
+				gStatus.vkStateId = WM_MOUSEMOVE;
+			}
+		}
+		else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+			HDC hdc = GetDC(NULL);
+			StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
+			gStatus.vkStrokePos = gStatus.penHoverPos;
+			ReleaseDC(NULL, hdc);
+		}
+		else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
+			if (gSettings.mgStepMsg) {
+				int delta = 0;
+				DWORD ms = WM_USER_DEBUG + gSettings.mgStepMsg;
+				while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
+					PostNotify(ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
+				while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
+					PostNotify(ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
+			}
 		}
 	}
+	else if (message == WM_LBUTTONDOWN) {
+		POINT pt = gStatus.penHoverPos;
+		int lppos = pt.x + pt.y * 0x10000;
+		InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
+		if (gStatus.vkStateId == 0) {
+			GetVectorEmpty();
+			PostNotify(WM_USER_GESTURE, 1, lppos);
+		}
+		else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+			GetVector();
+			PostNotify(WM_USER_GESTURE, 1, lppos);
+		}
+		gStatus.vkStateId = WM_LBUTTONDOWN;
+		// move the cursor to current position
+		SimulateMouse(0, 5, 0, MOUSEEVENTF_MOVE);
+		SimulateMouse(0, -5, 0, MOUSEEVENTF_MOVE);
+	}
 }
-void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
-	HPEN hpen = CreatePen(PS_SOLID, 5, RGB(0, 128, 255));
-	HPEN hOld = (HPEN)SelectObject(hdc, hpen);
-	MoveToEx(hdc, ptFrom.x, ptFrom.y, NULL);
-	LineTo(hdc, ptTo.x, ptTo.y);
-	DeleteObject(SelectObject(hdc, hOld));
+void MouseGestureEnd(DWORD tick, HWND hwnd) {
+	POINT pt = gStatus.penHoverPos;
+	int lppos = pt.x + pt.y * 0x10000;
+	if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout &&
+			IsPainterWindow(hwnd)) {
+		GetVectorEmpty();
+		PostNotify(WM_USER_GESTURE, 0, lppos);
+	}
+	else if (gStatus.vkStateId == WM_MOUSEMOVE) {
+		GetVector();
+		PostNotify(WM_USER_GESTURE, 0, lppos);
+	}
+	InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
+	gStatus.vkDownTick = 0;
+
+	gSettings.mgStepMsg = 0;
+	if (gSettings.mgDrag.enabled) {
+		DRAG_KEY *pdk = &gSettings.mgDrag;
+		pdk->enabled = FALSE;
+		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
+		if (pdk->vk)
+			SimulateKey(pdk->vk, KEYEVENTF_KEYUP);
+		if (pdk->ctrl)
+			SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
+		if (pdk->shift)
+			SimulateKey(VK_SHIFT, KEYEVENTF_KEYUP);
+		if (pdk->alt)
+			SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
+	}
 }
 
 LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -235,7 +317,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		/*
 		 * Test if right mouse is down
 		 */
-		// check if CTRL or ALT is down
+		static DWORD releaseTick = tick;
 		if ((msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
 				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
 			GetMessageExtraInfo() != LLMHF_INJECTED) {
@@ -249,94 +331,19 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					IsPainterWindow(msg->hwnd))
 				msg->message += WM_USER;
 
-			// trigger on
-			if (gStatus.isRightDown && !gStatus.vkDownTick) {
-				gStatus.vkDownTick = tick;
-				gStatus.vkStateId = 0;
-				gStatus.vkDownPos = gStatus.penHoverPos;
-				ResetVector();
-			}
-			else if (!gStatus.isRightDown && !gStatus.isLeftDown && gStatus.vkDownTick) {
-				POINT pt = gStatus.penHoverPos;
-				int lppos = pt.x + pt.y * 0x10000;
-				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout &&
-						IsPainterWindow(msg->hwnd)) {
-					GetVectorEmpty();
-					PostNotify(WM_USER_GESTURE, 0, lppos);
-				}
-				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-					GetVector();
-					PostNotify(WM_USER_GESTURE, 0, lppos);
-				}
-				InvalidateRect(WindowFromPoint(gStatus.penHoverPos), NULL, FALSE);
-				gStatus.vkDownTick = 0;
-
-				gSettings.mgStepMsg = 0;
-				if (gSettings.mgDrag.enabled) {
-					DRAG_KEY *pdk = &gSettings.mgDrag;
-					pdk->enabled = FALSE;
-					SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
-					if (pdk->vk)
-						SimulateKey(pdk->vk, KEYEVENTF_KEYUP);
-					if (pdk->ctrl)
-						SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
-					if (pdk->shift)
-						SimulateKey(VK_SHIFT, KEYEVENTF_KEYUP);
-					if (pdk->alt)
-						SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
-				}
-			}
+			// set release tick
+			if (gStatus.isRightDown || gStatus.isLeftDown)
+				releaseTick = tick + 50;
 		}
 
 		/*
-		 * Process virtual key events
+		 * Process mouse gestures
 		 */
+		if (gStatus.isRightDown && !gStatus.vkDownTick)
+			MouseGestureBegin(tick);
 		if (gStatus.vkDownTick) {
-			if (msg->message == WM_MOUSEMOVE) {
-				AddPoint(gStatus.penHoverPos);
-				if (gStatus.vkStateId == 0) {
-					if (SQUA_SUM(gStatus.vkDownPos.x - gStatus.penHoverPos.x, gStatus.vkDownPos.y - gStatus.penHoverPos.y) >
-						(LONG)SQUA(gSettings.mgEnableDistance)) {
-						gStatus.vkStrokePos = gStatus.vkDownPos;
-						gStatus.vkStateId = WM_MOUSEMOVE;
-					}
-				}
-				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-					HDC hdc = GetDC(NULL);
-					StrokeLine(hdc, gStatus.vkStrokePos, gStatus.penHoverPos);
-					gStatus.vkStrokePos = gStatus.penHoverPos;
-					ReleaseDC(NULL, hdc);
-				}
-				else if (gStatus.vkStateId == WM_LBUTTONDOWN) {
-					if (gSettings.mgStepMsg) {
-						int delta = 0;
-						DWORD ms = WM_USER_DEBUG + gSettings.mgStepMsg;
-						while (delta = ListIndex(&gSettings.mgStepX, gStatus.penHoverPos.x))
-							PostNotify(ms, 0+(delta > 0 ? 0 : 1), gSettings.mgStepX.index);
-						while (delta = ListIndex(&gSettings.mgStepY, gStatus.penHoverPos.y))
-							PostNotify(ms, 2+(delta > 0 ? 0 : 1), gSettings.mgStepY.index);
-					}
-				}
-			}
-			else if (msg->message == WM_LBUTTONDOWN) {
-				POINT pt = gStatus.penHoverPos;
-				int lppos = pt.x + pt.y * 0x10000;
-				InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
-				if (gStatus.vkStateId == 0) {
-					GetVectorEmpty();
-					PostNotify(WM_USER_GESTURE, 1, lppos);
-				}
-				else if (gStatus.vkStateId == WM_MOUSEMOVE) {
-					GetVector();
-					PostNotify(WM_USER_GESTURE, 1, lppos);
-				}
-				gStatus.vkStateId = WM_LBUTTONDOWN;
-				// move the cursor to current position
-				SimulateMouse(0, 5, 0, MOUSEEVENTF_MOVE);
-				SimulateMouse(0, -5, 0, MOUSEEVENTF_MOVE);
-			}
-
-			// block
+			MouseGestureKeep(msg->message);
+			// block unwanted events
 			if (((msg->message == WM_MOUSEMOVE && !gSettings.mgDrag.enabled) ||
 					msg->message == WM_LBUTTONDOWN ||
 					msg->message == WM_LBUTTONUP ||
@@ -344,6 +351,9 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 		}
+		if (!gStatus.isRightDown && !gStatus.isLeftDown && gStatus.vkDownTick && tick > releaseTick)
+			MouseGestureEnd(tick, msg->hwnd);
+
 
 		/*
 		 * Process gesture messages
