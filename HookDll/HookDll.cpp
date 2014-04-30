@@ -39,12 +39,6 @@ HOOKDLL_API HWND _stdcall GetSaiWindow() {
 
 }
 
-HOOKDLL_API HWND _stdcall SetNotifyWindow(HWND hWnd) {
-	HWND hLast = gSettings.nofityWnd;
-	gSettings.nofityWnd = hWnd;
-	return hLast;
-}
-
 HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 	HWND hWnd = GetSaiWindow();
 	DWORD dwProcess = 0, dwThread = 0;
@@ -58,6 +52,7 @@ HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 			gProcHook = SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndRetProc, hInst, dwThread);
 		}
 		gStatus.threadId = dwThread;
+		gStatus.notifyThread = GetCurrentThreadId();
 	}
 	if (dwThread == 0)
 		return 1444; // Invalid Thread Identifier

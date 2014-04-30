@@ -44,8 +44,6 @@ namespace SaiHooker
             SetWindowLong(m_hWnd, GWL_EXSTYLE, WS_EX_NOACTIVATE | GetWindowLong(m_hWnd, GWL_EXSTYLE));
             // can not set WS_EX_TOPMOST directly
             SetWindowPos(m_hWnd, (IntPtr)HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-
-            SetNotifyWindow(m_hWnd);
         }
 
         public void ActiveSaiWindow()
@@ -114,9 +112,6 @@ namespace SaiHooker
 
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr GetSaiWindow();
-
-        [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern IntPtr SetNotifyWindow(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr FindWindowEx(IntPtr hParent, IntPtr hPrev, String lpClassName, String lpWndName);

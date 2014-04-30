@@ -21,7 +21,7 @@
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
 
-#define PostNotify(msg, wp, lp) PostMessage(gSettings.nofityWnd, (msg), (wp), (lp));
+#define PostNotify(msg, wp, lp) PostThreadMessage(gStatus.notifyThread, (msg), (wp), (lp));
 
 struct DRAG_KEY {
 	BOOL enabled;
@@ -39,9 +39,6 @@ struct ARRAY_LIST {
 
 struct SETTINGS {
 	DWORD lockTouch;
-
-	// window that receives message
-	HWND nofityWnd;
 
 	DWORD touchEnableTimeout;
 	DWORD guestureEnableTimeout;
@@ -76,6 +73,8 @@ struct SETTINGS {
 struct STATUS {
 	// SAI thread id
 	DWORD threadId;
+	// Hooker thread id
+	DWORD notifyThread;
 
 	BOOL bEnableTouch;
 

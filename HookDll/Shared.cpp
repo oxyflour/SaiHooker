@@ -6,8 +6,6 @@
 SETTINGS gSettings = {
 	FALSE,
 
-	NULL,
-
 	500,
 	800,
 	500,
@@ -39,6 +37,7 @@ SETTINGS gSettings = {
 };
 
 STATUS gStatus = {
+	0,
 	0,
 
 	FALSE,
