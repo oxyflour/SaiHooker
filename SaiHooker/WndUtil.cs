@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace SaiHooker
 {
@@ -54,6 +55,21 @@ namespace SaiHooker
                 SetForegroundWindow(hWnd);
         }
 
+        public void TextOut(string text, int x, int y)
+        {
+            IntPtr hdc = GetDC(IntPtr.Zero);
+            /*
+            Graphics gc = Graphics.FromHdc(hdc);
+            Font f = new Font(FontFamily.GenericSansSerif, 15);
+            SizeF sz = gc.MeasureString(text, f);
+            RectangleF rt = new RectangleF(x, y, sz.Width, sz.Height);
+            gc.FillRectangle(new SolidBrush(Color.White), rt);
+            gc.DrawString(text, f, new SolidBrush(Color.Black), rt);
+            */
+            TextOut(hdc, x, y, text, text.Length);
+            ReleaseDC(IntPtr.Zero, hdc);
+        }
+
         public int PopupMenu(string menu, int x, int y)
         {
             IntPtr hMenu = CreateMenu();
@@ -102,11 +118,6 @@ namespace SaiHooker
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr SetNotifyWindow(IntPtr hWnd);
 
-        /*
-        [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int AddButton(string text, int left, int right, int top, int bottom, int index);
-        */
-
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr FindWindowEx(IntPtr hParent, IntPtr hPrev, String lpClassName, String lpWndName);
 
@@ -145,5 +156,14 @@ namespace SaiHooker
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int TrackPopupMenu(IntPtr hMenu, uint uFlags, int x, int y, int nReserved, IntPtr hWnd, int prcRect);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hdc);
+
+        [DllImport("gdi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int TextOut(IntPtr hdc, int x, int y, String text, int len);
     }
 }

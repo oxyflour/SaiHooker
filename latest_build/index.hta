@@ -212,10 +212,18 @@
                         */
 		            },
                     u: function () {
-		                hooker.SimulateDragStep(1, 20, 20);
+		                hooker.SimulateDragStep(1, 15, 20);
+		                setTimeout(function () {
+		                    wndutil.TextOut('\u2195 Zoom In/Out', x - 10, y - 30);
+		                    wndutil.TextOut('\u2194 Rotate', x + 20, y - 10);
+		                }, 100);
 		            },
                     l: function () {
 		                hooker.SimulateDragStep(2, 30, 20);
+		                setTimeout(function () {
+		                    wndutil.TextOut('\u2195 Pen Size', x - 10, y - 30);
+		                    wndutil.TextOut('\u2194 Pen Type', x + 20, y - 10);
+		                }, 100);
 		            }
 		        }[vec] || function () {
 		            logText('unknown stroke: ' + vec);
