@@ -115,6 +115,8 @@ HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, boo
 		SimulateKey(VK_MENU, 0);
 	if (pdk->vk = vk > 0 ? (WORD)vk : 0)
 		SimulateKey(vk, 0);
+	// an additional MOUSEEVENTF_RIGHTUP is required
+	SimulateMouse(0, 0, 0, MOUSEEVENTF_RIGHTUP);
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
 }
 

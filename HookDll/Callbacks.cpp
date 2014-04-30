@@ -233,26 +233,20 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			gStatus.penHoverPos = msg->pt;
 
 		/*
-		 * Test if virtual key is down
+		 * Test if right mouse is down
 		 */
 		// check if CTRL or ALT is down
-		if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
-				msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP ||
-				msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
-				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
-			if (msg->wParam == VK_CONTROL)
-				gStatus.isCtrlDown = msg->message == WM_KEYDOWN;
-			else if (msg->message == WM_SYSKEYDOWN || msg->message == WM_SYSKEYUP || msg->wParam == VK_MENU)
-				gStatus.isAltDown = msg->message == WM_SYSKEYDOWN || msg->message == WM_KEYDOWN;
-			else if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
+		if ((msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
+				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
+			GetMessageExtraInfo() != LLMHF_INJECTED) {
+			if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
 				gStatus.isLeftDown = msg->message == WM_LBUTTONDOWN;
 			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
 				gStatus.isRightDown = msg->message == WM_RBUTTONDOWN;
 
 			// block right mouse button
 			if ((msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
-					IsPainterWindow(WindowFromPoint(gStatus.penHoverPos)) &&
-					GetMessageExtraInfo() != LLMHF_INJECTED)
+					IsPainterWindow(msg->hwnd))
 				msg->message += WM_USER;
 
 			// trigger on
@@ -265,7 +259,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			else if (!gStatus.isRightDown && !gStatus.isLeftDown && gStatus.vkDownTick) {
 				POINT pt = gStatus.penHoverPos;
 				int lppos = pt.x + pt.y * 0x10000;
-				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout) {
+				if (gStatus.vkStateId == 0 && tick - gStatus.vkDownTick < gSettings.vkTimeout &&
+						IsPainterWindow(msg->hwnd)) {
 					GetVectorEmpty();
 					PostNotify(WM_USER_GESTURE, 0, lppos);
 				}
@@ -336,10 +331,13 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					PostNotify(WM_USER_GESTURE, 1, lppos);
 				}
 				gStatus.vkStateId = WM_LBUTTONDOWN;
+				// move the cursor to current position
+				SimulateMouse(0, 5, 0, MOUSEEVENTF_MOVE);
+				SimulateMouse(0, -5, 0, MOUSEEVENTF_MOVE);
 			}
 
 			// block
-			if ((msg->message == WM_MOUSEMOVE ||
+			if (((msg->message == WM_MOUSEMOVE && !gSettings.mgDrag.enabled) ||
 					msg->message == WM_LBUTTONDOWN ||
 					msg->message == WM_LBUTTONUP) &&
 					GetMessageExtraInfo() != LLMHF_INJECTED)

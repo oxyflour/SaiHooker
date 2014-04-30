@@ -89,8 +89,6 @@ struct STATUS {
 	DWORD fingerDownTick[MAX_STATUS_FINGERS];
 	DWORD fingerUpTick[MAX_STATUS_FINGERS];
 
-	BOOL isCtrlDown;
-	BOOL isAltDown;
 	BOOL isLeftDown;
 	BOOL isRightDown;
 	DWORD vkDownTick;
