@@ -339,7 +339,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			// block
 			if (((msg->message == WM_MOUSEMOVE && !gSettings.mgDrag.enabled) ||
 					msg->message == WM_LBUTTONDOWN ||
-					msg->message == WM_LBUTTONUP) &&
+					msg->message == WM_LBUTTONUP ||
+					msg->message == UNKNOWN_PEN_MSG) &&
 					GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 		}
