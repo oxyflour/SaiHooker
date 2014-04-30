@@ -342,8 +342,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				gStatus.vkStateId = WM_LBUTTONDOWN;
 				if (!gSettings.mgDrag.enabled)
 					msg->message += WM_USER;
-				else
-					PostMessage(gSettings.nofityWnd, WM_USER_DEBUG, 0, 0);
 			}
 		}
 

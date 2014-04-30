@@ -79,15 +79,13 @@ int FindInArray(double *arr, int size, double value) {
 }
 
 int ListIndex(ARRAY_LIST *pl, double val) {
-	if (pl->index >= 1 && val < pl->list[pl->index]) {
-		pl->index --;
-		return -1;
-	}
-	if (pl->index + 1 < pl->size - 1 && val > pl->list[pl->index + 1]) {
-		pl->index ++;
-		return 1;
-	}
-	return 0;
+	int delta = 0;
+	if (pl->index >= 1 && val < pl->list[pl->index])
+		delta = -1;
+	if (pl->index + 1 < pl->size - 1 && val > pl->list[pl->index + 1])
+		delta = 1;
+	pl->index += delta;
+	return delta;
 }
 
 BOOL IsPainterWindow(HWND hWnd) {

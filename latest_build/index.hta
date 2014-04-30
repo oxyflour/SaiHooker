@@ -203,7 +203,13 @@
 		    if (key == 1) {
 		        ({
 		            '': function () {
-//		                hooker.SimulateDragWith(0x20, false, false, false);
+		                hooker.SimulateDragWith(0x20, false, false, false);
+                        /*
+                        hooker.SimulateKey(18, true);
+                        hooker.SimulateMouse(0, 0, true);
+                        hooker.SimulateMouse(0, 0, 0);
+                        hooker.SimulateKey(18, 0);
+                        */
 		            },
                     u: function () {
 		                hooker.SimulateDragStep(1, 20, 20);
