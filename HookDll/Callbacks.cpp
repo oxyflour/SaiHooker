@@ -226,7 +226,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			msg->message == WM_LBUTTONDBLCLK || msg->message == WM_RBUTTONDBLCLK ||
 			msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_VSCROLL || msg->message == WM_HSCROLL) {
-			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled)
+			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled && gStatus.tgState == 1)
 				; // pass
 			else if ((!bEnableTouch ||
 					IsPainterWindow(msg->hwnd)) &&
@@ -285,7 +285,8 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (msg->message == WM_GESTURE_PROC) {
 			SHORT x = LOWORD(msg->lParam) - 0x8000, y = HIWORD(msg->lParam) - 0x8000,
 				s = LOWORD(msg->wParam) - 0x8000, r = HIWORD(msg->wParam) - 0x8000;
-			TouchGestureKeep(n, x, y, s, r);
+			if (bEnableTouch)
+				TouchGestureKeep(n, x, y, s, r);
 		}
 		if (msg->message == WM_GESTURE_DOWN) {
 			if (n > 0 && n <= MAX_STATUS_FINGERS)
