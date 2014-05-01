@@ -10,12 +10,6 @@
 		body { margin: 0; padding: 0; }
 		.hidden { display: none; }
 		.big { font-size: 120%; }
-		.tab { display: inline-block; margin: 5px; }
-		.tab.active { font-weight: bold; }
-		.tab-content { margin: 5px; display: none; }
-		.tab-content.active { display: block; }
-		.tab-content button { padding:7px; margin:3px; }
-		span.field { margin: 5px; font-size: 110%; }
 	</style>
 	<!-- HTA tag does not work in IE10 -->
 	<HTA:Application
@@ -33,65 +27,15 @@
 <body>
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-    <div class="hidden">
-        <label class="tab active" for="rad0">UI</label>
-        <label class="tab" for="rad1">Pens</label>
-        <label class="tab" for="rad2">Trans</label>
-        <label class="tab" for="rad4">Select</label>
-        <label class="tab" for="rad3">More</label>
-        <div for="rad0" class="tab-content active">
-            <button onclick="sendKeys('{TAB}')">Tab</button>
-            <button onclick="sendKeys('{F11}')">F11</button>
-            <button onclick="sendKeys('h')">Flip</button>
-            <button onclick="sendKeys('^{TAB}')">View</button>
-        </div>
-        <div for="rad1" class="tab-content">
-            <button onclick="sendKeys('n')">[N]</button>
-            <button onclick="sendKeys('c')">[C]</button>
-            <button onclick="sendKeys('e')">[E]</button>
-            <button onclick="sendKeys('s')">[S]</button>
-            <button onclick="sendKeys('a')">[A]</button>
-        </div>
-        <div for="rad2" class="tab-content">
-            <button onclick="sendKeys('^t')">Trans</button>
-            <button onclick="sendKeys('{ENTER}')">Accept</button>
-            <button onclick="sendKeys('{ESCAPE}')">Cancel</button>
-        </div>
-        <div for="rad3" class="tab-content">
-            Key: 
-            <span class="field">
-                <input type="checkbox" value="16" onchange="hooker.SimulateKey(this.value, this.checked)" />Shift
-            </span>
-            <span class="field">
-                <input type="checkbox" value="17" onchange="hooker.SimulateKey(this.value, this.checked)" />Ctrl
-            </span>
-            <span class="field">
-                <input type="checkbox" value="18" onchange="hooker.SimulateKey(this.value, this.checked)" />Alt
-            </span>
-            <br />
-            <br />
-            <span class="field">
-                <input class="auto-load" type="checkbox"
-                    initvalue="hooker.DisableTouch(-1)"
-                    onchange="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock All touches
-            </span>
-            <br />
-            <br />
-            <!--button onclick="wndutil.PopupMenu($('#popup').data('xml'), 200, 500)">Menu</!--button-->
-        </div>
-        <div for="rad4" class="tab-content">
-            <button onclick="sendKeys('^a')">All</button>
-            <button onclick="$('.tab:first').trigger('click');sendKeys('^d')">None</button>
-            <button onclick="sendKeys('^f')">Fill</button>
-            <button onclick="sendKeys('d')">Clr</button>
-            <!--button onclick="sendKeys('^c')">Copy</button>
-            <button onclick="sendKeys('^v')">Paste</button-->
-            <!--button onclick="sendKeys('{LEFT}')">&lt;</button>
-            <button onclick="sendKeys('{UP}')">&and;</button>
-            <button onclick="sendKeys('{DOWN}')">&or;</button>
-            <button onclick="sendKeys('{RIGHT}')">&gt;</button-->
-        </div>
-    </div>
+    <form>
+        <h5>Toggles</h5>
+        <p><label><input class="auto-load" type="checkbox"
+                initvalue="hooker.DisableTouch(-1)"
+                onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Lock All touches</label></p>
+        <p><label><input type="checkbox" value="16" onclick="hooker.SimulateKey(this.value, this.checked)" />Shift</label></p>
+        <p><label><input type="checkbox" value="17" onclick="hooker.SimulateKey(this.value, this.checked)" />Ctrl</label></p>
+        <p><label><input type="checkbox" value="18" onclick="hooker.SimulateKey(this.value, this.checked)" />Alt</label></p>
+    </form>
 	<div id="log"></div>
 	<script id="popup" type="text/xml">
 		<menu>
@@ -272,6 +216,7 @@
 		});
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
+
 			$('input[type=checkbox].auto-load').each(function(i, e) {
 				var v = $(e).attr('initvalue');
 				if (v) e.checked = eval(v);
@@ -281,12 +226,6 @@
 					v = $(e).attr('initvalue'),
 					p = c.filter('[value="'+(v ? eval(v) : '')+'"]');
 				(p[0] || c[0]).selected = true;
-			});
-
-			$('label.tab').click(function(e) {
-				$(this).addClass('active').siblings('.tab').removeClass('active');
-				$('.tab-content[for="'+$(this).attr('for')+'"]').addClass('active')
-					.siblings('.tab-content').removeClass('active');
 			});
 
 			// prepare xml text for PopupMenu
