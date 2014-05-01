@@ -70,29 +70,28 @@ namespace SaiHooker
         {
             if (nCode == HC_ACTION)
             {
-//                MSG msg = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
-                MSG* msg = (MSG*)lParam;
-                if (msg->message >= WM_USER_DEBUG && msg->message <= WM_USER_DEBUG + 64 && s_this.OnHookEvent != null)
+                MSG msg = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
+                if (msg.message >= WM_USER_DEBUG && msg.message <= WM_USER_DEBUG + 64 && s_this.OnHookEvent != null)
                 {
-                    s_this.OnHookEvent((int)msg->message - (int)WM_USER_DEBUG, (int)(ulong)msg->wParam, (int)msg->lParam);
+                    s_this.OnHookEvent((int)msg.message - (int)WM_USER_DEBUG, (int)(ulong)msg.wParam, (int)msg.lParam);
                 }
-                if (msg->message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
+                if (msg.message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
                     GetmgVectorStr(sz, sz.Capacity);
-                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
-                    s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam, x, y);
+                    int x = (int)msg.lParam % 0x10000, y = (int)msg.lParam / 0x10000;
+                    s_this.OnMouseGesture(sz.ToString(), (int)msg.wParam, x, y);
                 }
-                if (msg->message == WM_USER_TOUCH && s_this.OnTouchGesture != null)
+                if (msg.message == WM_USER_TOUCH && s_this.OnTouchGesture != null)
                 {
-                    int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
-                    int n = (int)msg->wParam % 0x10000, k = (int)msg->wParam / 0x10000;
+                    int x = (int)msg.lParam % 0x10000, y = (int)msg.lParam / 0x10000;
+                    int n = (int)msg.wParam % 0x10000, k = (int)msg.wParam / 0x10000;
                     s_this.OnTouchGesture(n, k, x, y);
                 }
                 // active window if titlebar is clicked
-                if (msg->message == WM_NCLBUTTONDOWN)
+                if (msg.message == WM_NCLBUTTONDOWN)
                 {
-                    WndUtil.SetForegroundWindow(msg->hwnd);
+                    WndUtil.SetForegroundWindow(msg.hwnd);
                 }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
