@@ -8,12 +8,12 @@
 #define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
 
 #define WT_PACKET (WM_USER + 0x7FF0)
-#define UNKNOWN_PEN_MSG 0x0ff2
+#define WM_PEN_HOVER_UNKNOWN 0x0ff2 // obtained from spyxx. not sure what's it
 
 #define WM_USER_DEBUG (WM_USER + WM_APP)
 #define WM_USER_QUIT (WM_USER + WM_QUIT)
 #define WM_USER_GESTURE (WM_USER + WM_COMMAND + 1)
-#define WM_USER_FINGERTAP (WM_USER + WM_COMMAND + 2)
+#define WM_USER_TOUCH (WM_USER + WM_COMMAND + 2)
 #define WM_GESTURE_PROC (WM_USER + WM_GESTURE)
 #define WM_GESTURE_DOWN (WM_USER + WM_GESTURE + 1)
 #define WM_GESTURE_UP (WM_USER + WM_GESTURE + 2)

@@ -33,7 +33,7 @@ namespace SaiHooker
 
         const uint WM_USER_DEBUG = WM_USER + WM_APP;
         const uint WM_USER_GESTURE = WM_USER + WM_COMMAND + 1;
-        const uint WM_USER_FINGERTAP = WM_USER + WM_COMMAND + 2;
+        const uint WM_USER_TOUCH = WM_USER + WM_COMMAND + 2;
 
         [StructLayout(LayoutKind.Sequential)]
         struct POINT
@@ -82,7 +82,7 @@ namespace SaiHooker
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam, x, y);
                 }
-                if (msg->message == WM_USER_FINGERTAP && s_this.OnTouchGesture != null)
+                if (msg->message == WM_USER_TOUCH && s_this.OnTouchGesture != null)
                 {
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     int n = (int)msg->wParam % 0x10000, k = (int)msg->wParam / 0x10000;

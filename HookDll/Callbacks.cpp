@@ -32,7 +32,7 @@ void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
 		if (tick - gStatus.tgDownTicks[i] < gSettings.fingerTapInteval) {
 			POINT pt; GetCursorPos(&pt);
-			PostNotify(WM_USER_FINGERTAP, i, pt.x + pt.y * 0x10000);
+			PostNotify(WM_USER_TOUCH, i, pt.x + pt.y * 0x10000);
 			break;
 		}
 	}
@@ -107,11 +107,11 @@ void TouchGestureKeep(DWORD n, long x, long y, long s, long r) {
 	gStatus.tgRotate = r;
 	if (n == 1) {
 		if (!gStatus.tgState && SQUA_SUM(x, y) > SQUA(10))
-			PostNotify(WM_USER_FINGERTAP, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
+			PostNotify(WM_USER_TOUCH, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
 	}
 	else if (n == 2) {
 		if (!gStatus.tgState && (s < 100-5 || s > 100+5 || r < -5 || r > 5))
-			PostNotify(WM_USER_FINGERTAP, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
+			PostNotify(WM_USER_TOUCH, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
 		if (gStatus.tgState == n) {
 			CheckEventTrigger(&gSettings.evtZoom, s);
 			CheckEventTrigger(&gSettings.evtRotate, r);
@@ -209,7 +209,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
 		// setup touch lock timeout
-		if (msg->message == UNKNOWN_PEN_MSG || msg->message == WT_PACKET)
+		if (msg->message == WM_PEN_HOVER_UNKNOWN || msg->message == WT_PACKET)
 			gStatus.penHoverTick = tick;
 		BOOL bEnableTouch = !gSettings.lockTouch &&
 			(tick - gStatus.penHoverTick > TIMEOUT_TOUCH_ENABLE_AFTER_PEN_HOVER);
@@ -268,7 +268,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			else if ((msg->message == WM_MOUSEMOVE||
 					msg->message == WM_LBUTTONDOWN ||
 					msg->message == WM_LBUTTONUP ||
-					msg->message == UNKNOWN_PEN_MSG) &&
+					msg->message == WM_PEN_HOVER_UNKNOWN) &&
 				GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 		}
