@@ -264,7 +264,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		/*
 		 * Process mouse gestures
 		 */
-		static DWORD releaseTick = tick;
 		if (gStatus.isRightDown && !gStatus.mgTick)
 			MouseGestureBegin(tick);
 		if (gStatus.mgTick) {
@@ -279,9 +278,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 		}
-		if (gStatus.isRightDown || gStatus.isLeftDown)
-			releaseTick = tick + TIMEOUT_MOUSE_GESTURE_FINISH_DELAY;
-		else if (gStatus.mgTick && tick > releaseTick)
+		if (!gStatus.isLeftDown && !gStatus.isRightDown && gStatus.mgTick)
 			MouseGestureEnd(tick, msg->hwnd);
 
 
