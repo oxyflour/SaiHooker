@@ -1,8 +1,6 @@
 #define MAX_SETTING_STEPS 64
 #define MAX_VECTOR_LENGTH 64
 #define MAX_STATUS_FINGERS 5
-#define MAX_BUTTON_COUNT 64
-#define MAX_BUTTON_TEXT 128
 
 #define SAI_WINDOW_CLASS TEXT("sfl_window_class")
 #define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
@@ -14,16 +12,25 @@
 #define WM_USER_QUIT (WM_USER + WM_QUIT)
 #define WM_USER_GESTURE (WM_USER + WM_COMMAND + 1)
 #define WM_USER_TOUCH (WM_USER + WM_COMMAND + 2)
+
 #define WM_GESTURE_PROC (WM_USER + WM_GESTURE)
 #define WM_GESTURE_DOWN (WM_USER + WM_GESTURE + 1)
 #define WM_GESTURE_UP (WM_USER + WM_GESTURE + 2)
 
 #define TIMEOUT_TOUCH_ENABLE_AFTER_PEN_HOVER 500
-#define TIMEOUT_GESTURE_ENABLE_AFTER_PALM 800
 #define TIMEOUT_MOUSE_GESTURE_FINISH_DELAY 50
+#define TIMEOUT_MOUSE_GESTURE_CLICK_INTERVAL 500
+#define TIMEOUT_MOUSE_GESTURE_TAP_INTERVAL 200
+#define TIMEOUT_PAINTER_LEAVE_INTERVAL 500
 
 #define DISTANCE_PAN_TRIGGER 10
 #define DISTANCE_ZOOM_CANCEL 80
+#define DISTANCE_MOUSE_GESTURE_BEGIN 35
+
+#define MOUSE_GESTURE_REDUCE_COUNT 8
+#define MOUSE_GESTURE_REDUCE_SLOPE 2.0
+#define MOUSE_GESTURE_REDUCE_DISTANCE 0.20
+#define MOUSE_GESTURE_REDUCE_RADIUS 0.55
 
 #define SQUA(x) ((x)*(x))
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
@@ -49,19 +56,6 @@ struct EVENT_TRIGGER {
 
 struct SETTINGS {
 	DWORD lockTouch;
-
-	DWORD painterLeaveTimeout;
-
-	DWORD vkTimeout;
-	DWORD fingerTapInteval;
-
-	DWORD mgEnableTimeout;
-	DWORD mgEnableDistance;
-	DWORD mgPointCount;
-	double mgSlope;
-	double mgDistanceIn;
-	double mgRadiusIn;
-
 	SHORTCUT_KEY dragKey;
 	EVENT_TRIGGER evtOffsetX;
 	EVENT_TRIGGER evtOffsetY;

@@ -30,7 +30,7 @@ void InitTouchWindow(HWND hwnd) {
 void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 	// check tap
 	for (int i = MAX_STATUS_FINGERS - 1; i >= 0; i --) {
-		if (tick - gStatus.tgDownTicks[i] < gSettings.fingerTapInteval) {
+		if (tick - gStatus.tgDownTicks[i] < TIMEOUT_MOUSE_GESTURE_TAP_INTERVAL) {
 			POINT pt; GetCursorPos(&pt);
 			PostNotify(WM_USER_TOUCH, i, pt.x + pt.y * 0x10000);
 			break;
@@ -66,7 +66,7 @@ void MsVectorReduce(int n) {
 		POINT pc = (*ls)[i];
 		double d = fabs(dy * (pc.x - pb.x) - dx * (pc.y - pb.y)) / l,
 			r = SQRT_SUM(pb.x - x, pb.y - y);
-		find = (d > l * gSettings.mgDistanceIn || r > l * gSettings.mgRadiusIn);
+		find = (d > l * MOUSE_GESTURE_REDUCE_DISTANCE || r > l * MOUSE_GESTURE_REDUCE_RADIUS);
 	}
 	if (!find) {
 		ls->erase(ls->end() - n, ls->end());
@@ -76,10 +76,10 @@ void MsVectorReduce(int n) {
 }
 void MsVectorAdd(POINT pt) {
 	g_MSVectors.push_back(pt);
-	MsVectorReduce(gSettings.mgPointCount);
+	MsVectorReduce(MOUSE_GESTURE_REDUCE_COUNT);
 }
 void MsVectorToString() {
-	for (int n = gSettings.mgPointCount - 1; n >= 3; n --)
+	for (int n = MOUSE_GESTURE_REDUCE_COUNT - 1; n >= 3; n --)
 		MsVectorReduce(n);
 	int j = 0;
 	std::vector<POINT> *ls = &g_MSVectors;
@@ -88,8 +88,8 @@ void MsVectorToString() {
 		std::vector<POINT>::iterator b = i, e = i + 1;
 		double k = fabs((b->y - e->y) / (b->x - e->x + 1e-6));
 		TCHAR c = j > 0 ? st[j-1] : 0;
-		if (k > gSettings.mgSlope) c = e->y > b->y ? L'd' : L'u';
-		else if (k < 1.0/gSettings.mgSlope) c = e->x > b->x ? L'r' : L'l';
+		if (k > MOUSE_GESTURE_REDUCE_SLOPE) c = e->y > b->y ? L'd' : L'u';
+		else if (k < 1.0/MOUSE_GESTURE_REDUCE_SLOPE) c = e->x > b->x ? L'r' : L'l';
 		else if (e->x > b->x) c = e->y > b->y ? L'R' : L'U';
 		else c = e->y > b->y ? L'D' : L'L';
 		if (j == 0 || st[j-1] != c)
@@ -142,7 +142,7 @@ void MouseGestureKeep(UINT message) {
 		MsVectorAdd(gStatus.penHoverPos);
 		if (gStatus.mgState == 0) {
 			if (SQUA_SUM(gStatus.mgBeginPos.x - gStatus.penHoverPos.x, gStatus.mgBeginPos.y - gStatus.penHoverPos.y) >
-				(LONG)SQUA(gSettings.mgEnableDistance)) {
+				SQUA(DISTANCE_MOUSE_GESTURE_BEGIN)) {
 				strokePt = gStatus.mgBeginPos;
 				gStatus.mgState = WM_MOUSEMOVE;
 			}
@@ -179,7 +179,7 @@ void MouseGestureKeep(UINT message) {
 void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	POINT pt = gStatus.penHoverPos;
 	int lppos = pt.x + pt.y * 0x10000;
-	if (gStatus.mgState == 0 && tick - gStatus.mgTick < gSettings.vkTimeout &&
+	if (gStatus.mgState == 0 && tick - gStatus.mgTick < TIMEOUT_MOUSE_GESTURE_CLICK_INTERVAL &&
 			IsPainterWindow(hwnd)) {
 		MsVectorToEmpty();
 		PostNotify(WM_USER_GESTURE, 0, lppos);
@@ -355,7 +355,7 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		static DWORD painterLeaveTick = 0;
 		if (cs->message == WM_MOUSELEAVE &&
 			IsPainterWindow(cs->hwnd)) {
-			if (tick - painterLeaveTick > gSettings.painterLeaveTimeout) {
+			if (tick - painterLeaveTick > TIMEOUT_PAINTER_LEAVE_INTERVAL) {
 				SimulateMouse(0, 0, 0, MOUSEEVENTF_MOVE);
 				PostMessage(cs->hwnd, 0x0ff2, 0, 0);
 			}
@@ -363,7 +363,7 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 		// Once cursor enter again, simulate a "ctrl" key
 		if (cs->message == WM_SETCURSOR &&
-			painterLeaveTick > 0 && tick - painterLeaveTick > gSettings.painterLeaveTimeout &&
+			painterLeaveTick > 0 && tick - painterLeaveTick > TIMEOUT_PAINTER_LEAVE_INTERVAL &&
 			IsPainterWindow(cs->hwnd)) {
 			SimulateKey(VK_CONTROL, 0);
 			SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
