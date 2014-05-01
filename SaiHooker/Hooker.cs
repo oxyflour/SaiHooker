@@ -27,6 +27,7 @@ namespace SaiHooker
         const int WH_CALLWNDPROCRET = 12;
         const int HC_ACTION = 0;
 
+        const uint WM_NCLBUTTONDOWN = 0x00A1;
         const uint WM_APP = 0x8000;
         const uint WM_USER = 0x0400;
         const uint WM_COMMAND = 0x0111;
@@ -87,6 +88,11 @@ namespace SaiHooker
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     int n = (int)msg->wParam % 0x10000, k = (int)msg->wParam / 0x10000;
                     s_this.OnTouchGesture(n, k, x, y);
+                }
+                // active window if titlebar is clicked
+                if (msg->message == WM_NCLBUTTONDOWN)
+                {
+                    WndUtil.SetForegroundWindow(msg->hwnd);
                 }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
