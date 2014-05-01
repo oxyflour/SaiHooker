@@ -98,18 +98,16 @@ HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
 }
 
 HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt) {
-	DRAG_KEY *pdk = &gSettings.mgDrag;
-	if (pdk->enabled)
+	SHORTCUT_KEY *pk = &gSettings.mgDrag;
+	if (pk->enabled || pk->pressed)
 		return;
-	pdk->enabled = TRUE;
-	if (pdk->ctrl = ctrl)
-		SimulateKey(VK_CONTROL, 0);
-	if (pdk->shift = shift)
-		SimulateKey(VK_SHIFT, 0);
-	if (pdk->alt = alt)
-		SimulateKey(VK_MENU, 0);
-	if (pdk->vk = vk > 0 ? (WORD)vk : 0)
-		SimulateKey(vk, 0);
+	pk->enabled = TRUE;
+	pk->pressed = FALSE;
+	pk->vk = (WORD)vk;
+	pk->ctrl = ctrl;
+	pk->shift = shift;
+	pk->alt = alt;
+	SimulateShortcut(pk, TRUE);
 	// an additional MOUSEEVENTF_RIGHTUP is required
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_RIGHTUP);
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
@@ -125,6 +123,14 @@ HOOKDLL_API void _stdcall RegisterEventNotify(int msg, TCHAR *evt, TCHAR *steps)
 	else if (!_tcscmp(evt, TEXT("ms-y"))) {
 		pe = &gSettings.mgStepY;
 		val = gStatus.penHoverPos.y;
+	}
+	else if (!_tcscmp(evt, TEXT("th-z"))) {
+		pe = &gSettings.tgZoom;
+		val = 100;
+	}
+	else if (!_tcscmp(evt, TEXT("th-r"))) {
+		pe = &gSettings.tgRotate;
+		val = 0;
 	}
 	if (pe) {
 		pe->msg = msg;

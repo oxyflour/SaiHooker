@@ -7,8 +7,6 @@ SETTINGS gSettings = {
 	FALSE,
 
 	500,
-	800,
-	500,
 
 	VK_SPACE,
 	500,
@@ -25,14 +23,9 @@ SETTINGS gSettings = {
 	{0, 0, 0},
 	{0, 0, 0},
 
-	10,
-	80,
-	90,
-	110,
-	{-1000, 5, 10, 15, 25, 35, 45, 55, 65, 75, 85, 100, 115, 125, 135, 145, 155, 165, 175, 185, 195, 200, 2000},
-	-10,
-	10,
-	{-1000, -180, -150, -120, -90, -85, -75, -65, -55, -45, -35, -25, -15, 0, 15, 25, 35, 45, 55, 65, 75, 85, 90, 120, 150, 180, 1000},
+	{0},
+	{0, 0, 0},
+	{0, 0, 0},
 };
 
 STATUS gStatus = {
@@ -46,6 +39,7 @@ STATUS gStatus = {
 
 	GID_BEGIN,
 	0,
+	NULL,
 	{0},
 	{0},
 
@@ -68,12 +62,6 @@ STATUS gStatus = {
 #pragma data_seg()
 #pragma comment(linker, "/Section:Share,rws")
 
-int FindInArray(double *arr, int size, double value) {
-	int i;
-	for(i = 0; i < size - 1 && !(arr[i] <= value && arr[i+1] > value); i ++);
-	return i;
-}
-
 int ListIndex(EVENT_TRIGGER *pl, double val) {
 	int delta = 0;
 	if (pl->index >= 1 && val < pl->list[pl->index])
@@ -87,6 +75,21 @@ int ListIndex(EVENT_TRIGGER *pl, double val) {
 BOOL IsPainterWindow(HWND hWnd) {
 	LONG lStyle = WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 	return (GetWindowLongPtr(hWnd, GWL_STYLE) & lStyle) == lStyle;
+}
+
+void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down) {
+	if (down) {
+	}
+	else {
+		if (pk->vk)
+			SimulateKey(pk->vk, KEYEVENTF_KEYUP);
+		if (pk->ctrl)
+			SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
+		if (pk->shift)
+			SimulateKey(VK_SHIFT, KEYEVENTF_KEYUP);
+		if (pk->alt)
+			SimulateKey(VK_MENU, KEYEVENTF_KEYUP);
+	}
 }
 
 void SimulateKey(WORD vk, DWORD flags) {

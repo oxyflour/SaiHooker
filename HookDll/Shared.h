@@ -18,14 +18,22 @@
 #define WM_GESTURE_DOWN (WM_USER + WM_GESTURE + 1)
 #define WM_GESTURE_UP (WM_USER + WM_GESTURE + 2)
 
+#define TIMEOUT_TOUCH_ENABLE_AFTER_PEN_HOVER 500
+#define TIMEOUT_GESTURE_ENABLE_AFTER_PALM 800
+#define TIMEOUT_MOUSE_GESTURE_FINISH_DELAY 50
+
+#define DISTANCE_PAN_TRIGGER 10
+#define DISTANCE_ZOOM_CANCEL 80
+
 #define SQUA(x) ((x)*(x))
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
 
 #define PostNotify(msg, wp, lp) PostThreadMessage(gStatus.notifyThread, (msg), (wp), (lp));
 
-struct DRAG_KEY {
+struct SHORTCUT_KEY {
 	BOOL enabled;
+	BOOL pressed;
 	WORD vk;
 	BOOL ctrl;
 	BOOL shift;
@@ -42,8 +50,6 @@ struct EVENT_TRIGGER {
 struct SETTINGS {
 	DWORD lockTouch;
 
-	DWORD touchEnableTimeout;
-	DWORD guestureEnableTimeout;
 	DWORD painterLeaveTimeout;
 
 	DWORD panVkCode;
@@ -57,18 +63,13 @@ struct SETTINGS {
 	double mgDistanceIn;
 	double mgRadiusIn;
 
-	DRAG_KEY mgDrag;
+	SHORTCUT_KEY mgDrag;
 	EVENT_TRIGGER mgStepX;
 	EVENT_TRIGGER mgStepY;
 
-	DWORD panTriggerDistance;
-	DWORD guestureCancelDistance;
-	double zoomTriMin;
-	double zoomTriMax;
-	double zoomArr[MAX_SETTING_STEPS];
-	double rotateTriMin;
-	double rotateTriMax;
-	double rotateArr[MAX_SETTING_STEPS];
+	SHORTCUT_KEY tgPan;
+	EVENT_TRIGGER tgZoom;
+	EVENT_TRIGGER tgRotate;
 };
 
 struct STATUS {
@@ -86,6 +87,7 @@ struct STATUS {
 	// gesture id (GID_XXX) and how many fingers is on
 	DWORD gestureId;
 	DWORD fingerCount;
+	HWND fingerAtWindow;
 	DWORD fingerDownTick[MAX_STATUS_FINGERS];
 	DWORD fingerUpTick[MAX_STATUS_FINGERS];
 
@@ -99,8 +101,6 @@ struct STATUS {
 	DWORD painterLeaveTick;
 
 	DWORD panVkState;
-	int zoomIndex;
-	int rotateIndex;
 
 	TCHAR vectorStr[MAX_VECTOR_LENGTH];
 };
@@ -109,8 +109,8 @@ extern SETTINGS gSettings;
 
 extern STATUS gStatus;
 
-int FindInArray(double *arr, int size, double value);
 int ListIndex(EVENT_TRIGGER *pl, double val);
 BOOL IsPainterWindow(HWND hWnd);
+void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);

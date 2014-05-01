@@ -192,6 +192,10 @@
                 wscript.SendKeys(('nbvceas').charAt(lParam - 9));
             else if (msg == 4)
                 wscript.SendKeys(wParam ? '{]}' : '{[}');
+            else if (msg == 21)
+                wscript.SendKeys(wParam ? '{PGDN}' : '{PGUP}');
+            else if (msg == 22)
+		        wscript.SendKeys(wParam ? '{DEL}' : '{END}');
             else
 	            logText('debug: ' + msg + ' (' + wParam + ', ' + lParam + ')');
 		});
@@ -289,6 +293,10 @@
 			var pop = $('#popup'), doc = $(pop.html());
 			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
 			pop.data('doc', doc).data('xml', doc[0].outerHTML);
+
+            // register touch gestures
+            hooker.RegisterNotify(21, 'th-z', createSteps(10, 20, 5));
+            hooker.RegisterNotify(22, 'th-r', createSteps(10, 20, 5));
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();
