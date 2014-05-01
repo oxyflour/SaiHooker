@@ -236,7 +236,7 @@
 		        }
 		    }
 		});
-		hooker.attachEvent("OnFingerTap", function (num, key, x, y) {
+		hooker.attachEvent("OnTouchGesture", function (num, key, x, y) {
 		    if (key == 1) {
 		        if (num == 1) {
 		            hooker.SimulateDragWith(0x20, false, false, false);

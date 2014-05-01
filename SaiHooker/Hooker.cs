@@ -14,7 +14,7 @@ namespace SaiHooker
         [DispId(3)]
         void OnMouseGesture(string vec, int key, int x, int y);
         [DispId(4)]
-        void OnFingerTap(int n, int k, int x, int y);
+        void OnTouchGesture(int n, int k, int x, int y);
     }
 
     [Guid("8E1D1128-0685-4C1D-8475-916B2BDE241A")]
@@ -82,11 +82,11 @@ namespace SaiHooker
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam, x, y);
                 }
-                if (msg->message == WM_USER_FINGERTAP && s_this.OnFingerTap != null)
+                if (msg->message == WM_USER_FINGERTAP && s_this.OnTouchGesture != null)
                 {
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     int n = (int)msg->wParam % 0x10000, k = (int)msg->wParam / 0x10000;
-                    s_this.OnFingerTap(n, k, x, y);
+                    s_this.OnTouchGesture(n, k, x, y);
                 }
             }
             return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
@@ -123,7 +123,7 @@ namespace SaiHooker
         public event MouseGestureHandle OnMouseGesture;
 
         public delegate void FingerTapHandle(int n, int k, int x, int y);
-        public event FingerTapHandle OnFingerTap;
+        public event FingerTapHandle OnTouchGesture;
 
         public uint Hook()
         {
