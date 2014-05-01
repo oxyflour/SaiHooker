@@ -147,11 +147,6 @@ namespace SaiHooker
             return LockTouch(l);
         }
 
-        public int SetPanningKey(int k)
-        {
-            return SetPanningVk(k);
-        }
-
         public void SimulateKey(int vkCode, bool keyDown)
         {
             SimulateKeyEvent(vkCode, keyDown);
@@ -180,9 +175,6 @@ namespace SaiHooker
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern int LockTouch(int l);
-
-        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int SetPanningVk(int l);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern int GetmgVectorStr(StringBuilder szBuf, int size);

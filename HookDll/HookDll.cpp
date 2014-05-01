@@ -79,12 +79,6 @@ HOOKDLL_API int _stdcall LockTouch(int lock) {
 	return gSettings.lockTouch;
 }
 
-HOOKDLL_API int _stdcall SetPanningVk(int vk) {
-	if (vk >= 0)
-		gSettings.panVkCode = vk;
-	return gSettings.panVkCode;
-}
-
 HOOKDLL_API int _stdcall GetmgVectorStr(TCHAR* szBuf, int size) {
 	return StringCbCopy(szBuf, size, gStatus.mgVectorStr);
 }

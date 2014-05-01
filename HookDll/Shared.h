@@ -52,7 +52,6 @@ struct SETTINGS {
 
 	DWORD painterLeaveTimeout;
 
-	DWORD panVkCode;
 	DWORD vkTimeout;
 	DWORD fingerTapInteval;
 
