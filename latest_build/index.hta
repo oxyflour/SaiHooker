@@ -5,11 +5,6 @@
 	<meta charset="utf-8" />
 	<title>SAI HOOKER TEST</title>
 	<script src="jquery-1.8.0.min.js"></script>
-	<style>
-		body { margin: 0; padding: 0; }
-		.hidden { display: none; }
-		.big { font-size: 120%; }
-	</style>
 	<!-- HTA tag does not work in IE Edge -->
 	<HTA:Application
 		id="Sai_Hooker_33895"
@@ -27,7 +22,7 @@
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
     <form>
-        <h5>Toggles</h5>
+        <h4>Toggles</h4>
         <p><label><input class="auto-load" type="checkbox"
                 initvalue="hooker.DisableTouch(-1)"
                 onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
@@ -242,7 +237,7 @@
 				(errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
 		}
 
-		window.resizeTo(300, 320);
+		window.resizeTo(240, 300);
 		window.ontimer();
 		setInterval(window.ontimer, 2000)
 	</script>
