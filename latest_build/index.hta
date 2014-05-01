@@ -22,7 +22,7 @@
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
     <form>
-        <h4>Toggles</h4>
+        <h3>SaiHooker Toggles</h3>
         <p><label><input class="auto-load" type="checkbox"
                 initvalue="hooker.DisableTouch(-1)"
                 onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
@@ -99,6 +99,8 @@
             wscript.SendKeys(wParam ? '{PGDN}' : '{PGUP}');
         else if (msg == 22)
             wscript.SendKeys(wParam ? '{DEL}' : '{END}');
+        else
+            logText('unknown event: ' + msg + ' (' + wParam + ', ' + lParam + ')');
         return false; // IE10 will not be sactisfied if you do nothing
     </script>
     <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
@@ -233,8 +235,7 @@
 		}
 		window.ontimer = function () {
 			var errno = hooker.Hook();
-			document.title = 'Sai Hooker: ' +
-				(errno ? 'Hook Failed (' + errno + ')' : 'Hook ok');
+			document.title = errno ? 'Hook Failed (' + errno + ')' : 'Hook ok';
 		}
 
 		window.resizeTo(240, 300);
