@@ -8,7 +8,6 @@
 
 typedef BOOL (WINAPI *pSetWindowFeedbackSetting)(HWND hwnd, FEEDBACK_TYPE feedback, DWORD dwFlags, UINT32 size, const VOID *configuration);
 
-static std::vector<POINT> g_MSVectors;
 void InitTouchWindow(HWND hwnd) {
 	BOOL val = FALSE;
 	SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
@@ -26,6 +25,10 @@ void InitTouchWindow(HWND hwnd) {
 	// Do not register touch window if you want WM_GESTURE
 	RegisterTouchWindow(hwnd, TWF_FINETOUCH | TWF_WANTPALM);
 	//RegisterPointerDeviceNotifications(GetSaiWindow(), TRUE);
+}
+void ResetTouchWindow(HWND hwnd) {
+	RemoveProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY);
+	UnregisterTouchWindow(hwnd);
 }
 void CheckFingerTap(DWORD tick, WORD x, WORD y) {
 	// check tap
@@ -50,6 +53,7 @@ void CheckEventTrigger(EVENT_TRIGGER *pe, double val) {
 		PostNotify(WM_USER_DEBUG + pe->msg, delta > 0 ? 0 : 1, pe->index);
 }
 
+static std::vector<POINT> g_MSVectors;
 void MsVectorReset() {
 	g_MSVectors.clear();
 }
@@ -208,6 +212,9 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		// Init
 		if (!IsTouchWindow(msg->hwnd, 0))
 			InitTouchWindow(msg->hwnd);
+		// update key state
+		if ((msg->message == WM_KEYDOWN || msg->message == WM_KEYUP) && msg->wParam == gSettings.dragKey.vk)
+			gSettings.dragKey.pressed = msg->message == WM_KEYDOWN;
 		// setup touch lock timeout
 		if (msg->message == WM_PEN_HOVER_UNKNOWN || msg->message == WT_PACKET)
 			gStatus.penHoverTick = tick;
@@ -229,7 +236,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled && gStatus.tgState == 1)
 				; // pass
 			else if ((!bEnableTouch ||
-					IsPainterWindow(msg->hwnd)) &&
+				IsPainterWindow(msg->hwnd)) &&
 				(GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH)
 				msg->message += WM_USER;
 		}
@@ -371,10 +378,8 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 
 		// Clean up
-		if (cs->message == WM_USER_QUIT) {
-			RemoveProp(cs->hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY);
-			UnregisterTouchWindow(cs->hwnd);
-		}
+		if (cs->message == WM_USER_QUIT)
+			ResetTouchWindow(cs->hwnd);
 	}
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
