@@ -63,45 +63,39 @@ struct SETTINGS {
 	double mgDistanceIn;
 	double mgRadiusIn;
 
-	SHORTCUT_KEY mgDrag;
-	EVENT_TRIGGER mgStepX;
-	EVENT_TRIGGER mgStepY;
-	EVENT_TRIGGER tgZoom;
-	EVENT_TRIGGER tgRotate;
+	SHORTCUT_KEY dragKey;
+	EVENT_TRIGGER evtOffsetX;
+	EVENT_TRIGGER evtOffsetY;
+	EVENT_TRIGGER evtZoom;
+	EVENT_TRIGGER evtRotate;
 };
 
 struct STATUS {
 	// SAI thread id
-	DWORD threadId;
+	DWORD targetThread;
 	// Hooker thread id
 	DWORD notifyThread;
-
-	BOOL bEnableTouch;
 
 	// pen hover time & position
 	DWORD penHoverTick;
 	POINT penHoverPos;
 
-	DWORD touchGestureId;
-	DWORD fingerCount;
-	HWND fingerAtWindow;
-	int fingerScale;
-	int fingerRotate;
-	DWORD fingerDownTick[MAX_STATUS_FINGERS];
-	DWORD fingerUpTick[MAX_STATUS_FINGERS];
+	// touch gesture status
+	DWORD tgState;
+	DWORD tgFingers;
+	HWND tgWindow;
+	int tgScale;
+	int tgRotate;
+	DWORD tgDownTicks[MAX_STATUS_FINGERS];
+	DWORD tgUpTicks[MAX_STATUS_FINGERS];
 
+	// mouse gesture status
 	BOOL isLeftDown;
 	BOOL isRightDown;
-	DWORD vkDownTick;
-	DWORD vkStateId;
-	POINT vkDownPos;
-	POINT vkStrokePos;
-
-	DWORD painterLeaveTick;
-
-	DWORD panVkState;
-
-	TCHAR vectorStr[MAX_VECTOR_LENGTH];
+	DWORD mgTick;
+	DWORD mgState;
+	POINT mgBeginPos;
+	TCHAR mgVectorStr[MAX_VECTOR_LENGTH];
 };
 
 extern SETTINGS gSettings;

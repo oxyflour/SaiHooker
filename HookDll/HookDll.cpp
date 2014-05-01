@@ -44,14 +44,14 @@ HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 	DWORD dwProcess = 0, dwThread = 0;
 	if (hWnd != NULL)
 		dwThread = GetWindowThreadProcessId(hWnd, &dwProcess);
-	if (gStatus.threadId != dwThread)
+	if (gStatus.targetThread != dwThread)
 		UnsetSaiHook();
-	if (gStatus.threadId != dwThread) {
+	if (gStatus.targetThread != dwThread) {
 		if (dwThread != 0) {
 			gMsgHook = SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, hInst, dwThread);
 			gProcHook = SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndRetProc, hInst, dwThread);
 		}
-		gStatus.threadId = dwThread;
+		gStatus.targetThread = dwThread;
 		gStatus.notifyThread = GetCurrentThreadId();
 	}
 	if (dwThread == 0)
@@ -65,9 +65,9 @@ HOOKDLL_API void _stdcall UnsetSaiHook() {
 		UnhookWindowsHookEx(gMsgHook);
 	if (gProcHook != NULL)
 		UnhookWindowsHookEx(gProcHook);
-	if (gStatus.threadId != 0)
-		EnumThreadWindows(gStatus.threadId, SendQuitMsgProc, NULL);
-	gStatus.threadId = 0;
+	if (gStatus.targetThread != 0)
+		EnumThreadWindows(gStatus.targetThread, SendQuitMsgProc, NULL);
+	gStatus.targetThread = 0;
 	gMsgHook = gProcHook = NULL;
 }
 
@@ -85,8 +85,8 @@ HOOKDLL_API int _stdcall SetPanningVk(int vk) {
 	return gSettings.panVkCode;
 }
 
-HOOKDLL_API int _stdcall GetVectorStr(TCHAR* szBuf, int size) {
-	return StringCbCopy(szBuf, size, gStatus.vectorStr);
+HOOKDLL_API int _stdcall GetmgVectorStr(TCHAR* szBuf, int size) {
+	return StringCbCopy(szBuf, size, gStatus.mgVectorStr);
 }
 
 HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
@@ -98,7 +98,7 @@ HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
 }
 
 HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt) {
-	SHORTCUT_KEY *pk = &gSettings.mgDrag;
+	SHORTCUT_KEY *pk = &gSettings.dragKey;
 	if (pk->enabled)
 		return;
 	pk->enabled = TRUE;
@@ -116,20 +116,20 @@ HOOKDLL_API void _stdcall RegisterEventNotify(int msg, TCHAR *evt, TCHAR *steps)
 	EVENT_TRIGGER *pe = NULL;
 	double val = 0;
 	if (!_tcscmp(evt, TEXT("ms-x"))) {
-		pe = &gSettings.mgStepX;
+		pe = &gSettings.evtOffsetX;
 		val = gStatus.penHoverPos.x;
 	}
 	else if (!_tcscmp(evt, TEXT("ms-y"))) {
-		pe = &gSettings.mgStepY;
+		pe = &gSettings.evtOffsetY;
 		val = gStatus.penHoverPos.y;
 	}
 	else if (!_tcscmp(evt, TEXT("th-z"))) {
-		pe = &gSettings.tgZoom;
-		val = gStatus.fingerScale;
+		pe = &gSettings.evtZoom;
+		val = gStatus.tgScale;
 	}
 	else if (!_tcscmp(evt, TEXT("th-r"))) {
-		pe = &gSettings.tgRotate;
-		val = gStatus.fingerRotate;
+		pe = &gSettings.evtRotate;
+		val = gStatus.tgRotate;
 	}
 	if (pe) {
 		pe->msg = msg;

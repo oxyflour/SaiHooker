@@ -78,7 +78,7 @@ namespace SaiHooker
                 if (msg->message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
-                    GetVectorStr(sz, sz.Capacity);
+                    GetmgVectorStr(sz, sz.Capacity);
                     int x = (int)msg->lParam % 0x10000, y = (int)msg->lParam / 0x10000;
                     s_this.OnMouseGesture(sz.ToString(), (int)msg->wParam, x, y);
                 }
@@ -185,7 +185,7 @@ namespace SaiHooker
         private static extern int SetPanningVk(int l);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int GetVectorStr(StringBuilder szBuf, int size);
+        private static extern int GetmgVectorStr(StringBuilder szBuf, int size);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateKeyEvent(int vkCode, bool keyDown);
