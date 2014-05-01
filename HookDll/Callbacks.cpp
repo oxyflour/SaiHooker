@@ -54,24 +54,24 @@ void MsVectorReset() {
 	g_MSVectors.clear();
 }
 void MsVectorReduce(int n) {
-	std::vector<POINT> ls = g_MSVectors;
-	int s = ls.size();
+	std::vector<POINT> *ls = &g_MSVectors;
+	int s = ls->size();
 	if (s < n) return;
 
-	POINT pb = ls[s - n], pe = ls.back();
+	POINT pb = (*ls)[s - n], pe = ls->back();
 	double x = (pb.x + pe.x) * .5, y = (pb.y + pe.y) * .5,
 		dx = pb.x - pe.x, dy = pb.y - pe.y, l = SQRT_SUM(dx, dy) + 1e-6;
 	BOOL find = FALSE;
 	for (int i = s - n; i < s && !find; i ++) {
-		POINT pc = ls[i];
+		POINT pc = (*ls)[i];
 		double d = fabs(dy * (pc.x - pb.x) - dx * (pc.y - pb.y)) / l,
 			r = SQRT_SUM(pb.x - x, pb.y - y);
 		find = (d > l * gSettings.mgDistanceIn || r > l * gSettings.mgRadiusIn);
 	}
 	if (!find) {
-		ls.erase(ls.end() - n, ls.end());
-		ls.push_back(pb);
-		ls.push_back(pe);
+		ls->erase(ls->end() - n, ls->end());
+		ls->push_back(pb);
+		ls->push_back(pe);
 	}
 }
 void MsVectorAdd(POINT pt) {
@@ -82,9 +82,9 @@ void MsVectorToString() {
 	for (int n = gSettings.mgPointCount - 1; n >= 3; n --)
 		MsVectorReduce(n);
 	int j = 0;
-	std::vector<POINT> ls = g_MSVectors;
+	std::vector<POINT> *ls = &g_MSVectors;
 	TCHAR *st = gStatus.mgVectorStr;
-	for (std::vector<POINT>::iterator i = ls.begin(); i < ls.end() - 1 && j < MAX_VECTOR_LENGTH; i ++) {
+	for (std::vector<POINT>::iterator i = ls->begin(); i < ls->end() - 1 && j < MAX_VECTOR_LENGTH; i ++) {
 		std::vector<POINT>::iterator b = i, e = i + 1;
 		double k = fabs((b->y - e->y) / (b->x - e->x + 1e-6));
 		TCHAR c = j > 0 ? st[j-1] : 0;
