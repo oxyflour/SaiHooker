@@ -99,10 +99,9 @@ HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
 
 HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt) {
 	SHORTCUT_KEY *pk = &gSettings.mgDrag;
-	if (pk->enabled || pk->pressed)
+	if (pk->enabled)
 		return;
 	pk->enabled = TRUE;
-	pk->pressed = FALSE;
 	pk->vk = (WORD)vk;
 	pk->ctrl = ctrl;
 	pk->shift = shift;
@@ -126,11 +125,11 @@ HOOKDLL_API void _stdcall RegisterEventNotify(int msg, TCHAR *evt, TCHAR *steps)
 	}
 	else if (!_tcscmp(evt, TEXT("th-z"))) {
 		pe = &gSettings.tgZoom;
-		val = 100;
+		val = gStatus.fingerScale;
 	}
 	else if (!_tcscmp(evt, TEXT("th-r"))) {
 		pe = &gSettings.tgRotate;
-		val = 0;
+		val = gStatus.fingerRotate;
 	}
 	if (pe) {
 		pe->msg = msg;

@@ -236,39 +236,50 @@
 		        }
 		    }
 		});
-		hooker.attachEvent("OnFingerTap", function (n, x, y) {
-			// one finger tap
-			if (n == 0) {
-				var tapTick = Date.now();
-				// double tap detection
-				if (tapTick - window.tapTick < 200) {
-                    // ALT + Click
-					hooker.SimulateKey(18, true);
-					hooker.SimulateMouse(x, y, true);
-					hooker.SimulateMouse(x, y, 0);
-					hooker.SimulateKey(18, 0);
-				}
-				window.tapTick = tapTick;
-			}
-			// two finger tap
-			else if (n == 1) {
-				var pop = $('#popup'),
-					id = wndutil.PopupMenu(pop.data('xml'), x, y),
-					item = pop.data('doc').find('[cid='+id+']');
-				wndutil.ActiveSaiWindow();
-				item.attr('key') && wscript.SendKeys(item.attr('key'));
-			}
-			// three finger tap
-			else if (n == 2) {
-				wscript.SendKeys('{F11}');
-			}
-			// four finger tap
-			else if (n == 3) {
-                // send WIN+D event
-				hooker.SimulateKey(0x5b, true);
-				wscript.SendKeys('d');
-				hooker.SimulateKey(0x5b, 0);
-			}
+		hooker.attachEvent("OnFingerTap", function (num, key, x, y) {
+		    if (key == 1) {
+		        if (num == 1) {
+		            hooker.SimulateDragWith(0x20, false, false, false);
+		        }
+		        else if (num == 2) {
+		            hooker.RegisterNotify(21, 'th-z', createSteps(10, 20, 5));
+		            hooker.RegisterNotify(22, 'th-r', createSteps(10, 20, 5));
+		        }
+		    }
+		    else {
+		        // one finger tap
+		        if (num == 0) {
+		            var tapTick = Date.now();
+		            // double tap detection
+		            if (tapTick - window.tapTick < 200) {
+		                // ALT + Click
+		                hooker.SimulateKey(18, true);
+		                hooker.SimulateMouse(x, y, true);
+		                hooker.SimulateMouse(x, y, 0);
+		                hooker.SimulateKey(18, 0);
+		            }
+		            window.tapTick = tapTick;
+		        }
+		            // two finger tap
+		        else if (num == 1) {
+		            var pop = $('#popup'),
+                        id = wndutil.PopupMenu(pop.data('xml'), x, y),
+                        item = pop.data('doc').find('[cid=' + id + ']');
+		            wndutil.ActiveSaiWindow();
+		            item.attr('key') && wscript.SendKeys(item.attr('key'));
+		        }
+		            // three finger tap
+		        else if (num == 2) {
+		            wscript.SendKeys('{F11}');
+		        }
+		            // four finger tap
+		        else if (num == 3) {
+		            // send WIN+D event
+		            hooker.SimulateKey(0x5b, true);
+		            wscript.SendKeys('d');
+		            hooker.SimulateKey(0x5b, 0);
+		        }
+		    }
 		});
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
@@ -293,10 +304,6 @@
 			var pop = $('#popup'), doc = $(pop.html());
 			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
 			pop.data('doc', doc).data('xml', doc[0].outerHTML);
-
-            // register touch gestures
-            hooker.RegisterNotify(21, 'th-z', createSteps(10, 20, 5));
-            hooker.RegisterNotify(22, 'th-r', createSteps(10, 20, 5));
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();

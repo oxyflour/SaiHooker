@@ -100,69 +100,34 @@ void MsVectorToEmpty() {
 	gStatus.vectorStr[0] = 0;
 }
 
-void TouchGestureKeep(long x, long y, long s, long r) {
-	if (gStatus.gestureId == GID_PAN) {
-		if (gStatus.panVkState != 0)
-			SimulateKey((WORD)gStatus.panVkState, 0);
+void TouchGestureKeep(DWORD n, long x, long y, long s, long r) {
+	gStatus.fingerScale = s;
+	gStatus.fingerRotate = r;
+	if (n == 1) {
+		if (!gStatus.touchGestureId && SQUA_SUM(x, y) > SQUA(10))
+			PostNotify(WM_USER_FINGERTAP, (gStatus.touchGestureId = n) + 0x10000, x + y * 0x10000);
 	}
-	else if (gStatus.gestureId == GID_ZOOM) {
-		CheckEventTrigger(&gSettings.tgZoom, s);
-		CheckEventTrigger(&gSettings.tgRotate, r);
-	}
-}
-void TouchGestureChange(DWORD newState, long x, long y, long s, long r) {
-	DWORD oldState = gStatus.gestureId;
-	if (oldState == newState)
-		return;
-
-	// close old state
-	if (oldState == GID_PAN) {
-		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
-		if (gStatus.panVkState != 0)
-			SimulateKey((WORD)gStatus.panVkState, KEYEVENTF_KEYUP);
-		gStatus.panVkState = 0;
-	}
-	else if (oldState == GID_ZOOM) {
-	}
-
-	gStatus.gestureId = newState;
-	// begin new
-	if (newState == GID_PAN) {
-		gStatus.panVkState = gSettings.panVkCode;
-		if (gStatus.panVkState != 0)
-			SimulateKey((WORD)gStatus.panVkState, 0);
-		SimulateMouse(0, 0, 0, MOUSEEVENTF_MOVE);
-		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
-	}
-	else if (newState == GID_ZOOM) {
-		while(ListIndex(&gSettings.tgZoom, s));
-		while(ListIndex(&gSettings.tgRotate, r));
-	}
-}
-void TouchGestureGiveup() {
-	TouchGestureChange(GID_BEGIN, 0, 0, 0, 0);
-}
-void TouchGestureHandle(DWORD tick, SHORT x, SHORT y, SHORT s, SHORT r) {
-		// two finger gesture (zoom, rotate)
-		if (gStatus.fingerCount == 2 &&
-			gStatus.gestureId != GID_ZOOM)
-			TouchGestureChange(GID_ZOOM, x, y, s, r);
-		if (gStatus.gestureId == GID_ZOOM &&
-			(gStatus.fingerCount != 2 || SQUA_SUM(x, y) > (LONG)SQUA(DISTANCE_ZOOM_CANCEL)))
-			TouchGestureGiveup();
-
-		// one finger gesture (pan)
-		if (gStatus.fingerCount == 1 &&
-			gStatus.gestureId != GID_PAN &&
-			SQUA_SUM(x, y) > (LONG)SQUA(DISTANCE_PAN_TRIGGER) && 
-			IsPainterWindow(gStatus.fingerAtWindow)) {
-			TouchGestureChange(GID_PAN, x, y, s, r);
+	else if (n == 2) {
+		if (!gStatus.touchGestureId && (s < 100-5 || s > 100+5 || r < -5 || r > 5))
+			PostNotify(WM_USER_FINGERTAP, (gStatus.touchGestureId = n) + 0x10000, x + y * 0x10000);
+		if (gStatus.touchGestureId == n) {
+			CheckEventTrigger(&gSettings.tgZoom, s);
+			CheckEventTrigger(&gSettings.tgRotate, r);
 		}
-		if (gStatus.fingerCount != 1 && gStatus.gestureId == GID_PAN)
-			TouchGestureGiveup();
-
-		// exec
-		TouchGestureKeep(x, y, s, r);
+	}
+}
+void TouchGestureEnd(DWORD tick, SHORT x, SHORT y) {
+	if (gStatus.bEnableTouch && !gStatus.touchGestureId)
+		CheckFingerTap(tick, x, y);
+	if (gSettings.mgDrag.enabled) {
+		SHORTCUT_KEY *pk = &gSettings.mgDrag;
+		pk->enabled = FALSE;
+		SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTUP);
+		SimulateShortcut(pk, FALSE);
+	}
+	gSettings.tgZoom.msg = 0;
+	gSettings.tgRotate.msg = 0;
+	gStatus.touchGestureId = 0;
 }
 
 void MouseGestureBegin(DWORD tick) {
@@ -260,10 +225,9 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			msg->message == WM_LBUTTONDBLCLK || msg->message == WM_RBUTTONDBLCLK ||
 			msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_VSCROLL || msg->message == WM_HSCROLL) {
-			if (msg->message == WM_MOUSEMOVE && gStatus.gestureId == GID_PAN)
+			if (msg->message == WM_MOUSEMOVE && gSettings.mgDrag.enabled)
 				; // pass
 			else if ((!gStatus.bEnableTouch ||
-					gStatus.gestureId != GID_BEGIN ||
 					IsPainterWindow(msg->hwnd)) &&
 				(GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH)
 				msg->message += WM_USER;
@@ -297,9 +261,6 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			MouseGestureBegin(tick);
 		if (gStatus.vkDownTick) {
 			MouseGestureKeep(msg->message);
-			// update key state
-			if ((msg->message == WM_KEYDOWN || msg->message == WM_KEYUP) && msg->wParam == gSettings.mgDrag.vk)
-				gSettings.mgDrag.pressed = msg->message == WM_KEYDOWN;
 			// block unwanted events
 			if (msg->message == WM_MOUSEMOVE && gSettings.mgDrag.enabled)
 				; // pass
@@ -319,29 +280,19 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		/*
 		 * Process touch gestures
 		 */
-		static DWORD lockTouch = tick;
 		DWORD n = gStatus.fingerCount;
 		if (msg->message == WM_GESTURE_PROC) {
 			SHORT x = LOWORD(msg->lParam) - 0x8000, y = HIWORD(msg->lParam) - 0x8000,
 				s = LOWORD(msg->wParam) - 0x8000, r = HIWORD(msg->wParam) - 0x8000;
-			if (n >= 3)
-				lockTouch = tick + TIMEOUT_GESTURE_ENABLE_AFTER_PALM;
-			if (gStatus.bEnableTouch && tick > lockTouch)
-				TouchGestureHandle(tick, x, y, s, r);
-			else
-				TouchGestureGiveup();
+			TouchGestureKeep(n, x, y, s, r);
 		}
 		if (msg->message == WM_GESTURE_DOWN) {
 			if (n > 0 && n <= MAX_STATUS_FINGERS)
 				gStatus.fingerDownTick[n - 1] = tick;
 		}
 		else if (msg->message == WM_GESTURE_UP) {
-			if (n == 0) {
-				// give up all gesture beacuse there are no fingers touching now
-				TouchGestureGiveup();
-				if (gStatus.bEnableTouch)
-					CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
-			}
+			if (n == 0)
+				TouchGestureEnd(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
 			if (n >= 0 && n < MAX_STATUS_FINGERS)
 				gStatus.fingerUpTick[n] = tick;
 		}

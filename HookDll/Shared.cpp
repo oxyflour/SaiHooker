@@ -22,8 +22,6 @@ SETTINGS gSettings = {
 	{0},
 	{0, 0, 0},
 	{0, 0, 0},
-
-	{0},
 	{0, 0, 0},
 	{0, 0, 0},
 };
@@ -40,6 +38,8 @@ STATUS gStatus = {
 	GID_BEGIN,
 	0,
 	NULL,
+	0,
+	0,
 	{0},
 	{0},
 
@@ -79,6 +79,14 @@ BOOL IsPainterWindow(HWND hWnd) {
 
 void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down) {
 	if (down) {
+		if (pk->ctrl)
+			SimulateKey(VK_CONTROL, 0);
+		if (pk->shift)
+			SimulateKey(VK_SHIFT, 0);
+		if (pk->alt)
+			SimulateKey(VK_MENU, 0);
+		if (pk->vk)
+			SimulateKey(pk->vk, 0);
 	}
 	else {
 		if (pk->vk)

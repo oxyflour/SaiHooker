@@ -66,8 +66,6 @@ struct SETTINGS {
 	SHORTCUT_KEY mgDrag;
 	EVENT_TRIGGER mgStepX;
 	EVENT_TRIGGER mgStepY;
-
-	SHORTCUT_KEY tgPan;
 	EVENT_TRIGGER tgZoom;
 	EVENT_TRIGGER tgRotate;
 };
@@ -84,10 +82,11 @@ struct STATUS {
 	DWORD penHoverTick;
 	POINT penHoverPos;
 
-	// gesture id (GID_XXX) and how many fingers is on
-	DWORD gestureId;
+	DWORD touchGestureId;
 	DWORD fingerCount;
 	HWND fingerAtWindow;
+	int fingerScale;
+	int fingerRotate;
 	DWORD fingerDownTick[MAX_STATUS_FINGERS];
 	DWORD fingerUpTick[MAX_STATUS_FINGERS];
 
