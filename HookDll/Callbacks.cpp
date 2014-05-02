@@ -354,26 +354,6 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		// A Dirty Fix for pen focus issue
-		// When leaving painter window, send an extra mouse move event
-		static DWORD painterLeaveTick = 0;
-		if (cs->message == WM_MOUSELEAVE &&
-			IsPainterWindow(cs->hwnd)) {
-			if (tick - painterLeaveTick > TIMEOUT_PAINTER_LEAVE_INTERVAL) {
-				SimulateMouse(0, 0, 0, MOUSEEVENTF_MOVE);
-				PostMessage(cs->hwnd, 0x0ff2, 0, 0);
-			}
-			painterLeaveTick = tick;
-		}
-		// Once cursor enter again, simulate a "ctrl" key
-		if (cs->message == WM_SETCURSOR &&
-			painterLeaveTick > 0 && tick - painterLeaveTick > TIMEOUT_PAINTER_LEAVE_INTERVAL &&
-			IsPainterWindow(cs->hwnd)) {
-			SimulateKey(VK_CONTROL, 0);
-			SimulateKey(VK_CONTROL, KEYEVENTF_KEYUP);
-			painterLeaveTick = 0;
-		}
-
 		// Clean up
 		if (cs->message == WM_USER_QUIT)
 			ResetTouchWindow(cs->hwnd);
