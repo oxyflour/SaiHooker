@@ -2,6 +2,7 @@
 #include "Callbacks.h"
 #include "Shared.h"
 #include "cmanipulationeventsink.h"
+#include <windowsx.h>
 #include <manipulations.h>
 #include <tpcshrd.h>
 #include <manipulations_i.c>
@@ -145,22 +146,24 @@ void MouseGestureBegin(DWORD tick) {
 	gStatus.mgBeginPos = gStatus.penHoverPos;
 	MsVectorReset();
 }
-void MouseGestureKeep(UINT message) {
+void MouseGestureKeep(UINT message, LPARAM lParam, HWND hWnd) {
 	if (message == WM_MOUSEMOVE) {
 		static POINT strokePt;
+		POINT newPt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 		MsVectorAdd(gStatus.penHoverPos);
 		if (gStatus.mgState == 0) {
 			if (SQUA_SUM(gStatus.mgBeginPos.x - gStatus.penHoverPos.x, gStatus.mgBeginPos.y - gStatus.penHoverPos.y) >
 				SQUA(DISTANCE_MOUSE_GESTURE_BEGIN)) {
 				strokePt = gStatus.mgBeginPos;
+				ScreenToClient(hWnd, &strokePt);
 				gStatus.mgState = WM_MOUSEMOVE;
 			}
 		}
 		else if (gStatus.mgState == WM_MOUSEMOVE) {
-			HDC hdc = GetDC(NULL);
-			StrokeLine(hdc, strokePt, gStatus.penHoverPos);
-			strokePt = gStatus.penHoverPos;
-			ReleaseDC(NULL, hdc);
+			HDC hdc = GetDC(hWnd);
+			StrokeLine(hdc, strokePt, newPt);
+			strokePt = newPt;
+			ReleaseDC(hWnd, hdc);
 		}
 		else if (gStatus.mgState == WM_LBUTTONDOWN) {
 			CheckEventTrigger(&gSettings.evtOffsetX, gStatus.penHoverPos.x);
@@ -272,7 +275,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (gStatus.isRightDown && !gStatus.mgTick)
 			MouseGestureBegin(tick);
 		if (gStatus.mgTick) {
-			MouseGestureKeep(msg->message);
+			MouseGestureKeep(msg->message, msg->lParam, msg->hwnd);
 			// block unwanted events
 			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled)
 				; // pass
