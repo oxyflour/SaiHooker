@@ -101,8 +101,9 @@ HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, boo
 	pk->shift = shift;
 	pk->alt = alt;
 	SimulateShortcut(pk, TRUE);
-	// an additional MOUSEEVENTF_RIGHTUP is required
-	SimulateMouse(0, 0, 0, MOUSEEVENTF_RIGHTUP);
+	// an additional MOUSEEVENTF_RIGHTUP is required for mouse gesture
+	if (gStatus.isRightDown)
+		SimulateMouse(0, 0, 0, MOUSEEVENTF_RIGHTUP);
 	SimulateMouse(0, 0, 0, MOUSEEVENTF_LEFTDOWN);
 }
 
