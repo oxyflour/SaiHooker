@@ -24,6 +24,7 @@ namespace SaiHooker
         public const string DLL_NAME = "HookDll.dll";
 
         const int WH_GETMESSAGE = 3;
+        const int WH_CALLWNDPROC = 4;
         const int WH_CALLWNDPROCRET = 12;
         const int HC_ACTION = 0;
 
@@ -31,6 +32,10 @@ namespace SaiHooker
         const uint WM_APP = 0x8000;
         const uint WM_USER = 0x0400;
         const uint WM_COMMAND = 0x0111;
+
+        const uint WM_ACTIVATE = 0x0006;
+        const uint WM_ACTIVATEAPP = 0x001C;
+        const uint WM_NCACTIVATE = 0x0086;
 
         const uint WM_USER_DEBUG = WM_USER + WM_APP;
         const uint WM_USER_GESTURE = WM_USER + WM_COMMAND + 1;
@@ -52,6 +57,15 @@ namespace SaiHooker
             public IntPtr lParam;
             public uint time;
             public POINT pt;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CWPSTRUCT
+        {
+            public IntPtr lParam;
+            public UIntPtr wParam;
+            public uint message;
+            public IntPtr hwnd;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -88,15 +102,25 @@ namespace SaiHooker
                     int n = (int)msg.wParam % 0x10000, k = (int)msg.wParam / 0x10000;
                     s_this.OnTouchGesture(n, k, x, y);
                 }
-                // active window if titlebar is clicked
+                // active the window
                 if (msg.message == WM_NCLBUTTONDOWN)
                 {
                     WndUtil.SetForegroundWindow(msg.hwnd);
                 }
             }
-            return CallNextHookEx(s_this.m_hHook, nCode, wParam, lParam);
+            return CallNextHookEx(s_this.m_hkMsg, nCode, wParam, lParam);
         }
-        private static HookProc hookProc = new HookProc(GetMsgProc);
+        private static HookProc s_pMsg = new HookProc(GetMsgProc);
+
+        public static unsafe int WndProc(int nCode, UIntPtr wParam, IntPtr lParam)
+        {
+            if (nCode == HC_ACTION)
+            {
+                CWPSTRUCT cs = (CWPSTRUCT)Marshal.PtrToStructure(lParam, typeof(CWPSTRUCT));
+            }
+            return CallNextHookEx(s_this.m_hkProc, nCode, wParam, lParam);
+        }
+        private static HookProc s_pProc = new HookProc(WndProc);
 
         public Hooker()
         {
@@ -104,22 +128,27 @@ namespace SaiHooker
             {
                 uint tid = GetCurrentThreadId();
                 if ((uint)tid > 0)
-                    m_hHook = SetWindowsHookEx(WH_GETMESSAGE, hookProc, IntPtr.Zero, tid);
+                {
+                    m_hkMsg = SetWindowsHookEx(WH_GETMESSAGE, s_pMsg, IntPtr.Zero, tid);
+                    m_hkProc = SetWindowsHookEx(WH_CALLWNDPROC, s_pProc, IntPtr.Zero, tid);
+                }
                 s_this = this;
             }
         }
 
         ~Hooker()
         {
-            if (m_hHook != IntPtr.Zero)
+            if (m_hkMsg != IntPtr.Zero || m_hkProc != IntPtr.Zero)
             {
-                UnhookWindowsHookEx(m_hHook);
+                UnhookWindowsHookEx(m_hkMsg);
+                UnhookWindowsHookEx(m_hkProc);
                 s_this = null;
             }
         }
 
         IntPtr m_hInst = IntPtr.Zero;
-        IntPtr m_hHook = IntPtr.Zero;
+        IntPtr m_hkMsg = IntPtr.Zero;
+        IntPtr m_hkProc = IntPtr.Zero;
 
         public delegate void HookEventHandle(int msg, int wParam, int lParam);
         public event HookEventHandle OnHookEvent;
