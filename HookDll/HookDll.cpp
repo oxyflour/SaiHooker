@@ -28,25 +28,33 @@ static HHOOK gMsgHook = NULL;
 static HHOOK gProcHook = NULL;
 
 HOOKDLL_API HWND _stdcall GetSaiWindow() {
-	HWND hWnd = NULL;
-	while (hWnd = FindWindowEx(NULL, hWnd, SAI_WINDOW_CLASS, NULL)) {
-		if (GetWindowTextLength(hWnd) > 0 &&
-			FindWindowEx(hWnd, NULL, SAI_MENUBAR_CLASS, NULL) != NULL) {
-			break;
-		}
-	}
-	return hWnd;
+	if (!IsWindow(gSaiWnds.main))
+		GetSaiWindowAll(&gSaiWnds);
+	return IsWindow(gSaiWnds.main) ? gSaiWnds.main : NULL;
+}
 
+HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key) {
+	TCHAR sz[64] = {0};
+	if (!_tcscmp(key, TEXT("zoom"))) {
+		GetWindowText(gSaiWnds.zoom, sz, sizeof(sz)/sizeof(TCHAR));
+		return _ttoi(sz);
+	}
+	else if (!_tcscmp(key, TEXT("rotate"))) {
+		GetWindowText(gSaiWnds.rotate, sz, sizeof(sz)/sizeof(TCHAR));
+		return _ttoi(sz);
+	}
+	return ~0;
 }
 
 HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
-	HWND hWnd = GetSaiWindow();
-	DWORD dwProcess = 0, dwThread = 0;
-	if (hWnd != NULL)
-		dwThread = GetWindowThreadProcessId(hWnd, &dwProcess);
-	if (gStatus.targetThread != dwThread)
-		UnsetSaiHook();
+	DWORD dwThread = 0;
+	if (GetSaiWindow() != NULL) {
+		dwThread = GetWindowThreadProcessId(gSaiWnds.main, NULL);
+		if (CheckSaiWindowList(&gSaiWnds) >= 0)
+			GetSaiWindowAll(&gSaiWnds);
+	}
 	if (gStatus.targetThread != dwThread) {
+		UnsetSaiHook();
 		if (dwThread != 0) {
 			gMsgHook = SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, hInst, dwThread);
 			gProcHook = SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndRetProc, hInst, dwThread);
@@ -69,8 +77,8 @@ HOOKDLL_API void _stdcall UnsetSaiHook() {
 	if (gProcHook != NULL)
 		UnhookWindowsHookEx(gProcHook);
 //	AttachThreadInput(gStatus.notifyThread, gStatus.targetThread, TRUE);
-	gStatus.targetThread = 0;
 	gMsgHook = gProcHook = NULL;
+	gStatus.targetThread = 0;
 }
 
 HOOKDLL_API int _stdcall LockTouch(int lock) {

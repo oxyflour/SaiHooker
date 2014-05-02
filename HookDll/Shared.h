@@ -34,7 +34,12 @@
 #define SQUA_SUM(x, y) (SQUA(x)+ SQUA(y))
 #define SQRT_SUM(x, y) (sqrt((double)SQUA_SUM(x, y)));
 
-#define PostNotify(msg, wp, lp) PostThreadMessage(gStatus.notifyThread, (msg), (wp), (lp));
+#define PostNotify(msg, wp, lp) PostThreadMessage(gStatus.notifyThread, (msg), (WPARAM)(wp), (LPARAM)(lp));
+
+struct WINDOW_LIST {
+	DWORD size;
+	HWND list[64];
+};
 
 struct SHORTCUT_KEY {
 	BOOL enabled;
@@ -89,12 +94,37 @@ struct STATUS {
 	TCHAR mgVectorStr[MAX_VECTOR_LENGTH];
 };
 
+struct SAI_WINDOWS {
+	HWND main;
+	HWND menu;
+
+	HWND top;
+	HWND zoom;
+	HWND rotate;
+
+	HWND nav;
+
+	HWND layers;
+
+	HWND color;
+
+	HWND tools;
+
+	HWND paint;
+	HWND canvas;
+};
+
 extern SETTINGS gSettings;
 
 extern STATUS gStatus;
 
+extern SAI_WINDOWS gSaiWnds;
+
 int ListIndex(EVENT_TRIGGER *pl, double val);
-BOOL IsPainterWindow(HWND hWnd);
+
 void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);
+
+int CheckSaiWindowList(SAI_WINDOWS *psw);
+void GetSaiWindowAll(SAI_WINDOWS *psw);

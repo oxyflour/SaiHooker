@@ -27,6 +27,8 @@ extern "C" {
 
 	HOOKDLL_API HWND _stdcall GetSaiWindow();
 
+	HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key);
+
 	HOOKDLL_API HWND _stdcall SetNotifyWindow(HWND hWnd);
 
 	HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst);
@@ -34,8 +36,6 @@ extern "C" {
 	HOOKDLL_API void _stdcall UnsetSaiHook();
 
 	HOOKDLL_API int _stdcall LockTouch(int lock);
-
-	HOOKDLL_API int _stdcall SetPanningVk(int vk);
 
 	HOOKDLL_API int _stdcall GetmgVectorStr(TCHAR* szBuf, int size);
 

@@ -45,6 +45,7 @@
         <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
         <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
         <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
+        <small><span class="zoom-value"></span>%,  <span class="rotate-value"></span>deg</small>
     </form>
 	<div id="log"></div>
 	<script src="jquery-1.8.0.min.js"></script>
@@ -118,7 +119,13 @@
             wscript.SendKeys(wParam ? '{DEL}' : '{END}');
         else
             logText('unknown event: ' + msg + ' (' + wParam + ', ' + lParam + ')');
-        return false; // IE10 will not be sactisfied if you do nothing
+
+        if (msg == 1 || msg == 22) setTimeout(function() {
+            $('.rotate-value').text(wndutil.GetStatus('rotate'));
+        }, 200);
+        else if (msg == 2 || msg == 21) setTimeout(function() {
+            $('.zoom-value').text(wndutil.GetStatus('zoom'));
+        }, 200);
     </script>
     <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
         // left mouse button is down
@@ -156,18 +163,21 @@
                 wscript.SendKeys('^z');
             }
         }
-        return false;
     </script>
     <script for="hooker" event="OnTouchGesture(num, key, x, y)">
+        // fingers are beging to move
         if (key == 1) {
+            // pan with one finger
             if (num == 1) {
                 hooker.SimulateDragWith(0x20, false, false, false);
             }
+            // zoom/rotate with two fingers
             else if (num == 2) {
-                hooker.RegisterNotify(21, 'th-z', createSteps(10, 20, 5));
-                hooker.RegisterNotify(22, 'th-r', createSteps(10, 20, 5));
+                hooker.RegisterNotify(21, 'th-z', createSteps(10, 0, 5));
+                hooker.RegisterNotify(22, 'th-r', createSteps(10, 0, 5));
             }
         }
+        // tap
         else {
             // one finger tap
             if (num == 0) {
@@ -202,7 +212,6 @@
                 hooker.SimulateKey(0x5b, 0);
             }
         }
-        return false;
     </script>
 	<script>
 		function logText(t, c, a) {
@@ -218,7 +227,7 @@
 		}
 		function createSteps(d, n, b) {
 		    var ls = [], b = b || 0;
-		    for (var i = 0; i < (n || 10); i++) {
+		    for (var i = 0; i < (n || 20); i++) {
 		        b += d;
 		        ls.push(b);
 		        ls.push(-b);
@@ -232,7 +241,7 @@
 		}
 		function runSai() {
 		    var path = $('input[type=file]').val();
-	        path && wscript.Run(path);
+	        path ? wscript.Run(path) : browseSai();
 		}
 
 		window.hooker = document.getElementById('hooker');
@@ -252,6 +261,8 @@
 					p = c.filter('[value="'+(v ? eval(v) : '')+'"]');
 				(p[0] || c[0]).selected = true;
 			});
+            $('.rotate-value').text(wndutil.GetStatus('rotate'));
+            $('.zoom-value').text(wndutil.GetStatus('zoom'));
 
 			// prepare xml text for PopupMenu
 			var pop = $('#popup'), doc = $(pop.html());

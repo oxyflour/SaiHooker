@@ -189,7 +189,7 @@ void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	POINT pt = gStatus.penHoverPos;
 	int lppos = pt.x + pt.y * 0x10000;
 	if (gStatus.mgState == 0 && tick - gStatus.mgTick < TIMEOUT_MOUSE_GESTURE_CLICK_INTERVAL &&
-			IsPainterWindow(hwnd)) {
+		hwnd == gSaiWnds.canvas) {
 		MsVectorToEmpty();
 		PostNotify(WM_USER_GESTURE, 0, lppos);
 	}
@@ -241,7 +241,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled && gStatus.tgState == 1)
 				; // pass
 			else if ((!bEnableTouch ||
-				IsPainterWindow(msg->hwnd)) &&
+				msg->hwnd == gSaiWnds.canvas) &&
 				(GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH)
 				msg->message += WM_USER;
 		}
@@ -262,7 +262,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 			// block right mouse button
 			if ((msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
-					IsPainterWindow(msg->hwnd))
+					msg->hwnd == gSaiWnds.canvas)
 				msg->message += WM_USER;
 		}
 
@@ -366,8 +366,12 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
+BOOL CALLBACK SendQuitMsgChild(HWND hWnd, LPARAM lParam) {
+	SendMessage(hWnd, WM_USER_QUIT, WM_QUIT, 0);
+	return TRUE;
+}
 BOOL CALLBACK SendQuitMsgProc(HWND hWnd, LPARAM lParam) {
 	SendMessage(hWnd, WM_USER_QUIT, WM_QUIT, 0);
-	EnumChildWindows(hWnd, SendQuitMsgProc, NULL);
+	EnumChildWindows(hWnd, SendQuitMsgChild, NULL);
 	return TRUE;
 }
