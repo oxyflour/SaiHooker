@@ -61,12 +61,12 @@ HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 }
 
 HOOKDLL_API void _stdcall UnsetSaiHook() {
+	if (gStatus.targetThread != 0)
+		EnumThreadWindows(gStatus.targetThread, SendQuitMsgProc, NULL);
 	if (gMsgHook != NULL)
 		UnhookWindowsHookEx(gMsgHook);
 	if (gProcHook != NULL)
 		UnhookWindowsHookEx(gProcHook);
-	if (gStatus.targetThread != 0)
-		EnumThreadWindows(gStatus.targetThread, SendQuitMsgProc, NULL);
 	gStatus.targetThread = 0;
 	gMsgHook = gProcHook = NULL;
 }
