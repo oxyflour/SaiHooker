@@ -110,15 +110,20 @@ void TouchGestureKeep(DWORD n, long x, long y, long s, long r) {
 	gStatus.tgScale = s;
 	gStatus.tgRotate = r;
 	if (n == 1) {
-		if (!gStatus.tgState && SQUA_SUM(x, y) > SQUA(10))
+		if (gStatus.tgState == 0 && SQUA_SUM(x, y) > SQUA(DISTANCE_PAN_TRIGGER))
 			PostNotify(WM_USER_TOUCH, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
 	}
 	else if (n == 2) {
-		if (!gStatus.tgState && (s < 100-5 || s > 100+5 || r < -5 || r > 5))
+		if (gStatus.tgState == 0 && (s < 100-5 || s > 100+5 || r < -5 || r > 5))
 			PostNotify(WM_USER_TOUCH, (gStatus.tgState = n) + 0x10000, x + y * 0x10000);
 		if (gStatus.tgState == n) {
-			CheckEventTrigger(&gSettings.evtZoom, s);
-			CheckEventTrigger(&gSettings.evtRotate, r);
+			if (SQUA_SUM(x, y) > SQUA(DISTANCE_ZOOM_CANCEL)) {
+				gStatus.tgState = 3;
+			}
+			else {
+				CheckEventTrigger(&gSettings.evtZoom, s);
+				CheckEventTrigger(&gSettings.evtRotate, r);
+			}
 		}
 	}
 }
@@ -298,7 +303,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 		else if (msg->message == WM_GESTURE_UP) {
 			if (n == 0) {
-				if (bEnableTouch && !gStatus.tgState)
+				if (bEnableTouch && gStatus.tgState == 0)
 					CheckFingerTap(tick, LOWORD(msg->lParam), HIWORD(msg->lParam));
 				TouchGestureEnd();
 			}
