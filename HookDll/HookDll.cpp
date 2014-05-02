@@ -53,6 +53,7 @@ HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 		}
 		gStatus.targetThread = dwThread;
 		gStatus.notifyThread = GetCurrentThreadId();
+		AttachThreadInput(gStatus.notifyThread, gStatus.targetThread, TRUE);
 	}
 	if (dwThread == 0)
 		return 1444; // Invalid Thread Identifier
@@ -67,6 +68,7 @@ HOOKDLL_API void _stdcall UnsetSaiHook() {
 		UnhookWindowsHookEx(gMsgHook);
 	if (gProcHook != NULL)
 		UnhookWindowsHookEx(gProcHook);
+	AttachThreadInput(gStatus.notifyThread, gStatus.targetThread, TRUE);
 	gStatus.targetThread = 0;
 	gMsgHook = gProcHook = NULL;
 }

@@ -41,7 +41,7 @@ namespace SaiHooker
         {
             m_hWnd = FindWindowEx(IntPtr.Zero, IntPtr.Zero, "HTML Application Host Window Class", wndTitle);
 //            SetWindowLong(m_hWnd, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | GetWindowLong(m_hWnd, GWL_STYLE));
-            SetWindowLong(m_hWnd, GWL_EXSTYLE, WS_EX_NOACTIVATE | GetWindowLong(m_hWnd, GWL_EXSTYLE));
+//            SetWindowLong(m_hWnd, GWL_EXSTYLE, WS_EX_NOACTIVATE | GetWindowLong(m_hWnd, GWL_EXSTYLE));
             // can not set WS_EX_TOPMOST directly
             SetWindowPos(m_hWnd, (IntPtr)HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         }

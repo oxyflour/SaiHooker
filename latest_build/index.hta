@@ -26,9 +26,9 @@
         <p><label><input class="auto-load" type="checkbox"
                 initvalue="hooker.DisableTouch(-1)"
                 onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
-        <p><label><input type="checkbox" value="16" onclick="hooker.SimulateKey(this.value, this.checked)" />Shift</label></p>
-        <p><label><input type="checkbox" value="17" onclick="hooker.SimulateKey(this.value, this.checked)" />Ctrl</label></p>
-        <p><label><input type="checkbox" value="18" onclick="hooker.SimulateKey(this.value, this.checked)" />Alt</label></p>
+        <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
+        <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
+        <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
     </form>
 	<div id="log"></div>
 	<script id="popup" type="text/xml">
@@ -188,9 +188,13 @@
         return false;
     </script>
 	<script>
-		function sendKeys(k) {
+		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
-			wscript.SendKeys(k);
+			wscript.SendKeys(ks);
+		}
+		function simulateKey(vk, down) {
+			wndutil.ActiveSaiWindow();
+			hooker.SimulateKey(vk, down);
 		}
 		function logText(t, c, a) {
 			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
