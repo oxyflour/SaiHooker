@@ -3,8 +3,15 @@
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=IE10" />
 	<meta charset="utf-8" />
-	<title>SAI HOOKER TEST</title>
-	<script src="jquery-1.8.0.min.js"></script>
+	<title>SaiHooker</title>
+    <style>
+        input[type=file] {
+            width: 0;
+            height: 0;
+            position: absolute;
+            font-size: 150%;
+        }
+    </style>
 	<!-- HTA tag does not work in IE Edge -->
 	<HTA:Application
 		id="Sai_Hooker_33895"
@@ -21,7 +28,16 @@
 <body>
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-    <form>
+    <div class="show-error">
+        <h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
+        <span>
+            <input type="file" onchange="runSai()" />
+            <a href="javascript:void(null)" onclick="browseSai();return false;">Browse</a>
+        </span>
+        &nbsp;
+        <a href="javascript:void(null)" onclick="runSai();return false;">Run</a>
+    </div>
+    <form class="hide-error">
         <h3>SaiHooker Toggles</h3>
         <p><label><input class="auto-load" type="checkbox"
                 initvalue="hooker.DisableTouch(-1)"
@@ -31,6 +47,7 @@
         <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
     </form>
 	<div id="log"></div>
+	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml">
 		<menu>
 			<item text="Pen (&amp;N/l)" gst="l" key="n" />
@@ -188,6 +205,9 @@
         return false;
     </script>
 	<script>
+		function logText(t, c, a) {
+			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
+		}
 		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
 			wscript.SendKeys(ks);
@@ -195,9 +215,6 @@
 		function simulateKey(vk, down) {
 			wndutil.ActiveSaiWindow();
 			hooker.SimulateKey(vk, down);
-		}
-		function logText(t, c, a) {
-			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
 		}
 		function createSteps(d, n, b) {
 		    var ls = [], b = b || 0;
@@ -209,6 +226,13 @@
 		    return ls.sort(function (a, b) {
 		        return a - b;
 		    }).join(',');
+		}
+		function browseSai() {
+		    $('input[type=file]').trigger('click');
+		}
+		function runSai() {
+		    var path = $('input[type=file]').val();
+	        path && wscript.Run(path);
 		}
 
 		window.hooker = document.getElementById('hooker');
@@ -239,7 +263,9 @@
 		}
 		window.ontimer = function () {
 			var errno = hooker.Hook();
-			document.title = errno ? 'Hook Failed (' + errno + ')' : 'Hook ok';
+			$('.errno').text(errno);
+			$(errno ? '.show-error' : '.hide-error').show();
+			$(errno ? '.hide-error' : '.show-error').hide();
 		}
 
 		window.resizeTo(240, 300);
