@@ -5,6 +5,10 @@
 	<meta charset="utf-8" />
 	<title>SaiHooker</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
         a {
             color: #555;
             text-decoration: none;
@@ -18,6 +22,9 @@
             height: 0;
             position: absolute;
             font-size: 150%;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 	<!-- HTA tag does not work in IE Edge -->
@@ -36,28 +43,35 @@
 <body>
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-    <div class="show-error">
-        <h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
-        <span>
-            <input type="file" onchange="runSai()" />
-            <a href="#" onclick="browseSai();return false;">[ Browse ]</a>
-        </span>
-        &nbsp;
-        <a href="#" onclick="runSai();return false;">[ Run ]</a>
+    <div class="show-image hidden">
+        <input id="img_file" type="file" />
+        <a style="position:absolute;background-color:#eee;margin:3px" href="#" onclick="loadImage()">[ close ]</a>
+        <img id="img" onclick="toggleImageSize(this)" />
     </div>
-    <form class="hide-error">
-        <h4>
-            <span class="zoom-value"></span>%,  <span class="rotate-value"></span>deg.
-            <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
-        </h4>
-        <p><label><input class="auto-load" type="checkbox"
-                initvalue="hooker.DisableTouch(-1)"
-                onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
-        <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
-        <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
-        <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
-    </form>
-	<div id="log" style="display:none"></div>
+    <div class="hide-image" style="margin:10px">
+        <div class="show-error">
+            <h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
+            <span>
+                <input id="sai_file" type="file" />
+                <a href="#" onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse ]</a>
+            </span>
+        </div>
+        <form class="hide-error">
+            <h4>
+                Canvas: <span class="zoom-value"></span>%,  <span class="rotate-value"></span>deg.
+                <br />
+                <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
+                <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
+            </h4>
+            <p><label><input class="auto-load" type="checkbox"
+                    initvalue="hooker.DisableTouch(-1)"
+                    onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
+            <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
+            <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
+            <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
+        </form>
+        <div id="log" style="display:none"></div>
+    </div>
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml">
 		<menu>
@@ -224,8 +238,25 @@
         }
     </script>
 	<script>
+	    function updateVisibility(name, value) {
+            $(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
+            $(value ? '.hide-'+name : '.show-'+name).addClass('hidden');
+	    }
 		function logText(t, c, a) {
 			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
+		}
+		function loadImage(fi) {
+		    var path = $(fi).val();
+		    if (path) {
+		        $('#img').attr('src', path);
+		        logText('loading image: ' + path);
+		    }
+		    updateVisibility('image', path);
+		}
+		function toggleImageSize(im) {
+		    im = $(im);
+		    var ww = $(window).width();
+		    im.width() == ww ? im.width('auto') : im.width(ww);
 		}
 		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
@@ -246,12 +277,13 @@
 		        return a - b;
 		    }).join(',');
 		}
-		function browseSai() {
-		    $('input[type=file]').trigger('click');
+		function browseFile(fi) {
+		    return $(fi).trigger('click').val();
 		}
-		function runSai() {
-		    var path = $('input[type=file]').val();
-	        path ? wscript.Run(path) : browseSai();
+		function runFile(fi) {
+		    var path = $(fi).val();
+            if (path)
+	            wscript.Run(path);
 		}
 
 		window.hooker = document.getElementById('hooker');
@@ -283,8 +315,7 @@
 		window.ontimer = function () {
 			var errno = hooker.Hook();
 			$('.errno').text(errno);
-			$(errno ? '.show-error' : '.hide-error').show();
-			$(errno ? '.hide-error' : '.show-error').hide();
+		    updateVisibility('error', errno);
             $('.rotate-value').text(wndutil.GetStatus('rotate'));
             $('.zoom-value').text(wndutil.GetStatus('zoom'));
 		}
