@@ -77,6 +77,20 @@ int CheckSaiWindowList(SAI_WINDOWS *psw) {
 void CheckSaiWindow(HWND hWnd, SAI_WINDOWS *psw) {
 	WINDOW_LIST wls;
 	GetChildWindowList(hWnd, &wls);
+	if (wls.size >= 1) {
+		BOOL find = TRUE;
+		LONG style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+		for (DWORD i = 0; i < wls.size; i ++) {
+			if ((GetWindowLongPtr(wls.list[i], GWL_STYLE) & style) != style) {
+				find = FALSE;
+				break;
+			}
+		}
+		if (find) {
+			psw->paint = hWnd;
+			return;
+		}
+	}
 	if (wls.size >= 4) {
 		if (GetWindowLongPtr(wls.list[0], GWL_STYLE)   == 0x50000000 &&
 			GetWindowLongPtr(wls.list[0], GWL_EXSTYLE) == 0x00000000 &&
@@ -103,13 +117,6 @@ void CheckSaiWindow(HWND hWnd, SAI_WINDOWS *psw) {
 		psw->top = hWnd;
 		psw->zoom = wls.list[5];
 		psw->rotate = wls.list[9];
-	}
-	else if (wls.size == 1) {
-		HWND hNext = wls.list[0];
-		if (GetWindowLongPtr(hNext, GWL_STYLE) == 0x56000000) {
-			psw->paint = hWnd;
-			psw->canvas = hNext;
-		}
 	}
 }
 

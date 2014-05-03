@@ -111,7 +111,6 @@ struct SAI_WINDOWS {
 	HWND tools;
 
 	HWND paint;
-	HWND canvas;
 };
 
 extern SETTINGS gSettings;
