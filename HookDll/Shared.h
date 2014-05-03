@@ -110,7 +110,7 @@ struct SAI_WINDOWS {
 
 	HWND tools;
 
-	HWND paint;
+	HWND canvas;
 };
 
 extern SETTINGS gSettings;
@@ -125,5 +125,6 @@ void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);
 
+BOOL IsSaiCanvasWindow(HWND hWnd);
 int CheckSaiWindowList(SAI_WINDOWS *psw);
 void GetSaiWindowAll(SAI_WINDOWS *psw);

@@ -76,7 +76,7 @@ int CheckSaiWindowList(SAI_WINDOWS *psw) {
 
 void CheckSaiWindow(HWND hWnd, SAI_WINDOWS *psw) {
 	if (GetDlgCtrlID(hWnd) == 0x800) {
-		psw->paint = hWnd;
+		psw->canvas = hWnd;
 		return;
 	}
 	WINDOW_LIST wls;
@@ -121,4 +121,8 @@ void GetSaiWindowAll(SAI_WINDOWS *psw) {
 	while (hChild = FindWindowEx(psw->main, hChild, SAI_WINDOW_CLASS, NULL)) {
 		CheckSaiWindow(hChild, psw);
 	}
+}
+
+BOOL IsSaiCanvasWindow(HWND hWnd) {
+	return hWnd == gSaiWnds.canvas || GetParent(hWnd) == gSaiWnds.canvas;
 }
