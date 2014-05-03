@@ -75,48 +75,33 @@ int CheckSaiWindowList(SAI_WINDOWS *psw) {
 }
 
 void CheckSaiWindow(HWND hWnd, SAI_WINDOWS *psw) {
+	if (GetDlgCtrlID(hWnd) == 0x800) {
+		psw->paint = hWnd;
+		return;
+	}
 	WINDOW_LIST wls;
 	GetChildWindowList(hWnd, &wls);
-	if (wls.size >= 1) {
-		BOOL find = TRUE;
-		LONG style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-		for (DWORD i = 0; i < wls.size; i ++) {
-			if ((GetWindowLongPtr(wls.list[i], GWL_STYLE) & style) != style) {
-				find = FALSE;
-				break;
+	if (wls.size) {
+		int dlgId = GetDlgCtrlID(wls.list[0]);
+		if (dlgId == 0x0000) {
+			if (wls.size >=2 && GetDlgCtrlID(wls.list[1]) == 0x0201) {
+				psw->nav = hWnd;
 			}
 		}
-		if (find) {
-			psw->paint = hWnd;
-			return;
+		else if (dlgId == 0x0301) {
+			psw->layers = hWnd;
 		}
-	}
-	if (wls.size >= 4) {
-		if (GetWindowLongPtr(wls.list[0], GWL_STYLE)   == 0x50000000 &&
-			GetWindowLongPtr(wls.list[0], GWL_EXSTYLE) == 0x00000000 &&
-			GetWindowLongPtr(wls.list[1], GWL_STYLE)   == 0x50000000 &&
-			GetWindowLongPtr(wls.list[1], GWL_EXSTYLE) == 0x00000000 &&
-			GetWindowLongPtr(wls.list[2], GWL_STYLE)   == 0x50000000 &&
-			GetWindowLongPtr(wls.list[2], GWL_EXSTYLE) == 0x00000200 &&
-			GetWindowLongPtr(wls.list[3], GWL_STYLE)   == 0x50000000 &&
-			GetWindowLongPtr(wls.list[3], GWL_EXSTYLE) == 0x00000000) {
+		else if (dlgId == 0x0401) {
+			psw->color = hWnd;
+		}
+		else if (dlgId == 0x0501) {
+			psw->top = hWnd;
+			psw->zoom = wls.list[5];
+			psw->rotate = wls.list[9];
+		}
+		else if (dlgId == 0x0601) {
 			psw->tools = hWnd;
-			return;
 		}
-	}
-	if (wls.size == 9) {
-		psw->nav = hWnd;
-	}
-	else if (wls.size == 10) {
-		psw->layers = hWnd;
-	}
-	else if (wls.size == 8) {
-		psw->color = hWnd;
-	}
-	else if (wls.size == 17) {
-		psw->top = hWnd;
-		psw->zoom = wls.list[5];
-		psw->rotate = wls.list[9];
 	}
 }
 

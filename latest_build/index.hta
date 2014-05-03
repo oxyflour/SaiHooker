@@ -142,7 +142,7 @@
         else if (msg == 22)
             wscript.SendKeys(wParam ? '{DEL}' : '{END}');
         else
-            logText('unknown event: ' + msg + ' (' + wParam + ', ' + lParam + ')');
+            logText('unknown event: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 
         if (msg == 1 || msg == 22) setTimeout(function() {
             $('.rotate-value').text(wndutil.GetStatus('rotate'));
