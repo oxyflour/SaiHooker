@@ -70,7 +70,7 @@ HWND GetSaiPenWindow() {
 	GetChildWindowList(gSaiWnds.tools, &wls);
 	HWND hPen = NULL;
 	for (DWORD i = 4; i < wls.size; i ++) {
-		if (IsWindowVisible(wls.list[i]))
+		if (GetWindowLong(wls.list[i], GWL_STYLE) & WS_VISIBLE)
 			hPen = wls.list[i];
 	}
 	return hPen;
