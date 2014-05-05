@@ -4,6 +4,7 @@
 
 #define SAI_WINDOW_CLASS TEXT("sfl_window_class")
 #define SAI_MENUBAR_CLASS TEXT("sfl_menubar_class")
+#define SAI_PROP_WININFO TEXT("_SFLWININFO_")
 
 #define WT_PACKET (WM_USER + 0x7FF0)
 #define WM_PEN_HOVER_UNKNOWN 0x0ff2 // obtained from spyxx. not sure what's it
@@ -12,6 +13,7 @@
 #define WM_USER_QUIT (WM_USER + WM_QUIT)
 #define WM_USER_GESTURE (WM_USER + WM_COMMAND + 1)
 #define WM_USER_TOUCH (WM_USER + WM_COMMAND + 2)
+#define WM_USER_GET_PEN (WM_USER + WM_COMMAND + 3)
 
 #define WM_GESTURE_PROC (WM_USER + WM_GESTURE)
 #define WM_GESTURE_DOWN (WM_USER + WM_GESTURE + 1)
@@ -75,6 +77,8 @@ struct STATUS {
 	// pen hover time & position
 	DWORD penHoverTick;
 	POINT penHoverPos;
+	DWORD penSize;
+	char *penName;
 
 	// touch gesture status
 	DWORD tgState;
@@ -103,13 +107,9 @@ struct SAI_WINDOWS {
 	HWND rotate;
 
 	HWND nav;
-
 	HWND layers;
-
 	HWND color;
-
 	HWND tools;
-
 	HWND canvas;
 };
 
@@ -120,11 +120,13 @@ extern STATUS gStatus;
 extern SAI_WINDOWS gSaiWnds;
 
 int ListIndex(EVENT_TRIGGER *pl, double val);
+void GetChildWindowList(HWND hParent, WINDOW_LIST *pls);
 
 void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down);
 void SimulateKey(WORD vk, DWORD flags);
 void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags);
 
+HWND GetSaiPenWindow();
 BOOL IsSaiCanvasWindow(HWND hWnd);
 int CheckSaiWindowList(SAI_WINDOWS *psw);
 void GetSaiWindowAll(SAI_WINDOWS *psw);

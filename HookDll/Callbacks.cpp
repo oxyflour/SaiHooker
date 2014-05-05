@@ -362,6 +362,20 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
+		// Get Pen Information
+		if (cs->message == WM_USER_GET_PEN) {
+			HWND hPen = GetSaiPenWindow();
+			BYTE *pWinInfo = NULL, *pData = NULL;
+			if (hPen)
+				pWinInfo = (BYTE *)GetProp(hPen, SAI_PROP_WININFO);
+			if (pWinInfo)
+				pData = (BYTE *)(*((DWORD *)(pWinInfo + 0x8)));
+			if (pData) {
+				gStatus.penSize = *((DWORD *)(pData + 0x128));
+				gStatus.penName = (char *)(*((DWORD *)(pData + 0x4C)));
+			}
+		}
+
 		// Clean up
 		if (cs->message == WM_USER_QUIT)
 			ResetTouchWindow(cs->hwnd);

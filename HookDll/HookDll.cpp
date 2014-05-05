@@ -43,6 +43,10 @@ HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key) {
 		GetWindowText(gSaiWnds.rotate, sz, sizeof(sz)/sizeof(TCHAR));
 		return _ttoi(sz);
 	}
+	else if (!_tcscmp(key, TEXT("pensize"))) {
+		SendMessage(gSaiWnds.tools, WM_USER_GET_PEN, 0, 0);
+		return gStatus.penSize;
+	}
 	return ~0;
 }
 

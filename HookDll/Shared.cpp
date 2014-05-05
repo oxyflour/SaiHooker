@@ -20,6 +20,15 @@ int ListIndex(EVENT_TRIGGER *pl, double val) {
 	return delta;
 }
 
+void GetChildWindowList(HWND hParent, WINDOW_LIST *pls) {
+	pls->size = 0;
+	HWND hWnd = NULL;
+	while (hWnd = FindWindowEx(hParent, hWnd, NULL, NULL)) {
+		pls->list[pls->size ++] = hWnd;
+	}
+}
+
+
 void SimulateShortcut(SHORTCUT_KEY *pk, BOOL down) {
 	if (down) {
 		if (pk->ctrl)
@@ -55,12 +64,16 @@ void SimulateMouse(LONG dx, LONG dy, DWORD data, DWORD flags) {
 	SendInput(1, &ip, sizeof(INPUT));
 }
 
-void GetChildWindowList(HWND hParent, WINDOW_LIST *pls) {
-	pls->size = 0;
-	HWND hWnd = NULL;
-	while (hWnd = FindWindowEx(hParent, hWnd, NULL, NULL)) {
-		pls->list[pls->size ++] = hWnd;
+
+HWND GetSaiPenWindow() {
+	WINDOW_LIST wls;
+	GetChildWindowList(gSaiWnds.tools, &wls);
+	HWND hPen = NULL;
+	for (DWORD i = 4; i < wls.size; i ++) {
+		if (IsWindowVisible(wls.list[i]))
+			hPen = wls.list[i];
 	}
+	return hPen;
 }
 
 int CheckSaiWindowList(SAI_WINDOWS *psw) {

@@ -58,7 +58,7 @@
         </div>
         <form class="hide-error">
             <h4>
-                Canvas: <span class="zoom-value"></span>%,  <span class="rotate-value"></span>deg.
+                <span class="zoom-value"></span>%,  <span class="rotate-value"></span>&deg;, <span class="pensize-value"></span>px.
                 <br />
                 <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
                 <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
@@ -150,6 +150,9 @@
         else if (msg == 2 || msg == 21) setTimeout(function() {
             $('.zoom-value').text(wndutil.GetStatus('zoom'));
         }, 200);
+        else if (msg == 4) setTimeout(function() {
+            $('.pensize-value').text(wndutil.GetStatus('pensize')/10);
+        }, 200);
     </script>
     <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
         // left mouse button is down
@@ -157,12 +160,6 @@
             ({
                 '': function () {
                     hooker.SimulateDragWith(0x20, false, false, false);
-                    /*
-                    hooker.SimulateKey(18, true);
-                    hooker.SimulateMouse(0, 0, true);
-                    hooker.SimulateMouse(0, 0, 0);
-                    hooker.SimulateKey(18, 0);
-                    */
                 },
                 u: function () {
                     hooker.RegisterNotify(1, 'ms-x', createSteps(15));
@@ -318,6 +315,7 @@
 		    updateVisibility('error', errno);
             $('.rotate-value').text(wndutil.GetStatus('rotate'));
             $('.zoom-value').text(wndutil.GetStatus('zoom'));
+            $('.pensize-value').text(wndutil.GetStatus('pensize')/10);
 		}
 
 		window.resizeTo(220, 260);

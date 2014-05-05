@@ -29,8 +29,6 @@ extern "C" {
 
 	HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key);
 
-	HOOKDLL_API HWND _stdcall SetNotifyWindow(HWND hWnd);
-
 	HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst);
 
 	HOOKDLL_API void _stdcall UnsetSaiHook();
