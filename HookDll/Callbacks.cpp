@@ -232,7 +232,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		/*
 		 * Block events from touch
 		 */
-		if (msg->message == WM_MOUSEMOVE ||
+		if (msg->message == WM_MOUSEMOVE || msg->message == WM_PEN_HOVER_UNKNOWN ||
 			msg->message == WM_NCHITTEST || msg->message == WM_NCMOUSEMOVE ||
 			msg->message == WM_NCLBUTTONDOWN ||
 			msg->message == WM_SETCURSOR || msg->message == WM_MOUSEWHEEL ||
@@ -241,11 +241,20 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			msg->message == WM_LBUTTONDBLCLK || msg->message == WM_RBUTTONDBLCLK ||
 			msg->message == WM_KEYDOWN || msg->message == WM_KEYUP ||
 			msg->message == WM_VSCROLL || msg->message == WM_HSCROLL) {
-			if (msg->message == WM_MOUSEMOVE && gSettings.dragKey.enabled && gStatus.tgState == 1)
-				; // pass
+			BOOL bFromTouch = (GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH;
+			if ((msg->message == WM_MOUSEMOVE || msg->message == WM_PEN_HOVER_UNKNOWN) &&
+				(gSettings.dragKey.enabled || gSettings.dragKey.pressed) &&
+				gStatus.tgState == 1) {
+				if (bFromTouch)
+					;	// let touch events pass
+				else {  // disable other inputs
+					SetCursorPos(gStatus.penHoverPos.x, gStatus.penHoverPos.y);
+					msg->message += WM_USER;
+				}
+			}
 			else if ((!bEnableTouch ||
 				IsSaiCanvasWindow(msg->hwnd)) &&
-				(GetMessageExtraInfo() & EVENTF_FROMTOUCH) == EVENTF_FROMTOUCH)
+				bFromTouch)
 				msg->message += WM_USER;
 		}
 		// remember mouse position
