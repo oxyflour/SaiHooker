@@ -141,6 +141,10 @@
             wscript.SendKeys(wParam ? '{PGDN}' : '{PGUP}');
         else if (msg == 22)
             wscript.SendKeys(wParam ? '{DEL}' : '{END}');
+        else if (msg == 23 || msg == 24) {
+            hooker.RegisterNotify(0, 'th-z', '0');
+            hooker.RegisterNotify(0, 'th-r', '0');
+        }
         else
             logText('unknown event: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 
@@ -186,7 +190,7 @@
         }
     </script>
     <script for="hooker" event="OnTouchGesture(num, key, x, y)">
-        // fingers are beging to move
+        // fingers are going to move
         if (key == 1) {
             // pan with one finger
             if (num == 1) {
@@ -196,6 +200,12 @@
             else if (num == 2) {
                 hooker.RegisterNotify(21, 'th-z', createSteps(10, 0, 5));
                 hooker.RegisterNotify(22, 'th-r', createSteps(10, 0, 5));
+                hooker.RegisterNotify(23, 'ms-x', createSteps(80, 2));
+                hooker.RegisterNotify(24, 'ms-y', createSteps(80, 2));
+            }
+            // move layer with three finger
+            else if (num == 3) {
+                hooker.SimulateDragWith(0, true, false, false);
             }
         }
         // tap

@@ -24,7 +24,6 @@
 #define TIMEOUT_MOUSE_GESTURE_TAP_INTERVAL 200
 
 #define DISTANCE_PAN_TRIGGER 10
-#define DISTANCE_ZOOM_CANCEL 80
 #define DISTANCE_MOUSE_GESTURE_BEGIN 35
 
 #define MOUSE_GESTURE_REDUCE_COUNT 8
@@ -83,9 +82,9 @@ struct STATUS {
 	// touch gesture status
 	DWORD tgState;
 	DWORD tgFingers;
-	HWND tgWindow;
 	int tgScale;
 	int tgRotate;
+	POINT tgBeginPos;
 	DWORD tgDownTicks[MAX_STATUS_FINGERS];
 	DWORD tgUpTicks[MAX_STATUS_FINGERS];
 
