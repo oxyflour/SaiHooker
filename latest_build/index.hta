@@ -215,11 +215,14 @@
                 var tapTick = Date.now();
                 // double tap detection
                 if (tapTick - window.tapTick < 200) {
+                    /*
                     // ALT + Click
                     hooker.SimulateKey(18, true);
                     hooker.SimulateMouse(x, y, true);
                     hooker.SimulateMouse(x, y, 0);
                     hooker.SimulateKey(18, 0);
+                    */
+                    wscript.SendKeys('{HOME}');
                 }
                 window.tapTick = tapTick;
             }
