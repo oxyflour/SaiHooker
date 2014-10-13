@@ -106,6 +106,7 @@ struct SAI_WINDOWS {
 	HWND rotate;
 
 	HWND nav;
+	HWND nav_zoom;
 	HWND layers;
 	HWND color;
 	HWND tools;

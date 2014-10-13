@@ -294,6 +294,25 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (!gStatus.isLeftDown && !gStatus.isRightDown && gStatus.mgTick)
 			MouseGestureEnd(tick, msg->hwnd);
 
+		/*
+		if (msg->message == WM_KEYUP && (msg->wParam == VK_PRIOR || msg->wParam == VK_NEXT) && GetKeyState(VK_SHIFT)) {
+			BYTE *pData = (BYTE *)GetProp(gSaiWnds.nav_zoom, SAI_PROP_WININFO);
+			if (pData)
+				pData = (BYTE *)(*((DWORD *)(pData + 0x8)));
+			if (pData)
+				pData = (BYTE *)(*((DWORD *)(pData + 0x10)));
+			if (pData)
+				pData = (BYTE *)(*((DWORD *)(pData + 0x44)));
+			if (pData) {
+				DWORD pModule = (DWORD)GetModuleHandle(NULL);
+				typedef void (__cdecl *pSetScaleFunc)(BYTE *pData, double scale, DWORD);
+				pSetScaleFunc pSetScale = (pSetScaleFunc)(pModule + 0xAEB30);
+				double dScale = *((double *)(pData + 0x78)) + (msg->wParam == VK_PRIOR ? 20.0 : -20.0);
+				pSetScale(pData, dScale, 0x81);
+				pSetScale(pData, dScale, 0x82);
+			}
+		}
+		*/
 
 		/*
 		 * Process touch gestures
@@ -371,11 +390,11 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		// Get Pen Information
 		if (cs->message == WM_USER_GET_PEN) {
 			HWND hPen = GetSaiPenWindow();
-			BYTE *pWinInfo = NULL, *pData = NULL;
+			BYTE *pData = NULL;
 			if (hPen)
-				pWinInfo = (BYTE *)GetProp(hPen, SAI_PROP_WININFO);
-			if (pWinInfo)
-				pData = (BYTE *)(*((DWORD *)(pWinInfo + 0x8)));
+				pData = (BYTE *)GetProp(hPen, SAI_PROP_WININFO);
+			if (pData)
+				pData = (BYTE *)(*((DWORD *)(pData + 0x8)));
 			if (pData) {
 				gStatus.penSize = *((DWORD *)(pData + 0x128));
 				gStatus.penName = (char *)(*((DWORD *)(pData + 0x4C)));

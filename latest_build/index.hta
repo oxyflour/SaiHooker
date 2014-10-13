@@ -228,11 +228,14 @@
             }
                 // two finger tap
             else if (num == 1) {
+                /*
                 var pop = $('#popup'),
                     id = wndutil.PopupMenu(pop.data('xml'), x, y),
                     item = pop.data('doc').find('[cid=' + id + ']');
                 wndutil.ActiveSaiWindow();
                 item.attr('key') && wscript.SendKeys(item.attr('key'));
+                */
+                wscript.SendKeys('{TAB}');
             }
                 // three finger tap
             else if (num == 2) {
