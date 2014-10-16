@@ -58,10 +58,6 @@
         </div>
         <form class="hide-error">
             <h4>
-                <span class="auto-update update-zoom" sai-status="zoom"></span>,
-                <span class="auto-update update-rotate" sai-status="rotate"></span>,
-                <span class="auto-update update-pen" sai-status="pen"></span>.
-                <br />
                 <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
                 <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
             </h4>
@@ -169,16 +165,6 @@
             }
             else
                 logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
-
-            if (wParam == 1 || wParam == 22) setTimeout(function() {
-                $('.update-rotate').trigger('update');
-            }, 200);
-            else if (wParam == 2 || wParam == 21) setTimeout(function() {
-                $('.update-zoom').trigger('update');
-            }, 200);
-            else if (wParam == 4) setTimeout(function() {
-                $('.update-pen').trigger('update');
-            }, 200);
         }
         else
             logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
@@ -325,7 +311,6 @@
 			var errno = hooker.Hook();
 			$('.errno').text(errno);
 		    updateVisibility('error', errno);
-		    $('.auto-update').trigger('update');
 		}
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
@@ -345,10 +330,6 @@
                 doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
                 elem.data('doc', doc).data('xml', doc[0].outerHTML);
 			});
-		    $('.auto-update').bind('update', function (e) {
-		        var t = $(this), s = t.attr('sai-status');
-		        if (s) t.text(hooker.GetSaiStatus(s));
-		    });
 
             window.resizeTo(220, 260);
             window.ontimer();
