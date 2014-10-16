@@ -66,8 +66,8 @@
                 <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
             </h4>
             <p><label><input class="auto-load" type="checkbox"
-                    initvalue="hooker.SaiStatus('lock-touch', null)"
-                    onclick="hooker.SaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
+                    initvalue="hooker.GetSaiStatus('lock-touch')"
+                    onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
             <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
             <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
             <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
@@ -131,50 +131,57 @@
 		</menu>
 	</script>
     <script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
+        // pen events
         if (msg == 0) {
             // pen reversed
-            if (wParam == 0)
-                hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+            if (wParam == 0 && lParam)
+                hooker.SimulateKey('E'.charCodeAt(0), window.penReversed = !window.penReversed);
             // pen eraser
             else if (wParam == 1)
                 ;
             // pen button
             else if (wParam == 2)
                 ;
-            else
-                logText('unknown debug event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+                logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
         }
-        else if (msg == 1)
-            wscript.SendKeys(wParam ? '{DEL}' : '{END}');
-        else if (msg == 2)
-            wscript.SendKeys(wParam ? '{PGUP}' : '{PGDN}');
-        else if (msg == 3)
-            wscript.SendKeys(('nbvceas').charAt(lParam - 9));
-        else if (msg == 4)
-            wscript.SendKeys(wParam ? '{]}' : '{[}');
-        else if (msg == 21)
-            wscript.SendKeys(wParam ? '{PGDN}' : '{PGUP}');
-        else if (msg == 22)
-            wscript.SendKeys(wParam ? '{DEL}' : '{END}');
-        else if (msg == 23 || msg == 24) {
-            hooker.RegisterNotify(0, 'th-z', '0');
-            hooker.RegisterNotify(0, 'th-r', '0');
-            hooker.RegisterNotify(0, 'ms-x', '0');
-            hooker.RegisterNotify(0, 'ms-y', '0');
-            hooker.SimulateDragWith(0x20, false, false, false);
+        // notify events
+        else if (msg == 1) {
+            var delta = lParam & 0x10000,
+                index = lParam & 0xffff;
+            if (wParam == 1)
+                wscript.SendKeys(delta ? '{DEL}' : '{END}');
+            else if (wParam == 2)
+                wscript.SendKeys(delta ? '{PGUP}' : '{PGDN}');
+            else if (wParam == 3)
+                wscript.SendKeys(('nbvceas').charAt(index - 9));
+            else if (wParam == 4)
+                wscript.SendKeys(delta ? '{]}' : '{[}');
+            else if (wParam == 21)
+                wscript.SendKeys(delta ? '{PGDN}' : '{PGUP}');
+            else if (wParam == 22)
+                wscript.SendKeys(delta ? '{DEL}' : '{END}');
+            else if (wParam == 23 || wParam == 24) {
+                hooker.RegisterNotify(0, 'th-z', '0');
+                hooker.RegisterNotify(0, 'th-r', '0');
+                hooker.RegisterNotify(0, 'ms-x', '0');
+                hooker.RegisterNotify(0, 'ms-y', '0');
+                hooker.SimulateDragWith(0x20, false, false, false);
+            }
+            else
+                logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+
+            if (wParam == 1 || wParam == 22) setTimeout(function() {
+                $('.update-rotate').trigger('update');
+            }, 200);
+            else if (wParam == 2 || wParam == 21) setTimeout(function() {
+                $('.update-zoom').trigger('update');
+            }, 200);
+            else if (wParam == 4) setTimeout(function() {
+                $('.update-pen').trigger('update');
+            }, 200);
         }
         else
             logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
-
-        if (msg == 1 || msg == 22) setTimeout(function() {
-            $('.update-rotate').trigger('update');
-        }, 200);
-        else if (msg == 2 || msg == 21) setTimeout(function() {
-            $('.update-zoom').trigger('update');
-        }, 200);
-        else if (msg == 4) setTimeout(function() {
-            $('.update-pen').trigger('update');
-        }, 200);
     </script>
     <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
         // left mouse button is down when the gesture ends
@@ -340,7 +347,7 @@
 			});
 		    $('.auto-update').bind('update', function (e) {
 		        var t = $(this), s = t.attr('sai-status');
-		        if (s) t.text(hooker.SaiStatus(s, null));
+		        if (s) t.text(hooker.GetSaiStatus(s));
 		    });
 
             window.resizeTo(220, 260);

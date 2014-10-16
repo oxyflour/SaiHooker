@@ -176,11 +176,15 @@ namespace SaiHooker
             m_hInst = IntPtr.Zero;
         }
 
-        public string SaiStatus(string key, string val)
+        public string SetSaiStatus(string key, string val)
         {
             StringBuilder ret = new StringBuilder(64);
             SaiStatus(key, val, ret, ret.Capacity);
             return ret.ToString();
+        }
+        public string GetSaiStatus(string key)
+        {
+            return SetSaiStatus(key, null);
         }
 
         public void SimulateKey(int vkCode, bool keyDown)

@@ -51,7 +51,7 @@ void StrokeLine(HDC hdc, POINT ptFrom, POINT ptTo) {
 void CheckEventTrigger(EVENT_TRIGGER *pe, double val) {
 	int delta = 0;
 	if (pe->msg) while (delta = ListIndex(pe, val))
-		PostNotify(WM_USER_DEBUG + pe->msg, delta > 0 ? 0 : 1, pe->index);
+		PostNotify(WM_USER_DEBUG + 1, pe->msg, (delta > 0 ? 0 : 0x10000) | pe->index);
 }
 
 static std::vector<POINT> g_MSVectors;
