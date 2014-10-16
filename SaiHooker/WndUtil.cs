@@ -68,11 +68,6 @@ namespace SaiHooker
             ReleaseDC(IntPtr.Zero, hdc);
         }
 
-        public int GetStatus(string key)
-        {
-            return GetSaiStatus(key);
-        }
-
         public int PopupMenu(string menu, int x, int y)
         {
             IntPtr hMenu = CreateMenu();
@@ -117,9 +112,6 @@ namespace SaiHooker
 
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr GetSaiWindow();
-
-        [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int GetSaiStatus(string key);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr FindWindowEx(IntPtr hParent, IntPtr hPrev, String lpClassName, String lpWndName);

@@ -92,7 +92,7 @@ namespace SaiHooker
                 if (msg.message == WM_USER_GESTURE && s_this.OnMouseGesture != null)
                 {
                     StringBuilder sz = new StringBuilder(64);
-                    GetmgVectorStr(sz, sz.Capacity);
+                    SaiStatus("gesture-vector", null, sz, sz.Capacity);
                     int x = (int)msg.lParam % 0x10000, y = (int)msg.lParam / 0x10000;
                     s_this.OnMouseGesture(sz.ToString(), (int)msg.wParam, x, y);
                 }
@@ -176,9 +176,11 @@ namespace SaiHooker
             m_hInst = IntPtr.Zero;
         }
 
-        public int DisableTouch(int l)
+        public string SaiStatus(string key, string val)
         {
-            return LockTouch(l);
+            StringBuilder ret = new StringBuilder(64);
+            SaiStatus(key, val, ret, ret.Capacity);
+            return ret.ToString();
         }
 
         public void SimulateKey(int vkCode, bool keyDown)
@@ -208,10 +210,7 @@ namespace SaiHooker
         private static extern void UnsetSaiHook();
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int LockTouch(int l);
-
-        [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern int GetmgVectorStr(StringBuilder szBuf, int size);
+        private static extern int SaiStatus(string key, string val, StringBuilder ret, int size);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateKeyEvent(int vkCode, bool keyDown);

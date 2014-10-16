@@ -58,14 +58,16 @@
         </div>
         <form class="hide-error">
             <h4>
-                <span class="zoom-value"></span>%,  <span class="rotate-value"></span>&deg;, <span class="pensize-value"></span>px.
+                <span class="auto-update update-zoom" sai-status="zoom"></span>,
+                <span class="auto-update update-rotate" sai-status="rotate"></span>,
+                <span class="auto-update update-pen" sai-status="pen"></span>.
                 <br />
                 <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
                 <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
             </h4>
             <p><label><input class="auto-load" type="checkbox"
-                    initvalue="hooker.DisableTouch(-1)"
-                    onclick="hooker.DisableTouch(this.checked ? 1 : 0)" />Disable Touch</label></p>
+                    initvalue="hooker.SaiStatus('lock-touch', null)"
+                    onclick="hooker.SaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
             <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
             <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
             <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
@@ -73,7 +75,7 @@
         <div id="log" style="display:none"></div>
     </div>
 	<script src="jquery-1.8.0.min.js"></script>
-	<script id="popup" type="text/xml">
+	<script id="popup" type="text/xml" for="menu">
 		<menu>
 			<item text="Pen (&amp;N/l)" gst="l" key="n" />
 			<item text="Eraser (&amp;E/r)" gst="r" key="e" />
@@ -129,7 +131,20 @@
 		</menu>
 	</script>
     <script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
-        if (msg == 1)
+        if (msg == 0) {
+            // pen reversed
+            if (wParam == 0)
+                hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+            // pen eraser
+            else if (wParam == 1)
+                ;
+            // pen button
+            else if (wParam == 2)
+                ;
+            else
+                logText('unknown debug event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+        }
+        else if (msg == 1)
             wscript.SendKeys(wParam ? '{DEL}' : '{END}');
         else if (msg == 2)
             wscript.SendKeys(wParam ? '{PGUP}' : '{PGDN}');
@@ -144,22 +159,25 @@
         else if (msg == 23 || msg == 24) {
             hooker.RegisterNotify(0, 'th-z', '0');
             hooker.RegisterNotify(0, 'th-r', '0');
+            hooker.RegisterNotify(0, 'ms-x', '0');
+            hooker.RegisterNotify(0, 'ms-y', '0');
+            hooker.SimulateDragWith(0x20, false, false, false);
         }
         else
-            logText('unknown event: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+            logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 
         if (msg == 1 || msg == 22) setTimeout(function() {
-            $('.rotate-value').text(wndutil.GetStatus('rotate'));
+            $('.update-rotate').trigger('update');
         }, 200);
         else if (msg == 2 || msg == 21) setTimeout(function() {
-            $('.zoom-value').text(wndutil.GetStatus('zoom'));
+            $('.update-zoom').trigger('update');
         }, 200);
         else if (msg == 4) setTimeout(function() {
-            $('.pensize-value').text(wndutil.GetStatus('pensize')/10);
+            $('.update-pen').trigger('update');
         }, 200);
     </script>
     <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
-        // left mouse button is down
+        // left mouse button is down when the gesture ends
         if (key == 1) {
             ({
                 '': function () {
@@ -177,7 +195,7 @@
                 logText('unknown stroke: ' + vec);
             })();
         }
-        // no button down
+        // no buttons are down
         else {
             if (vec) {
                 var item = $('#popup').data('doc').find('[gst=' + vec + ']');
@@ -190,7 +208,7 @@
         }
     </script>
     <script for="hooker" event="OnTouchGesture(num, key, x, y)">
-        // fingers are going to move
+        // fingers are on the surface and starting to move
         if (key == 1) {
             // pan with one finger
             if (num == 1) {
@@ -208,9 +226,9 @@
                 hooker.SimulateDragWith(0, true, false, false);
             }
         }
-        // tap
+        // fingers tap
         else {
-            // one finger tap
+            // one-finger tap
             if (num == 0) {
                 var tapTick = Date.now();
                 // double tap detection
@@ -226,22 +244,15 @@
                 }
                 window.tapTick = tapTick;
             }
-                // two finger tap
+            // two-finger tap
             else if (num == 1) {
-                /*
-                var pop = $('#popup'),
-                    id = wndutil.PopupMenu(pop.data('xml'), x, y),
-                    item = pop.data('doc').find('[cid=' + id + ']');
-                wndutil.ActiveSaiWindow();
-                item.attr('key') && wscript.SendKeys(item.attr('key'));
-                */
                 wscript.SendKeys('{TAB}');
             }
-                // three finger tap
+            // three-finger tap
             else if (num == 2) {
                 wscript.SendKeys('{F11}');
             }
-                // four finger tap
+            // four-finger tap
             else if (num == 3) {
                 // send WIN+D event
                 hooker.SimulateKey(0x5b, true);
@@ -303,6 +314,12 @@
 		window.wndutil = document.getElementById('wndutil');
 		window.wscript = new ActiveXObject("WScript.Shell");
 
+		window.ontimer = function () {
+			var errno = hooker.Hook();
+			$('.errno').text(errno);
+		    updateVisibility('error', errno);
+		    $('.auto-update').trigger('update');
+		}
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
 
@@ -316,27 +333,23 @@
 					p = c.filter('[value="'+(v ? eval(v) : '')+'"]');
 				(p[0] || c[0]).selected = true;
 			});
+			$('script[for=menu]').each(function (i, e) {
+                var elem = $(e), doc = $(elem.html());
+                doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
+                elem.data('doc', doc).data('xml', doc[0].outerHTML);
+			});
+		    $('.auto-update').bind('update', function (e) {
+		        var t = $(this), s = t.attr('sai-status');
+		        if (s) t.text(hooker.SaiStatus(s, null));
+		    });
 
-			// prepare xml text for PopupMenu
-			var pop = $('#popup'), doc = $(pop.html());
-			doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
-			pop.data('doc', doc).data('xml', doc[0].outerHTML);
+            window.resizeTo(220, 260);
+            window.ontimer();
+            setInterval(window.ontimer, 2000)
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();
 		}
-		window.ontimer = function () {
-			var errno = hooker.Hook();
-			$('.errno').text(errno);
-		    updateVisibility('error', errno);
-            $('.rotate-value').text(wndutil.GetStatus('rotate'));
-            $('.zoom-value').text(wndutil.GetStatus('zoom'));
-            $('.pensize-value').text(wndutil.GetStatus('pensize')/10);
-		}
-
-		window.resizeTo(220, 260);
-		window.ontimer();
-		setInterval(window.ontimer, 2000)
 	</script>
 </body>
 </html>

@@ -99,7 +99,7 @@ void CheckSaiWindow(HWND hWnd, SAI_WINDOWS *psw) {
 		if (dlgId == 0x0000) {
 			if (wls.size >=2 && GetDlgCtrlID(wls.list[1]) == 0x0201) {
 				psw->nav = hWnd;
-				psw->nav_zoom = wls.list[1];
+//				psw->nav_zoom = wls.list[1];
 			}
 		}
 		else if (dlgId == 0x0301) {

@@ -33,23 +33,6 @@ HOOKDLL_API HWND _stdcall GetSaiWindow() {
 	return IsWindow(gSaiWnds.main) ? gSaiWnds.main : NULL;
 }
 
-HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key) {
-	TCHAR sz[64] = {0};
-	if (!_tcscmp(key, TEXT("zoom"))) {
-		GetWindowText(gSaiWnds.zoom, sz, sizeof(sz)/sizeof(TCHAR));
-		return _ttoi(sz);
-	}
-	else if (!_tcscmp(key, TEXT("rotate"))) {
-		GetWindowText(gSaiWnds.rotate, sz, sizeof(sz)/sizeof(TCHAR));
-		return _ttoi(sz);
-	}
-	else if (!_tcscmp(key, TEXT("pensize"))) {
-		SendMessage(gSaiWnds.tools, WM_USER_GET_PEN, 0, 0);
-		return gStatus.penSize;
-	}
-	return ~0;
-}
-
 HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst) {
 	DWORD dwThread = 0;
 	if (GetSaiWindow() != NULL) {
@@ -85,16 +68,28 @@ HOOKDLL_API void _stdcall UnsetSaiHook() {
 	gStatus.targetThread = 0;
 }
 
-HOOKDLL_API int _stdcall LockTouch(int lock) {
-	if (lock > 0)
-		gSettings.lockTouch = 1;
-	else if (lock == 0)
-		gSettings.lockTouch = 0;
-	return gSettings.lockTouch;
-}
-
-HOOKDLL_API int _stdcall GetmgVectorStr(TCHAR* szBuf, int size) {
-	return StringCbCopy(szBuf, size, gStatus.mgVectorStr);
+HOOKDLL_API int _stdcall SaiStatus(TCHAR *szKey, TCHAR *szVal, TCHAR* szRet, int size) {
+	// setter
+	if (szVal) {
+		if (!_tcscmp(szKey, TEXT("lock-touch")))
+			gSettings.lockTouch = _tcslen(szVal) ? 1 : 0;
+	}
+	// getter
+	if (szRet) {
+		if (!_tcscmp(szKey, TEXT("lock-touch")))
+			StringCbCopy(szRet, size, gSettings.lockTouch ? TEXT("1") : TEXT(""));
+		else if (!_tcscmp(szKey, TEXT("gesture-vector")))
+			StringCbCopy(szRet, size, gStatus.mgVectorStr);
+		else if (!_tcscmp(szKey, TEXT("zoom")))
+			GetWindowText(gSaiWnds.zoom, szRet, size);
+		else if (!_tcscmp(szKey, TEXT("rotate")))
+			GetWindowText(gSaiWnds.rotate, szRet, size);
+		else if (!_tcscmp(szKey, TEXT("pen"))) {
+			SendMessage(gSaiWnds.tools, WM_USER_GET_PEN, 0, 0);
+			_stprintf_s(szRet, size, TEXT("%dpx %s"), gStatus.penSize, gStatus.penName);
+		}
+	}
+	return 0;
 }
 
 HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {

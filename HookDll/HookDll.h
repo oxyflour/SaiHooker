@@ -27,15 +27,11 @@ extern "C" {
 
 	HOOKDLL_API HWND _stdcall GetSaiWindow();
 
-	HOOKDLL_API int _stdcall GetSaiStatus(TCHAR *key);
-
 	HOOKDLL_API DWORD _stdcall SetSaiHook(HINSTANCE hInst);
 
 	HOOKDLL_API void _stdcall UnsetSaiHook();
 
-	HOOKDLL_API int _stdcall LockTouch(int lock);
-
-	HOOKDLL_API int _stdcall GetmgVectorStr(TCHAR* szBuf, int size);
+	HOOKDLL_API int _stdcall SaiStatus(TCHAR *szKey, TCHAR *szVal, TCHAR* szRet, int size);
 
 	HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down);
 

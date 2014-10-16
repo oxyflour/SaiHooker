@@ -295,6 +295,29 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			MouseGestureEnd(tick, msg->hwnd);
 
 		/*
+		 * Use WM_POINTER* to detect pen status
+		 */
+		if (msg->message == WM_POINTERDOWN || msg->message == WM_POINTERUP || msg->message == WM_POINTERUPDATE) {
+			UINT pid = GET_POINTERID_WPARAM(msg->wParam);
+			POINTER_INPUT_TYPE pt;
+			POINTER_PEN_INFO pi;
+			GetPointerType(pid, &pt);
+			if (pt == PT_PEN && GetPointerPenInfo(pid, &pi)) {
+				BOOL b;
+				b = pi.penFlags & PEN_FLAG_INVERTED;
+				if (b != gStatus.penInverted)
+					PostNotify(WM_USER_DEBUG, 0, gStatus.penInverted = b);
+				b = pi.penFlags & PEN_FLAG_ERASER;
+				if (b != gStatus.penEraser)
+					PostNotify(WM_USER_DEBUG, 1, gStatus.penEraser = b);
+				b = pi.penFlags & PEN_FLAG_BARREL;
+				if (b != gStatus.penBarrel)
+					PostNotify(WM_USER_DEBUG, 2, gStatus.penBarrel = b);
+			}
+		}
+
+		/*
+		 * for debug only
 		if (msg->message == WM_KEYUP && (msg->wParam == VK_PRIOR || msg->wParam == VK_NEXT) && GetKeyState(VK_SHIFT)) {
 			BYTE *pData = (BYTE *)GetProp(gSaiWnds.nav_zoom, SAI_PROP_WININFO);
 			if (pData)
@@ -397,7 +420,9 @@ LRESULT CALLBACK CallWndRetProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				pData = (BYTE *)(*((DWORD *)(pData + 0x8)));
 			if (pData) {
 				gStatus.penSize = *((DWORD *)(pData + 0x128));
-				gStatus.penName = (char *)(*((DWORD *)(pData + 0x4C)));
+				gStatus.penName[0] = '\0';
+				if (char *pName = (char *)(pData + 0x4C))
+					MultiByteToWideChar(CP_ACP, 0, pName, -1, gStatus.penName, MAX_VECTOR_LENGTH);
 			}
 		}
 

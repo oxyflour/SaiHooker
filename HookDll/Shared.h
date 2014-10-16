@@ -74,10 +74,13 @@ struct STATUS {
 	DWORD notifyThread;
 
 	// pen hover time & position
+	BOOL penInverted;
+	BOOL penEraser;
+	BOOL penBarrel;
 	DWORD penHoverTick;
 	POINT penHoverPos;
 	DWORD penSize;
-	char *penName;
+	TCHAR penName[MAX_VECTOR_LENGTH];
 
 	// touch gesture status
 	DWORD tgState;
@@ -106,7 +109,7 @@ struct SAI_WINDOWS {
 	HWND rotate;
 
 	HWND nav;
-	HWND nav_zoom;
+//	HWND nav_zoom;
 	HWND layers;
 	HWND color;
 	HWND tools;
