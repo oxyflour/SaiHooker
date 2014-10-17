@@ -202,9 +202,14 @@ namespace SaiHooker
             SimulateDragWithKey(vk, ctrl, shift, alt);
         }
 
-        public void RegisterNotify(int msg, string evt, string steps)
+        public void RegisterNotify(string evt, int msg, string steps)
         {
             RegisterEventNotify(msg, evt, steps);
+        }
+
+        public void UnRegisterNotify(string evt)
+        {
+            RegisterEventNotify(0, evt, "0");
         }
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]

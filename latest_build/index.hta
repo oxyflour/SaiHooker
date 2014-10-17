@@ -136,8 +136,9 @@
             else if (wParam == 1)
                 ;
             // pen button
-            else if (wParam == 2)
-                ;
+            else if (wParam == 2 && !lParam)
+                wscript.SendKeys('^z');
+            else
                 logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
         }
         // notify events
@@ -157,10 +158,10 @@
             else if (wParam == 22)
                 wscript.SendKeys(delta ? '{DEL}' : '{END}');
             else if (wParam == 23 || wParam == 24) {
-                hooker.RegisterNotify(0, 'th-z', '0');
-                hooker.RegisterNotify(0, 'th-r', '0');
-                hooker.RegisterNotify(0, 'ms-x', '0');
-                hooker.RegisterNotify(0, 'ms-y', '0');
+                hooker.UnRegisterNotify('th-z');
+                hooker.UnRegisterNotify('th-r');
+                hooker.UnRegisterNotify('ms-x');
+                hooker.UnRegisterNotify('ms-y');
                 hooker.SimulateDragWith(0x20, false, false, false);
             }
             else
@@ -177,12 +178,12 @@
                     hooker.SimulateDragWith(0x20, false, false, false);
                 },
                 u: function () {
-                    hooker.RegisterNotify(1, 'ms-x', createSteps(15));
-                    hooker.RegisterNotify(2, 'ms-y', createSteps(20));
+                    hooker.RegisterNotify('ms-x', 1, createSteps(15));
+                    hooker.RegisterNotify('ms-y', 2, createSteps(20));
                 },
                 l: function () {
-                    hooker.RegisterNotify(3, 'ms-x', createSteps(30));
-                    hooker.RegisterNotify(4, 'ms-y', createSteps(20));
+                    hooker.RegisterNotify('ms-x', 3, createSteps(30));
+                    hooker.RegisterNotify('ms-y', 4, createSteps(20));
                 }
             }[vec] || function () {
                 logText('unknown stroke: ' + vec);
@@ -209,10 +210,10 @@
             }
             // zoom/rotate with two fingers
             else if (num == 2) {
-                hooker.RegisterNotify(21, 'th-z', createSteps(10, 0, 5));
-                hooker.RegisterNotify(22, 'th-r', createSteps(10, 0, 5));
-                hooker.RegisterNotify(23, 'ms-x', createSteps(80, 2));
-                hooker.RegisterNotify(24, 'ms-y', createSteps(80, 2));
+                hooker.RegisterNotify('th-z', 21, createSteps(10, 0, 5));
+                hooker.RegisterNotify('th-r', 22, createSteps(10, 0, 5));
+                hooker.RegisterNotify('ms-x', 23, createSteps(80, 2));
+                hooker.RegisterNotify('ms-y', 24, createSteps(80, 2));
             }
             // move layer with three finger
             else if (num == 3) {
