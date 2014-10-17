@@ -165,7 +165,6 @@ namespace SaiHooker
                 m_hInst = LoadLibrary(DLL_NAME);
             return m_hInst == IntPtr.Zero ? (uint)Marshal.GetLastWin32Error() : SetSaiHook(m_hInst);
         }
-
         public void UnHook()
         {
             if (m_hInst != IntPtr.Zero)
@@ -191,12 +190,10 @@ namespace SaiHooker
         {
             SimulateKeyEvent(vkCode, keyDown);
         }
-
-        public void SimulateMouse(int x, int y, bool keyDown)
+        public void SimulateMouse(int x, int y, int leftDown, int rightDown)
         {
-            SimulateMouseEvent(x, y, keyDown);
+            SimulateMouseEvent(x, y, leftDown, rightDown);
         }
-
         public void SimulateDragWith(int vk, bool ctrl, bool shift, bool alt)
         {
             SimulateDragWithKey(vk, ctrl, shift, alt);
@@ -206,7 +203,6 @@ namespace SaiHooker
         {
             RegisterEventNotify(msg, evt, steps);
         }
-
         public void UnRegisterNotify(string evt)
         {
             RegisterEventNotify(0, evt, "0");
@@ -225,7 +221,7 @@ namespace SaiHooker
         private static extern void SimulateKeyEvent(int vkCode, bool keyDown);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
-        private static extern void SimulateMouseEvent(int x, int y, bool keyDown);
+        private static extern void SimulateMouseEvent(int x, int y, int leftDown, int rightDown);
 
         [DllImport(DLL_NAME, CharSet = CharSet.Auto)]
         private static extern void SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt);

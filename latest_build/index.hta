@@ -136,7 +136,7 @@
             else if (wParam == 1)
                 ;
             // pen button
-            else if (wParam == 2 && !lParam)
+            else if (wParam == 2 && lParam)
                 wscript.SendKeys('^z');
             else
                 logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
@@ -224,19 +224,12 @@
         else {
             // one-finger tap
             if (num == 0) {
-                var tapTick = Date.now();
-                // double tap detection
-                if (tapTick - window.tapTick < 200) {
-                    /*
-                    // ALT + Click
-                    hooker.SimulateKey(18, true);
-                    hooker.SimulateMouse(x, y, true);
-                    hooker.SimulateMouse(x, y, 0);
-                    hooker.SimulateKey(18, 0);
-                    */
-                    wscript.SendKeys('{HOME}');
-                }
-                window.tapTick = tapTick;
+                (window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
+                    if (count == 1)
+                        wscript.SendKeys('{HOME}');
+                    else if (count == 2)
+                        ;
+                })))()
             }
             // two-finger tap
             else if (num == 1) {
@@ -303,6 +296,21 @@
             if (path)
 	            wscript.Run(path);
 		}
+        function newClicker(callback) {
+            var tid = 0,
+                count = 0;
+            return function () {
+                if (tid > 0) {
+                    count ++;
+                    clearTimeout(tid);
+                }
+                tid = setTimeout(function() {
+                    callback(count);
+                    tid = 0;
+                    count = 0;
+                }, 200);
+            }
+        }
 
 		window.hooker = document.getElementById('hooker');
 		window.wndutil = document.getElementById('wndutil');

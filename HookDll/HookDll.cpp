@@ -96,8 +96,10 @@ HOOKDLL_API void _stdcall SimulateKeyEvent(int vk, bool down) {
 	SimulateKey(vk, down ? 0 : KEYEVENTF_KEYUP);
 }
 
-HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, bool down) {
-	SimulateMouse(x, y, 0, down ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP);
+HOOKDLL_API void _stdcall SimulateMouseEvent(int x, int y, int leftDown, int rightDown) {
+	SimulateMouse(x, y, 0,
+		(leftDown ? (leftDown > 0 ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP) : 0) |
+		(rightDown? (rightDown> 0 ? MOUSEEVENTF_RIGHTDOWN: MOUSEEVENTF_RIGHTUP): 0));
 }
 
 HOOKDLL_API void _stdcall SimulateDragWithKey(int vk, bool ctrl, bool shift, bool alt) {
