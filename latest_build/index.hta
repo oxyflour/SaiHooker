@@ -136,14 +136,15 @@
 			else if (wParam == 1)
 				;
 			// pen reversed
-			else if (wParam == 2)
-				hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+			else if (wParam == 2) setTimeout(function() {
+				hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
+			}, 100)
 			// pen eraser
 			else if (wParam == 3)
 				;
 			// pen button
 			else if (wParam == 4)
-				hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
+				hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
 			else
 				logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 		}
