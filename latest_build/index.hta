@@ -64,9 +64,9 @@
 			<p><label><input class="auto-load" type="checkbox"
 					initvalue="hooker.GetSaiStatus('lock-touch')"
 					onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
-			<p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
-			<p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
-			<p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
+			<p><label><input type="checkbox" onclick="simulateKey(VK.SHIFT, this.checked)" />Shift</label></p>
+			<p><label><input type="checkbox" onclick="simulateKey(VK.CTRL, this.checked)" />Ctrl</label></p>
+			<p><label><input type="checkbox" onclick="simulateKey(VK.ALT, this.checked)" />Alt</label></p>
 		</form>
 		<div id="log" style="display:none"></div>
 	</div>
@@ -143,7 +143,7 @@
 				;
 			// pen button
 			else if (wParam == 4)
-				hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+				hooker.SimulateKey(VK.E, !!lParam);
 			else
 				logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 		}
@@ -160,7 +160,7 @@
 				hooker.UnRegisterNotify('th-r');
 				hooker.UnRegisterNotify('ms-x');
 				hooker.UnRegisterNotify('ms-y');
-				hooker.SimulateDragWith(0x20, false, false, false);
+				hooker.SimulateDragWith(VK.SPACE, false, false, false);
 			}
 			else
 				logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
@@ -190,7 +190,7 @@
 		if (key == 1) {
 			// pan with one finger
 			if (num == 1) {
-				hooker.SimulateDragWith(0x20, false, false, false);
+				hooker.SimulateDragWith(VK.SPACE, false, false, false);
 			}
 			// zoom/rotate with two fingers
 			else if (num == 2) {
@@ -223,13 +223,24 @@
 			// four-finger tap
 			else if (num == 3) {
 				// send WIN+D event
-				hooker.SimulateKey(0x5b, true);
+				hooker.SimulateKey(VK.WIN, true);
 				wscript.SendKeys('d');
-				hooker.SimulateKey(0x5b, 0);
+				hooker.SimulateKey(VK.WIN, 0);
 			}
 		}
 	</script>
 	<script>
+		var VK = {
+			SHIFT: 0x10,
+			CTRL: 0x11,
+			ALT: 0x12,
+			SPACE: 0x20,
+			WIN: 0x5b,
+		};
+		ieach('ABCDEFGHIJKLMNOPQRSTUVWXYZ', function(i, c) {
+			VK[c] = c.charCodeAt(0);
+		});
+
 		function updateVisibility(name, value) {
 			$(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
 			$(value ? '.hide-'+name : '.show-'+name).addClass('hidden');
