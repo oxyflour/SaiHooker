@@ -73,6 +73,8 @@ HOOKDLL_API int _stdcall SaiStatus(TCHAR *szKey, TCHAR *szVal, TCHAR* szRet, int
 	if (szVal) {
 		if (!_tcscmp(szKey, TEXT("lock-touch")))
 			gSettings.lockTouch = _tcslen(szVal) ? 1 : 0;
+		else if (!_tcscmp(szKey, TEXT("keep-mousegesture")))
+			gSettings.keepMouseGesture = szVal && szVal[0];
 	}
 	// getter
 	if (szRet) {

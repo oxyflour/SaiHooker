@@ -73,8 +73,6 @@
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml" for="menu">
 		<menu>
-			<item text="Pen (&amp;N/l)" gst="l" key="n" />
-			<item text="Eraser (&amp;E/r)" gst="r" key="e" />
 			<item text="Move (&amp;M/d)" gst="d" key="m" />
 			<item text="Straw (&amp;L/D)" gst="D" key="l" />
 			<sep />
@@ -84,8 +82,8 @@
 			<item text="Fill (C-F/dU)" gst="dU" key="^f" />
 			<item text="Filter (&amp;O)" key="o" />
 			<sep />
-			<menu text="Select">
-				<item text="SelNone (C-D/u)" gst="u" key="^d" />
+			<menu text="Select" gst="u">
+				<item text="SelNone (C-D/u)" key="^d" />
 				<item text="SelRect (&amp;Q/ul)" gst="ul" key="q" />
 				<item text="SelFree (&amp;U/ur)" gst="ur" key="u" />
 				<item text="SelPen (&amp;A/uD)" gst="uD" key="a" />
@@ -112,7 +110,9 @@
 				<item text="Copy (C-C/Ld)" key="^c" />
 				<item text="Past (C-V/LR)" key="^v" />
 			</menu>
-			<menu text="Pens, Mix">
+			<menu text="Pens, Mix" gst="l">
+                <item text="Pen (&amp;N)" key="n" />
+                <item text="Eraser (&amp;E/r)" gst="r" key="e" />
 				<item text="Mark (&amp;I/lr)" gst="lr" key="i" />
 				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
 				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
@@ -129,15 +129,21 @@
     <script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
         // pen events
         if (msg == 0) {
-            // pen reversed
-            if (wParam == 0 && lParam)
-                hooker.SimulateKey('E'.charCodeAt(0), window.penReversed = !window.penReversed);
-            // pen eraser
+            // left button down
+            if (wParam == 0)
+                ;
+            // right button down
             else if (wParam == 1)
                 ;
+            // pen reversed
+            else if (wParam == 2)
+                hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+            // pen eraser
+            else if (wParam == 3)
+                ;
             // pen button
-            else if (wParam == 2 && lParam)
-                wscript.SendKeys('^z');
+            else if (wParam == 4)
+                hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
             else
                 logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
         }
@@ -192,8 +198,15 @@
         // no buttons are down
         else {
             if (vec) {
-                var item = $('#popup').data('doc').find('[gst=' + vec + ']');
-                item.attr('key') ? wscript.SendKeys(item.attr('key')) :
+                var doc = $('#popup').data('doc'),
+                    item = doc.find('[gst=' + vec + ']');
+                if (item.is('menu')) {
+                    var xml = '<menu>'+item.html()+'<sep /><item cid="0" text="Cancel" /></menu>',
+                        cid = wndutil.PopupMenu(xml, -1, -1);
+                    item = item.find('[cid=' + cid + ']');
+                }
+                item.attr('key') ?
+                    wscript.SendKeys(item.attr('key')):
                     logText('unknown gesture: ' + vec);
             }
             else {
@@ -225,10 +238,7 @@
             // one-finger tap
             if (num == 0) {
                 (window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
-                    if (count == 1)
-                        wscript.SendKeys('{HOME}');
-                    else if (count == 2)
-                        ;
+                    count && wscript.SendKeys('{HOME}');
                 })))()
             }
             // two-finger tap

@@ -78,7 +78,11 @@ namespace SaiHooker
             ParseMenu(hPopup, doc.DocumentElement);
             AppendMenu(hMenu, MF_STRING | MF_POPUP, (uint)(long)hPopup, "popup");
 
-            int ret = TrackPopupMenu(hPopup, TPM_CENTERALIGN | TPM_VCENTERALIGN | TPM_RETURNCMD, x, y, 0, m_hWnd, 0);
+            POINT pt = new POINT(x, y);
+            if (x < 0 || y < 0)
+                GetCursorPos(ref pt);
+
+            int ret = TrackPopupMenu(hPopup, TPM_CENTERALIGN | TPM_VCENTERALIGN | TPM_RETURNCMD, pt.x, pt.y, 0, m_hWnd, 0);
             DestroyMenu(hMenu);
 
             return ret;
@@ -109,6 +113,18 @@ namespace SaiHooker
         }
 
         IntPtr m_hWnd;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int x;
+            public int y;
+            public POINT(int px, int py)
+            {
+                x = px;
+                y = py;
+            }
+        }
 
         [DllImport(Hooker.DLL_NAME, CharSet = CharSet.Auto)]
         private static extern IntPtr GetSaiWindow();
@@ -157,6 +173,9 @@ namespace SaiHooker
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int ReleaseDC(IntPtr hWnd, IntPtr hdc);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool GetCursorPos(ref POINT lpPoint);
 
         [DllImport("gdi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int TextOut(IntPtr hdc, int x, int y, String text, int len);

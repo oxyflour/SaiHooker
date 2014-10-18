@@ -166,6 +166,7 @@ void MouseGestureKeep(UINT message, LPARAM lParam, HWND hWnd) {
 			CheckEventTrigger(&gSettings.evtOffsetY, gStatus.penHoverPos.y);
 		}
 	}
+	/*
 	else if (message == WM_LBUTTONDOWN) {
 		POINT pt = gStatus.penHoverPos;
 		int lppos = pt.x + pt.y * 0x10000;
@@ -183,6 +184,7 @@ void MouseGestureKeep(UINT message, LPARAM lParam, HWND hWnd) {
 		SimulateMouse(0, 5, 0, MOUSEEVENTF_MOVE);
 		SimulateMouse(0, -5, 0, MOUSEEVENTF_MOVE);
 	}
+	*/
 }
 void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	POINT pt = gStatus.penHoverPos;
@@ -263,10 +265,16 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if ((msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
 				msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
 			GetMessageExtraInfo() != LLMHF_INJECTED) {
-			if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP)
-				gStatus.isLeftDown = msg->message == WM_LBUTTONDOWN;
-			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP)
-				gStatus.isRightDown = msg->message == WM_RBUTTONDOWN;
+			if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP) {
+				BOOL b = msg->message == WM_LBUTTONDOWN;
+				if (gStatus.isLeftDown != b)
+					PostNotify(WM_USER_DEBUG, 0, gStatus.isLeftDown = b);
+			}
+			else if (msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) {
+				BOOL b = msg->message == WM_RBUTTONDOWN;
+				if (gStatus.isRightDown != b)
+					PostNotify(WM_USER_DEBUG, 1, gStatus.isRightDown = b);
+			}
 
 			// block right mouse button
 			if ((msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP) &&
@@ -277,7 +285,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		/*
 		 * Process mouse gestures
 		 */
-		if (gStatus.isRightDown && !gStatus.mgTick)
+		if (gSettings.keepMouseGesture && !gStatus.mgTick)
 			MouseGestureBegin(tick);
 		if (gStatus.mgTick) {
 			MouseGestureKeep(msg->message, msg->lParam, msg->hwnd);
@@ -291,7 +299,7 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				GetMessageExtraInfo() != LLMHF_INJECTED)
 				msg->message += WM_USER;
 		}
-		if (!gStatus.isLeftDown && !gStatus.isRightDown && gStatus.mgTick)
+		if (!gStatus.isLeftDown && !gStatus.isRightDown && !gSettings.keepMouseGesture && gStatus.mgTick)
 			MouseGestureEnd(tick, msg->hwnd);
 
 		/*
@@ -306,13 +314,13 @@ LRESULT CALLBACK GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam) {
 				BOOL b;
 				b = pi.penFlags & PEN_FLAG_INVERTED;
 				if (b != gStatus.penInverted)
-					PostNotify(WM_USER_DEBUG, 0, gStatus.penInverted = b);
+					PostNotify(WM_USER_DEBUG, 2, gStatus.penInverted = b);
 				b = pi.penFlags & PEN_FLAG_ERASER;
 				if (b != gStatus.penEraser)
-					PostNotify(WM_USER_DEBUG, 1, gStatus.penEraser = b);
+					PostNotify(WM_USER_DEBUG, 3, gStatus.penEraser = b);
 				b = pi.penFlags & PEN_FLAG_BARREL;
 				if (b != gStatus.penBarrel)
-					PostNotify(WM_USER_DEBUG, 2, gStatus.penBarrel = b);
+					PostNotify(WM_USER_DEBUG, 4, gStatus.penBarrel = b);
 			}
 		}
 

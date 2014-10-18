@@ -60,6 +60,7 @@ struct EVENT_TRIGGER {
 
 struct SETTINGS {
 	DWORD lockTouch;
+	DWORD keepMouseGesture;
 	SHORTCUT_KEY dragKey;
 	EVENT_TRIGGER evtOffsetX;
 	EVENT_TRIGGER evtOffsetY;
