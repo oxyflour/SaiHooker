@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+	<!-- HTA tag does not work in IE11 -->
 	<meta http-equiv="X-UA-Compatible" content="IE=IE10" />
 	<meta charset="utf-8" />
 	<title>SaiHooker</title>
@@ -27,7 +28,6 @@
 			display: none;
 		}
 	</style>
-	<!-- HTA tag does not work in IE Edge -->
 	<HTA:Application
 		id="Sai_Hooker_33895"
 		applicationname="Sai Hooker"
@@ -235,11 +235,10 @@
 			CTRL: 0x11,
 			ALT: 0x12,
 			SPACE: 0x20,
-			WIN: 0x5b,
+			WIN: 0x5b
 		};
-		ieach('ABCDEFGHIJKLMNOPQRSTUVWXYZ', function(i, c) {
-			VK[c] = c.charCodeAt(0);
-		});
+		for (var i = 0, s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; i < s.length; i ++)
+			VK[s.charAt(i)] = s.charCodeAt(i);
 
 		function updateVisibility(name, value) {
 			$(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
