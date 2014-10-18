@@ -50,7 +50,7 @@
 	</div>
 	<div class="hide-image" style="margin:10px">
 		<div class="show-error">
-			<h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
+			<h3>Hook to SAI failed <small>(<span class="err"></span>)</small></h3>
 			<span>
 				<input id="sai_file" type="file" />
 				<a href="#" onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse ]</a>
@@ -309,9 +309,9 @@
 		window.wscript = new ActiveXObject("WScript.Shell");
 
 		window.ontimer = function () {
-			var errno = hooker.Hook();
-			$('.errno').text(errno);
-			updateVisibility('error', errno);
+			var err = hooker.Hook();
+			$('.err').text(err == 1444 ? 'Is Sai Running?' : err);
+			updateVisibility('error', err);
 		}
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
