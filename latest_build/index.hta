@@ -73,54 +73,53 @@
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml" for="menu">
 		<menu>
-			<item text="Move (&amp;M/d)" gst="d" key="m" />
-			<item text="Straw (&amp;L/D)" gst="D" key="l" />
-			<sep />
-			<item text="Redu (&amp;R/du)" gst="du" key="^y" />
-			<item text="Clear (&amp;D/dL)" gst="dL" key="d" />
-			<item text="Flip (&amp;H/dl)" gst="dl" key="h" />
-			<item text="Fill (C-F/dU)" gst="dU" key="^f" />
-			<item text="Filter (&amp;O)" key="o" />
-			<sep />
-			<menu text="Select" gst="u">
-				<item text="SelNone (C-D/u)" key="^d" />
-				<item text="SelRect (&amp;Q/ul)" gst="ul" key="q" />
-				<item text="SelFree (&amp;U/ur)" gst="ur" key="u" />
-				<item text="SelPen (&amp;A/uD)" gst="uD" key="a" />
-				<item text="SelEraser (&amp;S/uR)" gst="uR" key="s" />
-				<item text="SelRegion (&amp;F/ud)" gst="ud" key="f" />
+			<menu text="Mix" gst="ud">
+				<item text="Redu (&amp;R)" key="^y" />
+				<item text="Clear (&amp;D)" key="d" />
+				<item text="Flip (&amp;H)" key="h" />
+				<item text="Fill (C-F)" key="^f" />
 			</menu>
-			<menu text="UI, File">
-				<item text="TAB (Tab/U)" gst="U" key="{TAB}" />
-				<item text="Fullscreen (F11/UD)" gst="UD" key="{F11}" />
-				<item text="NextView (C-Tab/Ul)" key="^{TAB}" />
-				<item text="PrevView (C-S-Tab/Ud)" key="^+{TAB}" />
+			<menu text="Select" gst="U">
+				<item text="Select None (C-D/u)" gst="u" key="^d" />
+				<item text="Select All (C-A)" key="^a" />
 				<sep />
-				<item text="Open... (C-O/rl)" key="^o" />
-				<item text="SaveAs... (C-S-S/rd)" key="^+s" />
-				<item text="New... (C-N/rL)" key="^n" />
-				<item text="Close (C-W/rD)" key="^w" />
-			</menu>
-			<menu text="Trans, Edit">
-				<item text="Trans (C-T/RL)" key="^t" />
-				<item text="Accept (Enter/Ru)" key="{ENTER}" />
-				<item text="Cancel (Escape/Rl)" key="{ESCAPE}" />
+				<item text="Select Rect (&amp;Q*)" key="q" />
+				<item text="Select Free (&amp;U*)" key="u" />
 				<sep />
-				<item text="Cut (C-X/Lr)" key="^x" />
-				<item text="Copy (C-C/Ld)" key="^c" />
-				<item text="Past (C-V/LR)" key="^v" />
+				<item text="Select Pen (&amp;A)" key="a" />
+				<item text="Select Eraser (&amp;S)" key="s" />
 			</menu>
-			<menu text="Pens, Mix" gst="l">
-				<item text="Pen (&amp;N)" key="n" />
+			<menu text="UI, File" gst="R">
+				<item text="TAB (Tab)" key="{TAB}" />
+				<item text="Fullscreen (F11)" key="{F11}" />
+				<item text="NextView (C-Tab)" key="^{TAB}" />
+				<item text="PrevView (C-S-Tab)" key="^+{TAB}" />
+				<sep />
+				<item text="Open... (C-O)" key="^o" />
+				<item text="SaveAs... (C-S-S)" key="^+s" />
+				<item text="New... (C-N)" key="^n" />
+				<item text="Close (C-W)" key="^w" />
+			</menu>
+			<menu text="Pens, Tools" gst="L">
+				<item text="Pen (&amp;N/l)" gst="l" key="n" />
 				<item text="Eraser (&amp;E/r)" gst="r" key="e" />
-				<item text="Mark (&amp;I/lr)" gst="lr" key="i" />
-				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
-				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
-				<item text="Pain (&amp;V/lU)" gst="lU" key="v" />
-				<item text="Blur (&amp;J/lR)" gst="lR" key="j" />
+				<item text="Mark (&amp;I*)" key="i" />
+				<item text="Color (&amp;C)" key="c" />
+				<item text="Spray (&amp;B)" key="b" />
+				<item text="Paint (&amp;V)" key="v" />
+				<item text="Blur (&amp;J*)" key="j" />
 				<sep />
-				<item text="Size+ (&amp;]/L)" gst="L" key="]" />
-				<item text="Size- (&amp;[/R)" gst="R" key="[" />
+				<item text="Size+ (&amp;])" key="]" />
+				<item text="Size- (&amp;[)" key="[" />
+			</menu>
+			<menu text="Trans, Edit" gst="D">
+				<item text="Trans (C-T)" key="^t" />
+				<item text="Accept (Enter)" key="{ENTER}" />
+				<item text="Cancel (Escape)" key="{ESCAPE}" />
+				<sep />
+				<item text="Cut (C-X)" key="^x" />
+				<item text="Copy (C-C)" key="^c" />
+				<item text="Paste (C-V)" key="^v" />
 			</menu>
 			<sep />
 			<item text="Cancel" />
@@ -152,15 +151,7 @@
 		else if (msg == 1) {
 			var delta = lParam & 0x10000,
 				index = lParam & 0xffff;
-			if (wParam == 1)
-				wscript.SendKeys(delta ? '{DEL}' : '{END}');
-			else if (wParam == 2)
-				wscript.SendKeys(delta ? '{PGUP}' : '{PGDN}');
-			else if (wParam == 3)
-				wscript.SendKeys(('nbvceas').charAt(index - 9));
-			else if (wParam == 4)
-				wscript.SendKeys(delta ? '{]}' : '{[}');
-			else if (wParam == 21)
+			if (wParam == 21)
 				wscript.SendKeys(delta ? '{PGDN}' : '{PGUP}');
 			else if (wParam == 22)
 				wscript.SendKeys(delta ? '{DEL}' : '{END}');
