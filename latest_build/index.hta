@@ -4,29 +4,29 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=IE10" />
 	<meta charset="utf-8" />
 	<title>SaiHooker</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        a {
-            color: #555;
-            text-decoration: none;
-        }
-        a:hover {
-            color: #999;
-            text-decoration: underline;
-        }
-        input[type=file] {
-            width: 0;
-            height: 0;
-            position: absolute;
-            font-size: 150%;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+		a {
+			color: #555;
+			text-decoration: none;
+		}
+		a:hover {
+			color: #999;
+			text-decoration: underline;
+		}
+		input[type=file] {
+			width: 0;
+			height: 0;
+			position: absolute;
+			font-size: 150%;
+		}
+		.hidden {
+			display: none;
+		}
+	</style>
 	<!-- HTA tag does not work in IE Edge -->
 	<HTA:Application
 		id="Sai_Hooker_33895"
@@ -43,33 +43,33 @@
 <body>
 	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
 	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-    <div class="show-image hidden">
-        <input id="img_file" type="file" />
-        <a style="position:absolute;background-color:#eee;margin:3px" href="#" onclick="loadImage()">[ close ]</a>
-        <img id="img" unselectable="on" onclick="toggleImageSize(this)" />
-    </div>
-    <div class="hide-image" style="margin:10px">
-        <div class="show-error">
-            <h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
-            <span>
-                <input id="sai_file" type="file" />
-                <a href="#" onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse ]</a>
-            </span>
-        </div>
-        <form class="hide-error">
-            <h4>
-                <small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
-                <small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
-            </h4>
-            <p><label><input class="auto-load" type="checkbox"
-                    initvalue="hooker.GetSaiStatus('lock-touch')"
-                    onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
-            <p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
-            <p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
-            <p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
-        </form>
-        <div id="log" style="display:none"></div>
-    </div>
+	<div class="show-image hidden">
+		<input id="img_file" type="file" />
+		<a style="position:absolute;background-color:#eee;margin:3px" href="#" onclick="loadImage()">[ close ]</a>
+		<img id="img" unselectable="on" onclick="toggleImageSize(this)" />
+	</div>
+	<div class="hide-image" style="margin:10px">
+		<div class="show-error">
+			<h3>Hook to SAI failed <small>(<span class="errno"></span>)</small></h3>
+			<span>
+				<input id="sai_file" type="file" />
+				<a href="#" onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse ]</a>
+			</span>
+		</div>
+		<form class="hide-error">
+			<h4>
+				<small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
+				<small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
+			</h4>
+			<p><label><input class="auto-load" type="checkbox"
+					initvalue="hooker.GetSaiStatus('lock-touch')"
+					onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
+			<p><label><input type="checkbox" value="16" onclick="simulateKey(this.value, this.checked)" />Shift</label></p>
+			<p><label><input type="checkbox" value="17" onclick="simulateKey(this.value, this.checked)" />Ctrl</label></p>
+			<p><label><input type="checkbox" value="18" onclick="simulateKey(this.value, this.checked)" />Alt</label></p>
+		</form>
+		<div id="log" style="display:none"></div>
+	</div>
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml" for="menu">
 		<menu>
@@ -111,8 +111,8 @@
 				<item text="Past (C-V/LR)" key="^v" />
 			</menu>
 			<menu text="Pens, Mix" gst="l">
-                <item text="Pen (&amp;N)" key="n" />
-                <item text="Eraser (&amp;E/r)" gst="r" key="e" />
+				<item text="Pen (&amp;N)" key="n" />
+				<item text="Eraser (&amp;E/r)" gst="r" key="e" />
 				<item text="Mark (&amp;I/lr)" gst="lr" key="i" />
 				<item text="Color (&amp;C/lu)" gst="lu" key="c" />
 				<item text="Spray (&amp;B/ld)" gst="ld" key="b" />
@@ -126,137 +126,137 @@
 			<item text="Cancel" />
 		</menu>
 	</script>
-    <script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
-        // pen events
-        if (msg == 0) {
-            // left button down
-            if (wParam == 0)
-                ;
-            // right button down
-            else if (wParam == 1)
-                ;
-            // pen reversed
-            else if (wParam == 2)
-                hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
-            // pen eraser
-            else if (wParam == 3)
-                ;
-            // pen button
-            else if (wParam == 4)
-                hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
-            else
-                logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
-        }
-        // notify events
-        else if (msg == 1) {
-            var delta = lParam & 0x10000,
-                index = lParam & 0xffff;
-            if (wParam == 1)
-                wscript.SendKeys(delta ? '{DEL}' : '{END}');
-            else if (wParam == 2)
-                wscript.SendKeys(delta ? '{PGUP}' : '{PGDN}');
-            else if (wParam == 3)
-                wscript.SendKeys(('nbvceas').charAt(index - 9));
-            else if (wParam == 4)
-                wscript.SendKeys(delta ? '{]}' : '{[}');
-            else if (wParam == 21)
-                wscript.SendKeys(delta ? '{PGDN}' : '{PGUP}');
-            else if (wParam == 22)
-                wscript.SendKeys(delta ? '{DEL}' : '{END}');
-            else if (wParam == 23 || wParam == 24) {
-                hooker.UnRegisterNotify('th-z');
-                hooker.UnRegisterNotify('th-r');
-                hooker.UnRegisterNotify('ms-x');
-                hooker.UnRegisterNotify('ms-y');
-                hooker.SimulateDragWith(0x20, false, false, false);
-            }
-            else
-                logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
-        }
-        else
-            logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
-    </script>
-    <script for="hooker" event="OnMouseGesture(vec, x, y)">
-        if (vec) {
-            var doc = $('#popup').data('doc'),
-                item = doc.find('[gst=' + vec + ']');
-            if (item.is('menu')) {
-                var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
-                    cid = wndutil.PopupMenu(xml, -1, -1);
-                item = item.find('[cid=' + cid + ']');
-            }
-            item.attr('key') ?
-                wscript.SendKeys(item.attr('key')):
-                logText('unknown gesture: ' + vec);
-        }
-        else {
-            wscript.SendKeys('^z');
-        }
-    </script>
-    <script for="hooker" event="OnTouchGesture(num, key, x, y)">
-        // fingers are on the surface and starting to move
-        if (key == 1) {
-            // pan with one finger
-            if (num == 1) {
-                hooker.SimulateDragWith(0x20, false, false, false);
-            }
-            // zoom/rotate with two fingers
-            else if (num == 2) {
-                hooker.RegisterNotify('th-z', 21, createSteps(10, 0, 5));
-                hooker.RegisterNotify('th-r', 22, createSteps(10, 0, 5));
-                hooker.RegisterNotify('ms-x', 23, createSteps(80, 2));
-                hooker.RegisterNotify('ms-y', 24, createSteps(80, 2));
-            }
-            // move layer with three finger
-            else if (num == 3) {
-                hooker.SimulateDragWith(0, true, false, false);
-            }
-        }
-        // fingers tap
-        else {
-            // one-finger tap
-            if (num == 0) {
-                (window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
-                    count && wscript.SendKeys('{HOME}');
-                })))()
-            }
-            // two-finger tap
-            else if (num == 1) {
-                wscript.SendKeys('{TAB}');
-            }
-            // three-finger tap
-            else if (num == 2) {
-                wscript.SendKeys('{F11}');
-            }
-            // four-finger tap
-            else if (num == 3) {
-                // send WIN+D event
-                hooker.SimulateKey(0x5b, true);
-                wscript.SendKeys('d');
-                hooker.SimulateKey(0x5b, 0);
-            }
-        }
-    </script>
+	<script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
+		// pen events
+		if (msg == 0) {
+			// left button down
+			if (wParam == 0)
+				;
+			// right button down
+			else if (wParam == 1)
+				;
+			// pen reversed
+			else if (wParam == 2)
+				hooker.SimulateKey('E'.charCodeAt(0), !!lParam);
+			// pen eraser
+			else if (wParam == 3)
+				;
+			// pen button
+			else if (wParam == 4)
+				hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
+			else
+				logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+		}
+		// notify events
+		else if (msg == 1) {
+			var delta = lParam & 0x10000,
+				index = lParam & 0xffff;
+			if (wParam == 1)
+				wscript.SendKeys(delta ? '{DEL}' : '{END}');
+			else if (wParam == 2)
+				wscript.SendKeys(delta ? '{PGUP}' : '{PGDN}');
+			else if (wParam == 3)
+				wscript.SendKeys(('nbvceas').charAt(index - 9));
+			else if (wParam == 4)
+				wscript.SendKeys(delta ? '{]}' : '{[}');
+			else if (wParam == 21)
+				wscript.SendKeys(delta ? '{PGDN}' : '{PGUP}');
+			else if (wParam == 22)
+				wscript.SendKeys(delta ? '{DEL}' : '{END}');
+			else if (wParam == 23 || wParam == 24) {
+				hooker.UnRegisterNotify('th-z');
+				hooker.UnRegisterNotify('th-r');
+				hooker.UnRegisterNotify('ms-x');
+				hooker.UnRegisterNotify('ms-y');
+				hooker.SimulateDragWith(0x20, false, false, false);
+			}
+			else
+				logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+		}
+		else
+			logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+	</script>
+	<script for="hooker" event="OnMouseGesture(vec, x, y)">
+		if (vec) {
+			var doc = $('#popup').data('doc'),
+				item = doc.find('[gst=' + vec + ']');
+			if (item.is('menu')) {
+				var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
+					cid = wndutil.PopupMenu(xml, -1, -1);
+				item = item.find('[cid=' + cid + ']');
+			}
+			item.attr('key') ?
+				wscript.SendKeys(item.attr('key')):
+				logText('unknown gesture: ' + vec);
+		}
+		else {
+			wscript.SendKeys('^z');
+		}
+	</script>
+	<script for="hooker" event="OnTouchGesture(num, key, x, y)">
+		// fingers are on the surface and starting to move
+		if (key == 1) {
+			// pan with one finger
+			if (num == 1) {
+				hooker.SimulateDragWith(0x20, false, false, false);
+			}
+			// zoom/rotate with two fingers
+			else if (num == 2) {
+				hooker.RegisterNotify('th-z', 21, createSteps(10, 0, 5));
+				hooker.RegisterNotify('th-r', 22, createSteps(10, 0, 5));
+				hooker.RegisterNotify('ms-x', 23, createSteps(80, 2));
+				hooker.RegisterNotify('ms-y', 24, createSteps(80, 2));
+			}
+			// move layer with three finger
+			else if (num == 3) {
+				hooker.SimulateDragWith(0, true, false, false);
+			}
+		}
+		// fingers tap
+		else {
+			// one-finger tap
+			if (num == 0) {
+				(window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
+					count && wscript.SendKeys('{HOME}');
+				})))()
+			}
+			// two-finger tap
+			else if (num == 1) {
+				wscript.SendKeys('{TAB}');
+			}
+			// three-finger tap
+			else if (num == 2) {
+				wscript.SendKeys('{F11}');
+			}
+			// four-finger tap
+			else if (num == 3) {
+				// send WIN+D event
+				hooker.SimulateKey(0x5b, true);
+				wscript.SendKeys('d');
+				hooker.SimulateKey(0x5b, 0);
+			}
+		}
+	</script>
 	<script>
-	    function updateVisibility(name, value) {
-            $(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
-            $(value ? '.hide-'+name : '.show-'+name).addClass('hidden');
-	    }
+		function updateVisibility(name, value) {
+			$(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
+			$(value ? '.hide-'+name : '.show-'+name).addClass('hidden');
+		}
 		function logText(t, c, a) {
 			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
 		}
 		function loadImage(fi) {
-		    var path = $(fi).val();
-		    if (path) {
-		        $('#img').attr('src', path);
-		        logText('loading image: ' + path);
-		    }
-		    updateVisibility('image', path);
+			var path = $(fi).val();
+			if (path) {
+				$('#img').attr('src', path);
+				logText('loading image: ' + path);
+			}
+			updateVisibility('image', path);
 		}
 		function toggleImageSize(im) {
-		    im = $(im);
-		    var ww = $(window).width();
-		    im.width() == ww ? im.width('auto') : im.width(ww);
+			im = $(im);
+			var ww = $(window).width();
+			im.width() == ww ? im.width('auto') : im.width(ww);
 		}
 		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
@@ -267,39 +267,39 @@
 			hooker.SimulateKey(vk, down);
 		}
 		function createSteps(d, n, b) {
-		    var ls = [], b = b || 0;
-		    for (var i = 0; i < (n || 20); i++) {
-		        b += d;
-		        ls.push(b);
-		        ls.push(-b);
-		    }
-		    return ls.sort(function (a, b) {
-		        return a - b;
-		    }).join(',');
+			var ls = [], b = b || 0;
+			for (var i = 0; i < (n || 20); i++) {
+				b += d;
+				ls.push(b);
+				ls.push(-b);
+			}
+			return ls.sort(function (a, b) {
+				return a - b;
+			}).join(',');
 		}
 		function browseFile(fi) {
-		    return $(fi).trigger('click').val();
+			return $(fi).trigger('click').val();
 		}
 		function runFile(fi) {
-		    var path = $(fi).val();
-            if (path)
-	            wscript.Run(path);
+			var path = $(fi).val();
+			if (path)
+				wscript.Run(path);
 		}
-        function newClicker(callback) {
-            var tid = 0,
-                count = 0;
-            return function () {
-                if (tid > 0) {
-                    count ++;
-                    clearTimeout(tid);
-                }
-                tid = setTimeout(function() {
-                    callback(count);
-                    tid = 0;
-                    count = 0;
-                }, 200);
-            }
-        }
+		function newClicker(callback) {
+			var tid = 0,
+				count = 0;
+			return function () {
+				if (tid > 0) {
+					count ++;
+					clearTimeout(tid);
+				}
+				tid = setTimeout(function() {
+					callback(count);
+					tid = 0;
+					count = 0;
+				}, 200);
+			}
+		}
 
 		window.hooker = document.getElementById('hooker');
 		window.wndutil = document.getElementById('wndutil');
@@ -308,7 +308,7 @@
 		window.ontimer = function () {
 			var errno = hooker.Hook();
 			$('.errno').text(errno);
-		    updateVisibility('error', errno);
+			updateVisibility('error', errno);
 		}
 		window.onload = function () {
 			wndutil.SetupToolWindow(document.title);
@@ -324,14 +324,14 @@
 				(p[0] || c[0]).selected = true;
 			});
 			$('script[for=menu]').each(function (i, e) {
-                var elem = $(e), doc = $(elem.html());
-                doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
-                elem.data('doc', doc).data('xml', doc[0].outerHTML);
+				var elem = $(e), doc = $(elem.html());
+				doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
+				elem.data('doc', doc).data('xml', doc[0].outerHTML);
 			});
 
-            window.resizeTo(220, 260);
-            window.ontimer();
-            setInterval(window.ontimer, 2000)
+			window.resizeTo(220, 260);
+			window.ontimer();
+			setInterval(window.ontimer, 2000)
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();
