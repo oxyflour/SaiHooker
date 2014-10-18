@@ -166,25 +166,6 @@ void MouseGestureKeep(UINT message, LPARAM lParam, HWND hWnd) {
 			CheckEventTrigger(&gSettings.evtOffsetY, gStatus.penHoverPos.y);
 		}
 	}
-	/*
-	else if (message == WM_LBUTTONDOWN) {
-		POINT pt = gStatus.penHoverPos;
-		int lppos = pt.x + pt.y * 0x10000;
-		InvalidateRect(WindowFromPoint(pt), NULL, FALSE);
-		if (gStatus.mgState == 0) {
-			MsVectorToEmpty();
-			PostNotify(WM_USER_GESTURE, 1, lppos);
-		}
-		else if (gStatus.mgState == WM_MOUSEMOVE) {
-			MsVectorToString();
-			PostNotify(WM_USER_GESTURE, 1, lppos);
-		}
-		gStatus.mgState = WM_LBUTTONDOWN;
-		// move the cursor to current position
-		SimulateMouse(0, 5, 0, MOUSEEVENTF_MOVE);
-		SimulateMouse(0, -5, 0, MOUSEEVENTF_MOVE);
-	}
-	*/
 }
 void MouseGestureEnd(DWORD tick, HWND hwnd) {
 	POINT pt = gStatus.penHoverPos;

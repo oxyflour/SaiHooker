@@ -12,7 +12,7 @@ namespace SaiHooker
         [DispId(1)]
         void OnHookEvent(int msg, int wParam, int lParam);
         [DispId(3)]
-        void OnMouseGesture(string vec, int key, int x, int y);
+        void OnMouseGesture(string vec, int x, int y);
         [DispId(4)]
         void OnTouchGesture(int n, int k, int x, int y);
     }
@@ -94,7 +94,7 @@ namespace SaiHooker
                     StringBuilder sz = new StringBuilder(64);
                     SaiStatus("gesture-vector", null, sz, sz.Capacity);
                     int x = (int)msg.lParam % 0x10000, y = (int)msg.lParam / 0x10000;
-                    s_this.OnMouseGesture(sz.ToString(), (int)msg.wParam, x, y);
+                    s_this.OnMouseGesture(sz.ToString(), x, y);
                 }
                 if (msg.message == WM_USER_TOUCH && s_this.OnTouchGesture != null)
                 {
@@ -153,7 +153,7 @@ namespace SaiHooker
         public delegate void HookEventHandle(int msg, int wParam, int lParam);
         public event HookEventHandle OnHookEvent;
 
-        public delegate void MouseGestureHandle(string vec, int key, int x, int y);
+        public delegate void MouseGestureHandle(string vec, int x, int y);
         public event MouseGestureHandle OnMouseGesture;
 
         public delegate void FingerTapHandle(int n, int k, int x, int y);

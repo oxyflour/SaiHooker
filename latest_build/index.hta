@@ -176,42 +176,21 @@
         else
             logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
     </script>
-    <script for="hooker" event="OnMouseGesture(vec, key, x, y)">
-        // left mouse button is down when the gesture ends
-        if (key == 1) {
-            ({
-                '': function () {
-                    hooker.SimulateDragWith(0x20, false, false, false);
-                },
-                u: function () {
-                    hooker.RegisterNotify('ms-x', 1, createSteps(15));
-                    hooker.RegisterNotify('ms-y', 2, createSteps(20));
-                },
-                l: function () {
-                    hooker.RegisterNotify('ms-x', 3, createSteps(30));
-                    hooker.RegisterNotify('ms-y', 4, createSteps(20));
-                }
-            }[vec] || function () {
-                logText('unknown stroke: ' + vec);
-            })();
+    <script for="hooker" event="OnMouseGesture(vec, x, y)">
+        if (vec) {
+            var doc = $('#popup').data('doc'),
+                item = doc.find('[gst=' + vec + ']');
+            if (item.is('menu')) {
+                var xml = '<menu>'+item.html()+'<sep /><item cid="0" text="Cancel" /></menu>',
+                    cid = wndutil.PopupMenu(xml, -1, -1);
+                item = item.find('[cid=' + cid + ']');
+            }
+            item.attr('key') ?
+                wscript.SendKeys(item.attr('key')):
+                logText('unknown gesture: ' + vec);
         }
-        // no buttons are down
         else {
-            if (vec) {
-                var doc = $('#popup').data('doc'),
-                    item = doc.find('[gst=' + vec + ']');
-                if (item.is('menu')) {
-                    var xml = '<menu>'+item.html()+'<sep /><item cid="0" text="Cancel" /></menu>',
-                        cid = wndutil.PopupMenu(xml, -1, -1);
-                    item = item.find('[cid=' + cid + ']');
-                }
-                item.attr('key') ?
-                    wscript.SendKeys(item.attr('key')):
-                    logText('unknown gesture: ' + vec);
-            }
-            else {
-                wscript.SendKeys('^z');
-            }
+            wscript.SendKeys('^z');
         }
     </script>
     <script for="hooker" event="OnTouchGesture(num, key, x, y)">
