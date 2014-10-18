@@ -101,8 +101,9 @@ namespace SaiHooker
                 }
                 else if (name == "item")
                 {
+                    uint cid = n.Attributes["cid"] == null ? 0 : uint.Parse(n.Attributes["cid"].Value.ToString());
                     if (n.Attributes["hidden"] == null)
-                        AppendMenu(hParent, MF_STRING, uint.Parse(n.Attributes["cid"].Value.ToString()),
+                        AppendMenu(hParent, MF_STRING, cid,
                             n.Attributes["text"].Value.ToString());
                 }
                 else if (name == "sep")

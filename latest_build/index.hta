@@ -181,7 +181,7 @@
             var doc = $('#popup').data('doc'),
                 item = doc.find('[gst=' + vec + ']');
             if (item.is('menu')) {
-                var xml = '<menu>'+item.html()+'<sep /><item cid="0" text="Cancel" /></menu>',
+                var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
                     cid = wndutil.PopupMenu(xml, -1, -1);
                 item = item.find('[cid=' + cid + ']');
             }
