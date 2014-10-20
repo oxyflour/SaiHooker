@@ -2,7 +2,7 @@
 <html>
 <head>
 	<!-- HTA tag does not work in IE11 -->
-	<meta http-equiv="X-UA-Compatible" content="IE=IE10" />
+	<meta http-equiv="X-UA-Compatible" content="IE=IE9" />
 	<meta charset="utf-8" />
 	<title>SaiHooker</title>
 	<style>
@@ -26,6 +26,19 @@
 		}
 		.hidden {
 			display: none;
+		}
+		.check-button input {
+			position: absolute;
+			width: 0;
+			opacity: 0;
+		}
+		.check-button label {
+			display: block;
+			margin: 2px;
+			padding: 5px;
+		}
+		.check-button input:checked + label {
+			background: #ccc;
 		}
 	</style>
 	<HTA:Application
@@ -61,12 +74,24 @@
 				<small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
 				<small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
 			</h4>
-			<p><label><input class="auto-load" type="checkbox"
+			<p class="check-button">
+				<input class="auto-load" type="checkbox"
 					initvalue="hooker.GetSaiStatus('lock-touch')"
-					onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />Disable Touch</label></p>
-			<p><label><input type="checkbox" onclick="simulateKey(VK.SHIFT, this.checked)" />Shift</label></p>
-			<p><label><input type="checkbox" onclick="simulateKey(VK.CTRL, this.checked)" />Ctrl</label></p>
-			<p><label><input type="checkbox" onclick="simulateKey(VK.ALT, this.checked)" />Alt</label></p>
+					onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />
+				<label for="prev-input">Disable Touch</label>
+			</p>
+			<p class="check-button">
+				<input type="checkbox" onclick="simulateKey(VK.SHIFT, this.checked)" />
+				<label for="prev-input">Shift</label>
+			</p>
+			<p class="check-button">
+				<input type="checkbox" onclick="simulateKey(VK.CTRL, this.checked)" />
+				<label for="prev-input">Ctrl</label>
+			</p>
+			<p class="check-button">
+				<input type="checkbox" onclick="simulateKey(VK.ALT, this.checked)" />
+				<label for="prev-input">Alt</label>
+			</p>
 		</form>
 		<div id="log" style="display:none"></div>
 	</div>
@@ -325,6 +350,12 @@
 				var elem = $(e), doc = $(elem.html());
 				doc.find('item').each(function(i, e) { $(e).attr('cid', i+1); })
 				elem.data('doc', doc).data('xml', doc[0].outerHTML);
+			});
+			$('label[for="prev-input"]').each(function(i, e) {
+				var elem = $(e), prev = elem.prev();
+				if (!prev.attr('id'))
+					prev.attr('id', Date.now()+Math.random());
+				elem.attr('for', prev.attr('id'));
 			});
 
 			window.resizeTo(320, 360);
