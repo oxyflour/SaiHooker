@@ -18,27 +18,51 @@
 			color: #999;
 			text-decoration: underline;
 		}
-		input[type=file] {
-			width: 0;
-			height: 0;
-			position: absolute;
-			font-size: 150%;
+		.button {
+			display: inline-block;
+			margin: 2px;
+			padding: 5px;
+			cursor: pointer;
 		}
 		.hidden {
 			display: none;
 		}
+		.invisible {
+			position: absolute;
+			width: 0;
+			height: 0;
+		}
+		input[type=file] {
+			font-size: 150%;
+		}
+
 		.check-button input {
 			position: absolute;
 			width: 0;
+			height: 0;
 			opacity: 0;
-		}
-		.check-button label {
-			display: block;
-			margin: 2px;
-			padding: 5px;
 		}
 		.check-button input:checked + label {
 			background: #ccc;
+		}
+
+		.tabs {
+			background: #ccc;
+			margin-bottom: 10px;
+		}
+		.radio-button input {
+			position: absolute;
+			width: 0;
+			height: 0;
+			opacity: 0;
+		}
+		.radio-button label {
+			cursor: pointer;
+			line-height: 32px;
+			padding: 8px 12px;
+		}
+		.radio-button input:checked + label {
+			background: #eee;
 		}
 	</style>
 	<HTA:Application
@@ -54,46 +78,72 @@
 		singleinstance="yes" />
 </head>
 <body>
-	<object id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
-	<object id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
-	<div class="show-image hidden">
-		<input id="img_file" type="file" />
-		<a style="position:absolute;background-color:#eee;margin:3px" href="#" onclick="loadImage()">[ close ]</a>
-		<img id="img" unselectable="on" onclick="toggleImageSize(this)" />
-	</div>
-	<div class="hide-image" style="margin:10px">
+	<object class="invisible" id="hooker" width="0" height="0" classid="clsid:8E1D1128-0685-4C1D-8475-916B2BDE241A"></object>
+	<object class="invisible" id="wndutil" width="0" height="0" classid="clsid:4661BF20-A332-4ADA-9F20-1D6EAB5DADA3"></object>
 		<div class="show-error">
 			<h3>Hook to SAI failed <small>(<span class="err"></span>)</small></h3>
 			<span>
-				<input id="sai_file" type="file" />
-				<a href="#" onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse ]</a>
+				<input id="sai_file" class="invisible" type="file" />
+				<a href onclick="browseFile('#sai_file') && runFile('#sai_file');return false;">[ Browse for SAI ]</a>
 			</span>
 		</div>
 		<form class="hide-error">
-			<h4>
-				<small><a href="#" onclick="$('#log').toggle();return false">[ see log ]</a></small>
-				<small><a href="#" onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a></small>
-			</h4>
-			<p class="check-button">
-				<input class="auto-load" type="checkbox"
-					initvalue="hooker.GetSaiStatus('lock-touch')"
-					onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />
-				<label for="prev-input">Disable Touch</label>
-			</p>
-			<p class="check-button">
-				<input type="checkbox" onclick="simulateKey(VK.SHIFT, this.checked)" />
-				<label for="prev-input">Shift</label>
-			</p>
-			<p class="check-button">
-				<input type="checkbox" onclick="simulateKey(VK.CTRL, this.checked)" />
-				<label for="prev-input">Ctrl</label>
-			</p>
-			<p class="check-button">
-				<input type="checkbox" onclick="simulateKey(VK.ALT, this.checked)" />
-				<label for="prev-input">Alt</label>
-			</p>
+			<div class="tabs">
+				<span class="radio-button">
+					<input type="radio" name="tab" value="c" />
+					<label for="prev-input">ctrls</label>
+				</span>
+				<span class="radio-button">
+					<input type="radio" name="tab" value="i" />
+					<label for="prev-input">img</label>
+				</span>
+				<span class="radio-button">
+					<input type="radio" name="tab" value="l" />
+					<label for="prev-input">log</label>
+				</span>
+			</div>
+			<div class="tab tab-c">
+				<p>
+					<span class="button" onclick="sendKeys('^z')">
+						[ Undo ]
+					</span>
+					<span class="button" onclick="sendKeys('^y')">
+						[ Redo ]
+					</span>
+				</p>
+				<p>
+					<span class="button check-button">
+						<input type="checkbox" onclick="simulateKey(VK.SHIFT, this.checked)" />
+						<label for="prev-input">[ Shift ]</label>
+					</span>
+					<span class="button check-button">
+						<input type="checkbox" onclick="simulateKey(VK.CTRL, this.checked)" />
+						<label for="prev-input">[ Ctrl ]</label>
+					</span>
+					<span class="button check-button">
+						<input type="checkbox" onclick="simulateKey(VK.ALT, this.checked)" />
+						<label for="prev-input">[ Alt ]</label>
+					</span>
+				</p>
+				<p>
+					<span class="button check-button">
+						<input class="auto-load" type="checkbox"
+							initvalue="hooker.GetSaiStatus('lock-touch')"
+							onclick="hooker.SetSaiStatus('lock-touch', this.checked ? '1' : '')" />
+						<label for="prev-input">[ Disable Touch ]</label>
+					</span>
+				</p>
+			</div>
+			<div class="tab tab-i">
+				<div>
+					<input id="img_file" class="invisible" type="file" />
+					<a class="button" href
+						onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a>
+				</div>
+				<img id="img" unselectable="on" onclick="toggleImageSize(this)" />
+			</div>
+			<div class="tab tab-l" id="log"></div>
 		</form>
-		<div id="log" style="display:none"></div>
 	</div>
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml" for="menu">
@@ -265,7 +315,7 @@
 			$(value ? '.show-'+name : '.hide-'+name).removeClass('hidden');
 			$(value ? '.hide-'+name : '.show-'+name).addClass('hidden');
 		}
-		function logText(t, c, a) {
+		function logText(t, c) {
 			$('#log').prepend('<div class="'+c+'">'+t+'</div>');
 		}
 		function loadImage(fi) {
@@ -274,12 +324,11 @@
 				$('#img').attr('src', path);
 				logText('loading image: ' + path);
 			}
-			updateVisibility('image', path);
 		}
 		function toggleImageSize(im) {
 			im = $(im);
 			var ww = $(window).width();
-			im.width() == ww ? im.width('auto') : im.width(ww);
+			im.width() == ww ? im.width('auto') : im.width('100%');
 		}
 		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
@@ -357,6 +406,10 @@
 					prev.attr('id', Date.now()+Math.random());
 				elem.attr('for', prev.attr('id'));
 			});
+			$('input[name=tab]').click(function(e) {
+				$('.tab').hide();
+				$('.tab.tab-' + $(this).val()).show();
+			}).first().trigger('click');
 
 			window.resizeTo(320, 360);
 			window.ontimer();
