@@ -244,7 +244,7 @@
 	<script for="hooker" event="OnMouseGesture(vec, x, y)">
 		if (vec) {
 			var doc = $('#popup').data('doc'),
-				item = doc.find('[gst=' + vec + ']');
+				item = doc.find('[gst="' + vec + '"]');
 			if (item.is('menu')) {
 				// popup the menu and wait for user selection
 				var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
