@@ -143,7 +143,7 @@
 				;
 			// pen button
 			else if (wParam == 4)
-				hooker.SimulateKey(VK.E, !!lParam);
+				simulateKey(VK.E, !!lParam);
 			else
 				logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 		}
@@ -152,9 +152,9 @@
 			var delta = lParam & 0x10000,
 				index = lParam & 0xffff;
 			if (wParam == 21)
-				wscript.SendKeys(delta ? '{PGDN}' : '{PGUP}');
+				sendKeys(delta ? '{PGDN}' : '{PGUP}');
 			else if (wParam == 22)
-				wscript.SendKeys(delta ? '{DEL}' : '{END}');
+				sendKeys(delta ? '{DEL}' : '{END}');
 			else if (wParam == 23 || wParam == 24) {
 				hooker.UnRegisterNotify('th-z');
 				hooker.UnRegisterNotify('th-r');
@@ -178,11 +178,11 @@
 				item = item.find('[cid=' + cid + ']');
 			}
 			item.attr('key') ?
-				wscript.SendKeys(item.attr('key')):
+				sendKeys(item.attr('key')):
 				logText('unknown gesture: ' + vec);
 		}
 		else {
-			wscript.SendKeys('^z');
+			sendKeys('^z');
 		}
 	</script>
 	<script for="hooker" event="OnTouchGesture(num, key, x, y)">
@@ -209,23 +209,23 @@
 			// one-finger tap
 			if (num == 0) {
 				(window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
-					count && wscript.SendKeys('{HOME}');
+					count && sendKeys('{HOME}');
 				})))()
 			}
 			// two-finger tap
 			else if (num == 1) {
-				wscript.SendKeys('{TAB}');
+				sendKeys('{TAB}');
 			}
 			// three-finger tap
 			else if (num == 2) {
-				wscript.SendKeys('{F11}');
+				sendKeys('{F11}');
 			}
 			// four-finger tap
 			else if (num == 3) {
 				// send WIN+D event
-				hooker.SimulateKey(VK.WIN, true);
-				wscript.SendKeys('d');
-				hooker.SimulateKey(VK.WIN, 0);
+				simulateKey(VK.WIN, true);
+				sendKeys('d');
+				simulateKey(VK.WIN, 0);
 			}
 		}
 	</script>
