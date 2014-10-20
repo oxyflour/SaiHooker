@@ -95,8 +95,8 @@ void MsVectorToString() {
 		TCHAR c = j > 0 ? st[j-1] : 0;
 		if (k > MOUSE_GESTURE_REDUCE_SLOPE) c = e->y > b->y ? L'd' : L'u';
 		else if (k < 1.0/MOUSE_GESTURE_REDUCE_SLOPE) c = e->x > b->x ? L'r' : L'l';
-		else if (e->x > b->x) c = e->y > b->y ? L'R' : L'U';
-		else c = e->y > b->y ? L'D' : L'L';
+		else if (e->x > b->x) c = e->y > b->y ? L']' : L'}';
+		else c = e->y > b->y ? L'[' : L'{';
 		if (j == 0 || st[j-1] != c)
 			st[j ++] = c;
 	}

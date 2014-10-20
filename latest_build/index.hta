@@ -149,34 +149,13 @@
 	<script src="jquery-1.8.0.min.js"></script>
 	<script id="popup" type="text/xml" for="menu">
 		<menu>
-			<menu text="Mix" gst="ud">
+			<menu text="Mix" gst="d">
 				<item text="Redu (&amp;R)" key="^y" />
 				<item text="Clear (&amp;D)" key="d" />
 				<item text="Flip (&amp;H)" key="h" />
 				<item text="Fill (C-F)" key="^f" />
 			</menu>
-			<menu text="Select" gst="U">
-				<item text="Select None (C-D/u)" gst="u" key="^d" />
-				<item text="Select All (C-A)" key="^a" />
-				<sep />
-				<item text="Select Rect (&amp;Q*)" key="q" />
-				<item text="Select Free (&amp;U*)" key="u" />
-				<sep />
-				<item text="Select Pen (&amp;A)" key="a" />
-				<item text="Select Eraser (&amp;S)" key="s" />
-			</menu>
-			<menu text="UI, File" gst="R">
-				<item text="TAB (Tab)" key="{TAB}" />
-				<item text="Fullscreen (F11)" key="{F11}" />
-				<item text="NextView (C-Tab)" key="^{TAB}" />
-				<item text="PrevView (C-S-Tab)" key="^+{TAB}" />
-				<sep />
-				<item text="Open... (C-O)" key="^o" />
-				<item text="SaveAs... (C-S-S)" key="^+s" />
-				<item text="New... (C-N)" key="^n" />
-				<item text="Close (C-W)" key="^w" />
-			</menu>
-			<menu text="Pens, Tools" gst="L">
+			<menu text="Pens, Tools" gst="{">
 				<item text="Pen (&amp;N/l)" gst="l" key="n" />
 				<item text="Eraser (&amp;E/r)" gst="r" key="e" />
 				<item text="Mark (&amp;I*)" key="i" />
@@ -188,7 +167,17 @@
 				<item text="Size+ (&amp;])" key="]" />
 				<item text="Size- (&amp;[)" key="[" />
 			</menu>
-			<menu text="Trans, Edit" gst="D">
+			<menu text="Select" gst="}">
+				<item text="Select None (C-D/u)" gst="u" key="^d" />
+				<item text="Select All (C-A)" key="^a" />
+				<sep />
+				<item text="Select Rect (&amp;Q*)" key="q" />
+				<item text="Select Free (&amp;U*)" key="u" />
+				<sep />
+				<item text="Select Pen (&amp;A)" key="a" />
+				<item text="Select Eraser (&amp;S)" key="s" />
+			</menu>
+			<menu text="Trans, Edit" gst="[">
 				<item text="Trans (C-T)" key="^t" />
 				<item text="Accept (Enter)" key="{ENTER}" />
 				<item text="Cancel (Escape)" key="{ESCAPE}" />
@@ -196,6 +185,17 @@
 				<item text="Cut (C-X)" key="^x" />
 				<item text="Copy (C-C)" key="^c" />
 				<item text="Paste (C-V)" key="^v" />
+			</menu>
+			<menu text="UI, File" gst="]">
+				<item text="TAB (Tab)" key="{TAB}" />
+				<item text="Fullscreen (F11)" key="{F11}" />
+				<item text="NextView (C-Tab)" key="^{TAB}" />
+				<item text="PrevView (C-S-Tab)" key="^+{TAB}" />
+				<sep />
+				<item text="Open... (C-O)" key="^o" />
+				<item text="SaveAs... (C-S-S)" key="^+s" />
+				<item text="New... (C-N)" key="^n" />
+				<item text="Close (C-W)" key="^w" />
 			</menu>
 			<sep />
 			<item text="Cancel" />
