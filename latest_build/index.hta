@@ -36,19 +36,12 @@
 			font-size: 150%;
 		}
 
-		.check-button input {
-			position: absolute;
-			width: 0;
-			height: 0;
-			opacity: 0;
-		}
-		.check-button input:checked + label {
-			background: #ccc;
-		}
-
 		.tabs {
 			background: #ccc;
 			margin-bottom: 10px;
+			overflow: hidden;
+			width: 100%;
+			line-height: 40px;
 		}
 		.radio-button input {
 			position: absolute;
@@ -58,11 +51,20 @@
 		}
 		.radio-button label {
 			cursor: pointer;
-			line-height: 32px;
-			padding: 8px 12px;
+			padding: 12px;
 		}
 		.radio-button input:checked + label {
 			background: #eee;
+		}
+
+		.check-button input {
+			position: absolute;
+			width: 0;
+			height: 0;
+			opacity: 0;
+		}
+		.check-button input:checked + label {
+			background: #ccc;
 		}
 	</style>
 	<HTA:Application
@@ -136,7 +138,7 @@
 					<a class="button" href
 						onclick="browseFile('#img_file') && loadImage('#img_file');return false">[ load image ]</a>
 				</div>
-				<img id="img" unselectable="on" onclick="toggleImageSize(this)" />
+				<img id="img" unselectable="on" ondblclick="toggleImageSize(this)" />
 			</div>
 			<div class="tab tab-l">
 				<p><a href="https://github.com/oxyflour/saihooker">[ Project Page ]</a></p>
@@ -329,7 +331,7 @@
 		function toggleImageSize(im) {
 			im = $(im);
 			var ww = $(window).width();
-			im.width() == ww ? im.width('auto') : im.width('100%');
+			im.width() == ww ? im.width('auto') : im.width(ww);
 		}
 		function sendKeys(ks) {
 			wndutil.ActiveSaiWindow();
