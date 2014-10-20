@@ -126,29 +126,27 @@
 		</menu>
 	</script>
 	<script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
-		// pen events
 		if (msg == 0) {
-			// left button down
+			// pen events
 			if (wParam == 0)
+				// left button down
 				;
-			// right button down
 			else if (wParam == 1)
+				// right button down
 				;
-			// pen reversed
 			else if (wParam == 2) setTimeout(function() {
+				// pen reversed
 				hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
 			}, 100)
-			// pen eraser
 			else if (wParam == 3)
+				// pen eraser
 				;
-			// pen button
 			else if (wParam == 4)
+				// pen button
 				simulateKey(VK.E, !!lParam);
-			else
-				logText('unknown pen event: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 		}
-		// notify events
 		else if (msg == 1) {
+			// notify events (from RegisterNotify)
 			var delta = lParam & 0x10000,
 				index = lParam & 0xffff;
 			if (wParam == 21)
@@ -162,8 +160,6 @@
 				hooker.UnRegisterNotify('ms-y');
 				hooker.SimulateDragWith(VK.SPACE, false, false, false);
 			}
-			else
-				logText('unknown notify: (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
 		}
 		else
 			logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
@@ -173,6 +169,7 @@
 			var doc = $('#popup').data('doc'),
 				item = doc.find('[gst=' + vec + ']');
 			if (item.is('menu')) {
+				// popup the menu and wait for user selection
 				var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
 					cid = wndutil.PopupMenu(xml, -1, -1);
 				item = item.find('[cid=' + cid + ']');
@@ -186,43 +183,42 @@
 		}
 	</script>
 	<script for="hooker" event="OnTouchGesture(num, key, x, y)">
-		// fingers are on the surface and starting to move
 		if (key == 1) {
-			// pan with one finger
+			// fingers are on the surface and starting to move
 			if (num == 1) {
+				// pan with one finger
 				hooker.SimulateDragWith(VK.SPACE, false, false, false);
 			}
-			// zoom/rotate with two fingers
 			else if (num == 2) {
+				// zoom/rotate with two fingers
 				hooker.RegisterNotify('th-z', 21, createSteps(10, 0, 5));
 				hooker.RegisterNotify('th-r', 22, createSteps(10, 0, 5));
 				hooker.RegisterNotify('ms-x', 23, createSteps(80, 2));
 				hooker.RegisterNotify('ms-y', 24, createSteps(80, 2));
 			}
-			// move layer with three finger
 			else if (num == 3) {
+				// move layer with three finger
 				hooker.SimulateDragWith(0, true, false, false);
 			}
 		}
-		// fingers tap
 		else {
-			// one-finger tap
+			// fingers tap
 			if (num == 0) {
+				// one-finger tap
 				(window.fingerClicker0 || (window.fingerClicker0 = newClicker(function(count) {
 					count && sendKeys('{HOME}');
 				})))()
 			}
-			// two-finger tap
 			else if (num == 1) {
+				// two-finger tap
 				sendKeys('{TAB}');
 			}
-			// three-finger tap
 			else if (num == 2) {
+				// three-finger tap
 				sendKeys('{F11}');
 			}
-			// four-finger tap
 			else if (num == 3) {
-				// send WIN+D event
+				// four-finger tap
 				simulateKey(VK.WIN, true);
 				sendKeys('d');
 				simulateKey(VK.WIN, 0);
