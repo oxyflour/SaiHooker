@@ -91,25 +91,21 @@
 			<div class="tabs">
 				<span class="radio-button">
 					<input type="radio" name="tab" value="c" />
-					<label for="prev-input">ctrls</label>
+					<label for="prev-input">Ctrls</label>
 				</span>
 				<span class="radio-button">
 					<input type="radio" name="tab" value="i" />
-					<label for="prev-input">img</label>
+					<label for="prev-input">Ref</label>
 				</span>
 				<span class="radio-button">
 					<input type="radio" name="tab" value="l" />
-					<label for="prev-input">log</label>
+					<label for="prev-input">About</label>
 				</span>
 			</div>
 			<div class="tab tab-c">
 				<p>
-					<span class="button" onclick="sendKeys('^z')">
-						[ Undo ]
-					</span>
-					<span class="button" onclick="sendKeys('^y')">
-						[ Redo ]
-					</span>
+					<span class="button" onclick="sendKeys('^z')">[ Undo ]</span>
+					<span class="button" onclick="sendKeys('^y')">[ Redo ]</span>
 				</p>
 				<p>
 					<span class="button check-button">
@@ -142,7 +138,12 @@
 				</div>
 				<img id="img" unselectable="on" onclick="toggleImageSize(this)" />
 			</div>
-			<div class="tab tab-l" id="log"></div>
+			<div class="tab tab-l">
+				<p><a href="https://github.com/oxyflour/saihooker">[ Project Page ]</a></p>
+				<p><a href="https://github.com/oxyflour/saihooker/issues">[ Report an Issue ]</a></p>
+				Log:
+				<div id="log"></div>
+			</div>
 		</form>
 	</div>
 	<script src="jquery-1.8.0.min.js"></script>
