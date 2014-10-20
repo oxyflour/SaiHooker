@@ -331,9 +331,9 @@
 				elem.data('doc', doc).data('xml', doc[0].outerHTML);
 			});
 
-			window.resizeTo(220, 260);
+			window.resizeTo(320, 360);
 			window.ontimer();
-			setInterval(window.ontimer, 2000)
+			setInterval(window.ontimer, 2000);
 		}
 		window.onbeforeunload = function () {
 			hooker.UnHook();
