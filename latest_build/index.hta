@@ -155,6 +155,12 @@
 				<item text="Clear (&amp;D)" key="d" />
 				<item text="Flip (&amp;H)" key="h" />
 				<item text="Fill (C-F)" key="^f" />
+				<sep />
+				<item text="Move Canvas" toggle-once="SPACE" />
+				<item text="Move Layer" toggle-once="CTRL" />
+				<item text="Resize Pen" toggle-once="CTRL,ALT" />
+				<item text="Rotate Canvas" toggle-once="ALT,SPACE" />
+				<item text="Pickup Color" toggle-once="ALT" />
 			</menu>
 			<menu text="Pens, Tools" gst="{">
 				<item text="Pen (&amp;N/l)" gst="l" key="n" />
@@ -205,31 +211,39 @@
 	<script for="hooker" event="OnHookEvent(msg, wParam, lParam)">
 		if (msg == 0) {
 			// pen events
-			if (wParam == 0)
-				// left button down
-				;
-			else if (wParam == 1)
-				// right button down
-				;
+		    if (wParam == 0) {
+				// left button
+		        if (!lParam) {
+		            while (window.keysToToggleOff.length)
+		                simulateKey(window.keysToToggleOff.pop(), false);
+		        }
+		    }
+			else if (wParam == 1) setTimeout(function() {
+			    // right button down
+			    hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
+			}, 100)
 			else if (wParam == 2) setTimeout(function() {
 				// pen reversed (or bottom pen button on SP3)
 				hooker.SetSaiStatus('keep-mousegesture', lParam ? '1' : '');
 			}, 100)
-			else if (wParam == 3)
+			else if (wParam == 3) {
 				// pen eraser (or drawing with bottom pen button down on SP3)
-				;
-			else if (wParam == 4)
+			}
+			else if (wParam == 4) {
 				// pen button (or top pen button)
 				simulateKey(VK.E, !!lParam);
+			}
 		}
 		else if (msg == 1) {
 			// notify events (from RegisterNotify)
 			var delta = lParam & 0x10000,
 				index = lParam & 0xffff;
-			if (wParam == 21)
+			if (wParam == 21) {
 				sendKeys(delta ? '{PGDN}' : '{PGUP}');
-			else if (wParam == 22)
+			}
+			else if (wParam == 22) {
 				sendKeys(delta ? '{DEL}' : '{END}');
+			}
 			else if (wParam == 23 || wParam == 24) {
 				hooker.UnRegisterNotify('th-z');
 				hooker.UnRegisterNotify('th-r');
@@ -238,22 +252,33 @@
 				hooker.SimulateDragWith(VK.SPACE, false, false, false);
 			}
 		}
-		else
+		else {
 			logText('unknown message: ' + msg + ' (' + wParam.toString(16) + ', ' + lParam.toString(16) + ')');
+		}
 	</script>
 	<script for="hooker" event="OnMouseGesture(vec, x, y)">
 		if (vec) {
 			var doc = $('#popup').data('doc'),
-				item = doc.find('[gst="' + vec + '"]');
+				item = doc.find('[gst="' + vec + '"]'),
+			    attr = null;
 			if (item.is('menu')) {
 				// popup the menu and wait for user selection
 				var xml = '<menu>'+item.html()+'<sep /><item text="Cancel" /></menu>',
 					cid = wndutil.PopupMenu(xml, -1, -1);
 				item = item.find('[cid=' + cid + ']');
 			}
-			item.attr('key') ?
-				sendKeys(item.attr('key')):
+			if (attr = item.attr('key')) {
+			    sendKeys(item.attr('key'));
+			}
+			else if (attr = item.attr('toggle')) attr.split(',').forEach(function (k) {
+                VK[k] && simulateKey(VK[k], VK['toggle-' + k] = !VK['toggle-' + k])
+            })
+            else if (attr = item.attr('toggle-once')) attr.split(',').forEach(function (k) {
+                VK[k] && (simulateKey(VK[k], true), window.keysToToggleOff.push(VK[k]))
+            })
+			else {
 				logText('unknown gesture: ' + vec);
+			}
 		}
 		else {
 			sendKeys('^z');
@@ -378,6 +403,8 @@
 		window.hooker = document.getElementById('hooker');
 		window.wndutil = document.getElementById('wndutil');
 		window.wscript = new ActiveXObject("WScript.Shell");
+
+        window.keysToToggleOff = [ ]
 
 		window.ontimer = function () {
 			var err = hooker.Hook();
